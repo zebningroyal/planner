@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Md Shazeb's Weekly Planner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #0f172a;
+            background-image: radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.15) 0px, transparent 50%);
+            min-height: 100vh;
+            color: white;
+            padding-bottom: 140px;
+            overflow-x: hidden;
+        }
+
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+        }
+
+        .header-card {
+            border: 1px solid rgba(45, 212, 191, 0.3);
+            box-shadow: 0 0 20px rgba(45, 212, 191, 0.05);
+        }
+
+        .task-done {
+            text-decoration: line-through;
+            opacity: 0.5;
+        }
+
+        .time-badge {
+            background: rgba(45, 212, 191, 0.15);
+            color: #2dd4bf;
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .recurring-badge {
+            background: rgba(244, 63, 94, 0.15);
+            color: #fb7185;
+            font-size: 8px;
+            padding: 1px 4px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .day-column {
+            transition: transform 0.2s ease;
+        }
+
+        .day-column:hover {
+            transform: translateY(-2px);
+            border-color: rgba(45, 212, 191, 0.4);
+        }
+
+        #history-sidebar {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+
+        .pie-container {
+            position: relative;
+            width: 140px;
+            height: 140px;
+        }
+        
+        #xp-pie {
+            transform: rotate(-90deg);
+            border-radius: 50%;
+        }
+
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Main Branding -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+            <div>
+                <h1 class="text-3xl font-800 text-white tracking-tight">Productivity <span class="text-teal-400 text-sm font-400 ml-2 italic">by Md Shazeb</span></h1>
+                <p class="text-slate-400 text-sm">Your personal dashboard for weekly mastery.</p>
+            </div>
+            <div class="flex gap-3">
+                 <button onclick="toggleHistory()" class="bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold uppercase border border-white/10 transition-all">
+                    History
+                </button>
+                <button onclick="resetWeek()" class="bg-rose-500/20 hover:bg-rose-500/40 text-rose-400 px-5 py-2.5 rounded-xl text-xs font-bold uppercase border border-rose-500/30 transition-all">
+                    Reset Week
+                </button>
+            </div>
+        </header>
+
+        <!-- Command Input -->
+        <div class="glass header-card p-6 mb-8">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-teal-500 rounded-lg flex items-center justify-center text-slate-900 shadow-lg shadow-teal-500/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="font-800 text-sm text-teal-400 uppercase tracking-widest">Add To Schedule</h2>
+                    <p id="status-text" class="text-[10px] text-slate-400 font-medium uppercase tracking-tight">Example: "Math on Monday at 10am" or "Football Friday"</p>
+                </div>
+            </div>
+            
+            <div class="relative">
+                <textarea id="command-input" rows="2" class="w-full bg-slate-800/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all" placeholder="Enter your plans here..."></textarea>
+                <button onclick="processCommand()" class="absolute bottom-3 right-3 bg-teal-500 hover:bg-teal-400 text-slate-900 font-bold text-[10px] uppercase px-4 py-2 rounded-lg transition-all active:scale-95">
+                    Add Tasks
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats & Analytics -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <div class="glass p-6 flex flex-col justify-center gap-4">
+                <div>
+                    <div class="flex justify-between items-end mb-2">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Completion</span>
+                        <span id="percent-display" class="text-sm font-black text-white">0%</span>
+                    </div>
+                    <div class="w-full h-3 bg-slate-800/50 rounded-full overflow-hidden border border-white/5">
+                        <div id="mastery-bar" class="h-full bg-gradient-to-r from-teal-600 to-teal-400 w-0 transition-all duration-1000"></div>
+                    </div>
+                </div>
+                <div class="pt-4 border-t border-white/5 flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Total XP</span>
+                        <span id="xp-display" class="text-3xl font-black text-teal-400">0</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Rank</span>
+                        <span id="level-display" class="text-xl font-black text-white">1</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass p-6 lg:col-span-2 flex flex-col md:flex-row items-center gap-8">
+                <div class="flex-shrink-0 text-center">
+                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Daily XP Mix</h3>
+                    <div class="pie-container mx-auto">
+                        <svg id="xp-pie" width="140" height="140" viewBox="0 0 42 42">
+                            <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#1e293b" stroke-width="5"></circle>
+                            <g id="pie-segments"></g>
+                        </svg>
+                    </div>
+                </div>
+                <div class="flex-1 w-full">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" id="xp-legend"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weekly Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-4 mb-12" id="planner-grid"></div>
+    </div>
+
+    <!-- History -->
+    <div id="history-sidebar" class="fixed inset-y-0 right-0 w-full md:w-96 transform translate-x-full transition-transform duration-300 z-50 p-6 flex flex-col">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-xl font-black">Archive</h2>
+            <button onclick="toggleHistory()" class="text-slate-400 hover:text-white bg-white/5 w-8 h-8 rounded-full">✕</button>
+        </div>
+        <div id="history-list" class="flex-1 overflow-y-auto space-y-4 pr-2"></div>
+        <button onclick="clearHistory()" class="mt-4 text-[10px] uppercase font-bold text-slate-500 hover:text-rose-400 transition text-center w-full">Clear Archive</button>
+    </div>
+    <div id="history-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden" onclick="toggleHistory()"></div>
+
+    <script>
+        const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+        const dayColors = {
+            "Monday": "#2dd4bf", "Tuesday": "#38bdf8", "Wednesday": "#818cf8", 
+            "Thursday": "#c084fc", "Friday": "#f472b6", "Saturday": "#fbbf24", "Sunday": "#4ade80"
+        };
+        
+        let plannerData = JSON.parse(localStorage.getItem('shazeb_v1')) || {
+            "Monday": [], "Tuesday": [], "Wednesday": [], "Thursday": [], "Friday": [], "Saturday": [], "Sunday": []
+        };
+        let recurringTasks = JSON.parse(localStorage.getItem('shazeb_rec_v1')) || {}; 
+        let history = JSON.parse(localStorage.getItem('shazeb_his_v1')) || [];
+        let xp = parseInt(localStorage.getItem('shazeb_xp_v1')) || 0;
+
+        function render() {
+            const grid = document.getElementById('planner-grid');
+            grid.innerHTML = "";
+            days.forEach(day => {
+                const dayCard = document.createElement('div');
+                dayCard.className = "glass day-column p-4 flex flex-col min-h-[220px]";
+                const tasksHtml = (plannerData[day] || []).map((t, idx) => `
+                    <div class="flex flex-col gap-1 py-3 border-b border-white/5 last:border-0 group">
+                        <div class="flex items-center justify-between">
+                             <div class="flex gap-1 items-center">
+                                <span class="time-badge">${t.timeLabel}</span>
+                                ${t.isRecurring ? '<span class="recurring-badge">Common</span>' : ''}
+                             </div>
+                             <button onclick="deleteTask('${day}', ${idx})" class="text-slate-600 hover:text-rose-400 text-xs opacity-0 group-hover:opacity-100 transition">✕</button>
+                        </div>
+                        <div class="flex items-center gap-2 cursor-pointer mt-1" onclick="toggleTask('${day}', ${idx})">
+                            <div class="w-4 h-4 shrink-0 rounded border ${t.done ? 'bg-teal-500 border-teal-500 shadow-[0_0_8px_rgba(45,212,191,0.4)]' : 'border-slate-500'} flex items-center justify-center transition-all">
+                                ${t.done ? '<span class="text-[8px] text-slate-900 font-bold">✓</span>' : ''}
+                            </div>
+                            <span class="text-xs font-semibold ${t.done ? 'task-done text-slate-500' : 'text-slate-200'}">${t.text}</span>
+                        </div>
+                    </div>
+                `).join('');
+                dayCard.innerHTML = `
+                    <div class="flex justify-between items-center mb-4 pb-2 border-b border-white/10">
+                        <h3 class="text-[11px] font-900 text-teal-400 uppercase tracking-widest">${day}</h3>
+                        <button onclick="addTaskPrompt('${day}')" class="w-6 h-6 flex items-center justify-center rounded-full bg-white/5 hover:bg-teal-500 hover:text-slate-900 transition-all text-xs font-bold">+</button>
+                    </div>
+                    <div class="flex-1 space-y-1">${tasksHtml || '<p class="text-[8px] opacity-10 uppercase text-center py-4">Free</p>'}</div>`;
+                grid.appendChild(dayCard);
+            });
+            updateStats();
+        }
+
+        function updateStats() {
+            let totalTasks = 0, doneCount = 0, dayXPData = {}, currentWeeklyXP = 0;
+            days.forEach(d => {
+                const dayTasks = plannerData[d] || [];
+                const completed = dayTasks.filter(t => t.done);
+                dayXPData[d] = { xp: completed.length * 10 };
+                totalTasks += dayTasks.length;
+                doneCount += completed.length;
+                currentWeeklyXP += (completed.length * 10);
+            });
+            const percent = totalTasks === 0 ? 0 : Math.round((doneCount / totalTasks) * 100);
+            document.getElementById('xp-display').innerText = xp.toLocaleString();
+            document.getElementById('level-display').innerText = Math.floor(xp / 100) + 1;
+            document.getElementById('mastery-bar').style.width = percent + "%";
+            document.getElementById('percent-display').innerText = percent + "%";
+            updatePieChart(dayXPData, currentWeeklyXP);
+            localStorage.setItem('shazeb_v1', JSON.stringify(plannerData));
+            localStorage.setItem('shazeb_xp_v1', xp);
+        }
+
+        function updatePieChart(data, totalXP) {
+            const g = document.getElementById('pie-segments');
+            const legend = document.getElementById('xp-legend');
+            g.innerHTML = ''; legend.innerHTML = '';
+            let accumulatedPercent = 0;
+            days.forEach(day => {
+                const dayXP = data[day].xp;
+                const percentage = totalXP === 0 ? 0 : (dayXP / totalXP) * 100;
+                const color = dayColors[day];
+                if (percentage > 0) {
+                    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    circle.setAttribute("cx", "21"); circle.setAttribute("cy", "21");
+                    circle.setAttribute("r", "15.91549430918954"); circle.setAttribute("fill", "transparent");
+                    circle.setAttribute("stroke", color); circle.setAttribute("stroke-width", "5");
+                    circle.setAttribute("stroke-dasharray", `${percentage} ${100 - percentage}`); circle.setAttribute("stroke-dashoffset", -accumulatedPercent);
+                    g.appendChild(circle);
+                    accumulatedPercent += percentage;
+                }
+                legend.innerHTML += `
+                    <div class="flex flex-col gap-1">
+                        <div class="flex items-center gap-2">
+                            <div class="legend-dot" style="background: ${color}"></div>
+                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-tighter">${day.substring(0,3)}</span>
+                        </div>
+                        <div class="text-[10px] font-bold ${dayXP > 0 ? 'text-white' : 'text-slate-600'}">${dayXP} XP</div>
+                    </div>`;
+            });
+        }
+
+        function extractTime(text) {
+            const match = text.match(/(\d{1,2}(:\d{2})?\s*(am|pm))|(\b(morning|afternoon|evening|night)\b)/i);
+            return match ? { label: match[0].toUpperCase() } : { label: "ANYTIME" };
+        }
+
+        function processCommand() {
+            const input = document.getElementById('command-input');
+            const summary = input.value.trim();
+            if (!summary) return;
+            summary.split(/[.!?\n]|\band\b/).forEach(phrase => {
+                let dayMatch = days.find(d => phrase.toLowerCase().includes(d.toLowerCase()));
+                if (dayMatch) {
+                    const timeInfo = extractTime(phrase);
+                    let taskName = phrase.replace(new RegExp(dayMatch, 'gi'), '').replace(new RegExp(timeInfo.label, 'gi'), '').replace(/\b(i have|i'm|going to|at|on)\b/gi, '').trim();
+                    if (taskName.length > 1) {
+                        const taskObj = { text: taskName.charAt(0).toUpperCase() + taskName.slice(1), done: false, timeLabel: timeInfo.label, isRecurring: ['gym','study','work','class'].some(c=>taskName.toLowerCase().includes(c)) };
+                        plannerData[dayMatch].push(taskObj);
+                        if (taskObj.isRecurring) {
+                            if (!recurringTasks[dayMatch]) recurringTasks[dayMatch] = [];
+                            recurringTasks[dayMatch].push(taskObj);
+                        }
+                    }
+                }
+            });
+            input.value = ""; render();
+            localStorage.setItem('shazeb_rec_v1', JSON.stringify(recurringTasks));
+        }
+
+        function toggleTask(day, idx) {
+            plannerData[day][idx].done = !plannerData[day][idx].done;
+            xp += (plannerData[day][idx].done ? 10 : -10);
+            render();
+        }
+
+        function deleteTask(day, idx) {
+            if (plannerData[day][idx].done) xp = Math.max(0, xp - 10);
+            plannerData[day].splice(idx, 1);
+            render();
+        }
+
+        function addTaskPrompt(day) {
+            const task = prompt(`New task for ${day}?`);
+            if (task) {
+                const timeInfo = extractTime(task);
+                plannerData[day].push({ text: task, done: false, timeLabel: timeInfo.label, isRecurring: false });
+                render();
+            }
+        }
+
+        function resetWeek() {
+            if (!confirm("Complete this week and archive your progress?")) return;
+            let total = 0, done = 0;
+            days.forEach(d => { plannerData[d].forEach(t => { total++; if (t.done) done++; }); });
+            history.unshift({ date: new Date().toLocaleDateString(), score: total ? Math.round((done/total)*100) : 0, xp });
+            if (history.length > 20) history.pop();
+            const nextWeek = {};
+            days.forEach(d => { nextWeek[d] = (recurringTasks[d] || []).map(t => ({...t, done: false})); });
+            plannerData = nextWeek;
+            localStorage.setItem('shazeb_his_v1', JSON.stringify(history));
+            render();
+        }
+
+        function toggleHistory() {
+            document.getElementById('history-sidebar').classList.toggle('translate-x-full');
+            document.getElementById('history-backdrop').classList.toggle('hidden');
+            updateHistoryUI();
+        }
+
+        function updateHistoryUI() {
+            const list = document.getElementById('history-list');
+            list.innerHTML = history.length ? history.map(h => `
+                <div class="p-4 bg-white/5 rounded-2xl border border-white/5 flex justify-between items-center">
+                    <div><span class="text-[10px] font-black text-slate-500 uppercase">${h.date}</span><div class="text-xs text-teal-400 font-bold">${h.xp} XP</div></div>
+                    <div class="text-lg font-black text-white">${h.score}%</div>
+                </div>`).join('') : '<p class="text-center opacity-30 text-xs py-10">Empty.</p>';
+        }
+
+        function clearHistory() {
+            if (confirm("Clear history?")) {
+                history = []; localStorage.setItem('shazeb_his_v1', JSON.stringify(history)); updateHistoryUI();
+            }
+        }
+        render();
+    </script>
+</body>
+</html>
