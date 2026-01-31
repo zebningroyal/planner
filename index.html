@@ -45,6 +45,13 @@
             background: rgba(30, 41, 59, 0.8);
         }
 
+        #history-sidebar {
+            background: rgba(15, 23, 42, 0.98);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 500;
+        }
+
         @keyframes popIn {
             0% { transform: translate(-50%, -45%) scale(0.9); opacity: 0; }
             100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
@@ -53,7 +60,7 @@
         .pop-alert {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            z-index: 300;
+            z-index: 600;
         }
 
         .pulse-teal { animation: shadow-pulse 2s infinite; }
@@ -64,32 +71,25 @@
         }
 
         .digital-clock { font-family: 'Courier New', Courier, monospace; letter-spacing: 2px; }
-        
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
-    <!-- TASK ALERT NOTIFICATION -->
-    <div id="alert-overlay" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[200] hidden items-center justify-center">
+    <!-- ALARM NOTIFICATION -->
+    <div id="alert-overlay" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[600] hidden items-center justify-center">
         <div class="glass pop-alert p-8 max-w-sm w-full border-2 border-teal-500/30 pulse-teal text-center">
-            <div class="w-20 h-20 bg-teal-500 rounded-full flex items-center justify-center text-slate-900 mx-auto mb-6 shadow-xl shadow-teal-500/40 animate-bounce">
+            <div class="w-20 h-20 bg-teal-500 rounded-full flex items-center justify-center text-slate-900 mx-auto mb-6 animate-bounce">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                 </svg>
             </div>
-            <h2 class="text-teal-400 font-black uppercase tracking-[0.2em] text-[10px] mb-2">Alarm Active</h2>
+            <h2 class="text-teal-400 font-black uppercase tracking-[0.2em] text-[10px] mb-2">Alarm Triggered</h2>
             <div id="alert-time-badge" class="inline-block bg-teal-500/10 text-teal-400 px-3 py-1 rounded-full text-xs font-bold mb-4">--:--</div>
-            <h3 id="alert-task-text" class="text-2xl font-bold text-white leading-tight mb-8 italic">Task Title</h3>
+            <h3 id="alert-task-text" class="text-2xl font-bold text-white leading-tight mb-8">Task Title</h3>
             
             <div class="flex flex-col gap-3">
-                <button onclick="dismissAlert()" class="w-full bg-teal-500 hover:bg-teal-400 text-slate-900 font-bold py-4 rounded-xl transition-all active:scale-95 shadow-lg shadow-teal-500/20 uppercase tracking-widest text-xs">
-                    I'm Doing This Now
-                </button>
-                <button onclick="snoozeAlert()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 rounded-xl transition-all active:scale-95 border border-white/10 uppercase tracking-widest text-[10px]">
-                    Snooze (5 Minutes)
-                </button>
+                <button onclick="dismissAlert()" class="w-full bg-teal-500 hover:bg-teal-400 text-slate-900 font-bold py-4 rounded-xl transition-all uppercase tracking-widest text-xs">Done</button>
+                <button onclick="snoozeAlert()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 rounded-xl transition-all border border-white/10 uppercase tracking-widest text-[10px]">Snooze 5 Mins</button>
             </div>
         </div>
     </div>
@@ -105,22 +105,24 @@
                 </div>
             </div>
             <div class="flex gap-4">
-                <button onclick="resetWeek()" class="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 px-6 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest border border-rose-500/20">Clear All</button>
+                <button onclick="toggleHistory()" class="bg-slate-800 hover:bg-slate-700 text-white px-6 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest border border-white/10">History</button>
+                <button onclick="archiveWeek()" class="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 px-6 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest border border-rose-500/20">Archive Week</button>
             </div>
         </header>
 
+        <!-- Task Input -->
         <div class="glass p-8 mb-10">
             <div class="flex items-center gap-4 mb-5">
                 <div class="w-12 h-12 bg-teal-500 rounded-xl flex items-center justify-center text-slate-900 shadow-lg">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" /></svg>
                 </div>
                 <div>
-                    <h2 class="font-extrabold text-sm text-white uppercase tracking-widest">Quick Task Entry</h2>
-                    <p class="text-[11px] text-slate-400">Example: "Meeting at 2:30pm Monday"</p>
+                    <h2 class="font-extrabold text-sm text-white uppercase tracking-widest">Add Task</h2>
+                    <p class="text-[11px] text-slate-400 font-medium">Example: "Study at 7:00pm Monday"</p>
                 </div>
             </div>
             <div class="relative">
-                <input id="command-input" class="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-6 py-5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-teal-500/50" placeholder="Type task here...">
+                <input id="command-input" class="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-6 py-5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-teal-500/50" placeholder="Type here...">
                 <button onclick="processCommand()" class="absolute top-1/2 -translate-y-1/2 right-4 bg-teal-500 hover:bg-teal-400 text-slate-900 font-black text-[10px] uppercase tracking-widest px-6 py-2.5 rounded-lg transition-all">Add Task</button>
             </div>
         </div>
@@ -128,37 +130,45 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-6" id="planner-grid"></div>
     </div>
 
+    <!-- History Sidebar -->
+    <div id="history-sidebar" class="fixed inset-y-0 right-0 w-80 transform translate-x-full transition-transform duration-300 p-6 flex flex-col">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-xl font-black text-white">Archives</h2>
+            <button onclick="toggleHistory()" class="text-slate-400 hover:text-white">✕</button>
+        </div>
+        <div id="history-list" class="flex-1 overflow-y-auto space-y-4"></div>
+        <button onclick="clearHistory()" class="mt-4 py-3 text-[10px] font-bold text-rose-400 border border-rose-400/20 rounded-xl hover:bg-rose-400/10 uppercase">Clear History</button>
+    </div>
+    <div id="history-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden" onclick="toggleHistory()"></div>
+
     <script>
         const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
         let plannerData = JSON.parse(localStorage.getItem('prod_suite_v3')) || days.reduce((a, d) => ({...a, [d]: []}), {});
+        let history = JSON.parse(localStorage.getItem('prod_history_v3')) || [];
         let alarmInterval = null;
         let activeAlarmTask = null;
         let lastTriggeredMinute = "";
 
-        // Alarm Logic
+        // Audio & Alarm
         function playAlarmSound() {
             try {
                 const context = new (window.AudioContext || window.webkitAudioContext)();
                 const osc = context.createOscillator();
                 const gain = context.createGain();
                 osc.type = 'square';
-                osc.frequency.setValueAtTime(880, context.currentTime); // High pitch A5
-                osc.connect(gain);
-                gain.connect(context.destination);
+                osc.frequency.setValueAtTime(880, context.currentTime);
+                osc.connect(gain); gain.connect(context.destination);
                 gain.gain.setValueAtTime(0, context.currentTime);
                 gain.gain.linearRampToValueAtTime(0.3, context.currentTime + 0.05);
                 gain.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.4);
-                osc.start();
-                osc.stop(context.currentTime + 0.5);
+                osc.start(); osc.stop(context.currentTime + 0.5);
                 if (navigator.vibrate) navigator.vibrate([300, 100, 300]);
             } catch(e) {}
         }
 
         function requestAlarmAccess() {
-            // Trigger audio context unlock
             playAlarmSound();
-            document.getElementById('status-indicator').classList.replace('bg-rose-500', 'bg-teal-500');
-            document.getElementById('status-indicator').classList.add('animate-pulse');
+            document.getElementById('status-indicator').className = 'w-2 h-2 rounded-full bg-teal-500 animate-pulse';
             document.getElementById('bg-btn').innerText = "Sound Ready";
             document.getElementById('bg-btn').style.opacity = "0.5";
         }
@@ -168,45 +178,32 @@
             activeAlarmTask = task;
             document.getElementById('alert-task-text').innerText = task.text;
             document.getElementById('alert-time-badge').innerText = task.timeLabel;
-            document.getElementById('alert-overlay').classList.remove('hidden');
-            document.getElementById('alert-overlay').classList.add('flex');
-            
+            document.getElementById('alert-overlay').classList.replace('hidden', 'flex');
             playAlarmSound();
-            alarmInterval = setInterval(playAlarmSound, 1000);
+            alarmInterval = setInterval(playAlarmSound, 1500);
         }
 
         function dismissAlert() {
-            clearInterval(alarmInterval);
-            alarmInterval = null;
-            document.getElementById('alert-overlay').classList.add('hidden');
-            document.getElementById('alert-overlay').classList.remove('flex');
-            
-            // Mark task as done
-            if (activeAlarmTask) {
-                toggleTask(activeAlarmTask.day, activeAlarmTask.id);
-            }
+            clearInterval(alarmInterval); alarmInterval = null;
+            document.getElementById('alert-overlay').classList.replace('flex', 'hidden');
+            if (activeAlarmTask) toggleTask(activeAlarmTask.day, activeAlarmTask.id);
         }
 
         function snoozeAlert() {
-            clearInterval(alarmInterval);
-            alarmInterval = null;
-            document.getElementById('alert-overlay').classList.add('hidden');
-            document.getElementById('alert-overlay').classList.remove('flex');
-
+            clearInterval(alarmInterval); alarmInterval = null;
+            document.getElementById('alert-overlay').classList.replace('flex', 'hidden');
             if (activeAlarmTask) {
-                // Schedule a snooze reminder for 5 minutes from now
                 const now = new Date();
                 const snoozeTime = new Date(now.getTime() + 5 * 60000);
                 const h = snoozeTime.getHours();
                 const m = snoozeTime.getMinutes().toString().padStart(2, '0');
                 const ampm = h >= 12 ? 'PM' : 'AM';
-                const snoozeLabel = `${h % 12 || 12}:${m}${ampm}`;
-
                 plannerData[activeAlarmTask.day].push({
                     text: `Snoozed: ${activeAlarmTask.text}`,
                     done: false,
-                    timeLabel: snoozeLabel,
-                    id: Date.now()
+                    timeLabel: `${h % 12 || 12}:${m}${ampm}`,
+                    id: Date.now(),
+                    dateCreated: new Date().toLocaleDateString()
                 });
                 render();
             }
@@ -214,22 +211,19 @@
 
         function updateClock() {
             const now = new Date();
-            const h24 = now.getHours();
-            const h12 = h24 % 12 || 12;
+            const h12 = now.getHours() % 12 || 12;
             const m = now.getMinutes().toString().padStart(2, '0');
             const s = now.getSeconds().toString().padStart(2, '0');
-            const ampm = h24 >= 12 ? 'PM' : 'AM';
+            const ampm = now.getHours() >= 12 ? 'PM' : 'AM';
             const currentTimeStr = `${h12}:${m}${ampm}`;
-            const currentDay = days[now.getDay()];
-
+            
             document.getElementById('clock').innerText = `${h12}:${m}:${s} ${ampm}`;
 
-            // Check for tasks
             if (lastTriggeredMinute !== currentTimeStr) {
-                const dayTasks = plannerData[currentDay] || [];
+                const dayTasks = plannerData[days[now.getDay()]] || [];
                 dayTasks.forEach(task => {
                     if (!task.done && task.timeLabel === currentTimeStr) {
-                        task.day = currentDay; // Attach day for easier handling
+                        task.day = days[now.getDay()];
                         startAlarm(task);
                         lastTriggeredMinute = currentTimeStr;
                     }
@@ -237,6 +231,7 @@
             }
         }
 
+        // CRUD Operations
         function processCommand() {
             const input = document.getElementById('command-input');
             const val = input.value.trim();
@@ -244,19 +239,16 @@
 
             const timeMatch = val.match(/(\d{1,2}(:\d{2})?\s*(am|pm))/i);
             const timeLabel = timeMatch ? timeMatch[0].toUpperCase().replace(/\s/g, '') : "ANYTIME";
-            
-            let dayMatch = days.find(d => val.toLowerCase().includes(d.toLowerCase()));
-            if(!dayMatch) dayMatch = days[new Date().getDay()];
-
+            let dayMatch = days.find(d => val.toLowerCase().includes(d.toLowerCase())) || days[new Date().getDay()];
             let taskName = val.replace(timeLabel, '').replace(new RegExp(dayMatch, 'gi'), '').replace(/at/gi, '').trim();
             
             plannerData[dayMatch].push({ 
                 text: taskName || "Untitled Task", 
                 done: false, 
                 timeLabel: timeLabel, 
-                id: Date.now() 
+                id: Date.now(),
+                dateCreated: new Date().toLocaleDateString()
             });
-            
             input.value = "";
             render();
         }
@@ -272,11 +264,45 @@
             render();
         }
 
-        function resetWeek() {
-            if(confirm("Clear everything?")) {
-                plannerData = days.reduce((a, d) => ({...a, [d]: []}), {});
-                render();
+        // Archive/History
+        function toggleHistory() {
+            document.getElementById('history-sidebar').classList.toggle('translate-x-full');
+            document.getElementById('history-backdrop').classList.toggle('hidden');
+            renderHistory();
+        }
+
+        function archiveWeek() {
+            if(!confirm("Archive your progress for this week? This will clear the current board.")) return;
+            let total = 0, done = 0;
+            days.forEach(d => plannerData[d].forEach(t => { total++; if(t.done) done++; }));
+            const score = total ? Math.round((done/total)*100) : 0;
+            history.unshift({ date: new Date().toLocaleDateString(), score });
+            localStorage.setItem('prod_history_v3', JSON.stringify(history.slice(0, 10)));
+            plannerData = days.reduce((a, d) => ({...a, [d]: []}), {});
+            render();
+        }
+
+        function clearHistory() {
+            if(confirm("Delete all archives?")) {
+                history = [];
+                localStorage.setItem('prod_history_v3', JSON.stringify([]));
+                renderHistory();
             }
+        }
+
+        function renderHistory() {
+            const list = document.getElementById('history-list');
+            list.innerHTML = history.length ? history.map(h => `
+                <div class="glass p-4 border border-white/5">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase">${h.date}</span>
+                        <span class="text-teal-400 font-black">${h.score}%</span>
+                    </div>
+                    <div class="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
+                        <div class="h-full bg-teal-500" style="width: ${h.score}%"></div>
+                    </div>
+                </div>
+            `).join('') : '<p class="text-[10px] text-slate-500 text-center py-10 uppercase font-bold tracking-widest">No history yet</p>';
         }
 
         function render() {
@@ -289,17 +315,16 @@
                 const col = document.createElement('div');
                 col.className = 'day-column glass p-5 flex flex-col min-h-[300px]';
                 col.innerHTML = `
-                    <h3 class="font-black text-xs uppercase tracking-[0.2em] mb-4 text-teal-400 border-b border-teal-500/20 pb-2">${day}</h3>
+                    <h3 class="font-black text-[10px] uppercase tracking-[0.2em] mb-4 text-teal-400 border-b border-teal-500/20 pb-2">${day}</h3>
                     <div class="flex-1 space-y-3">
                         ${dayTasks.map(t => `
                             <div class="group bg-slate-800/40 p-3 rounded-xl border border-white/5 hover:border-teal-500/30 transition-all ${t.done ? 'task-done' : ''}">
                                 <div class="flex justify-between items-start mb-1">
                                     <span class="text-[9px] font-bold text-teal-500/80 uppercase">${t.timeLabel}</span>
-                                    <button onclick="deleteTask('${day}', ${t.id})" class="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-rose-500 transition-all">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                                    </button>
+                                    <button onclick="deleteTask('${day}', ${t.id})" class="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-rose-500 transition-all">✕</button>
                                 </div>
-                                <p class="text-xs font-bold text-white leading-snug cursor-pointer" onclick="toggleTask('${day}', ${t.id})">${t.text}</p>
+                                <p class="text-xs font-bold text-white leading-snug cursor-pointer mb-1" onclick="toggleTask('${day}', ${t.id})">${t.text}</p>
+                                <span class="text-[8px] text-slate-500 uppercase font-black tracking-tighter">Added: ${t.dateCreated || 'N/A'}</span>
                             </div>
                         `).join('')}
                     </div>
