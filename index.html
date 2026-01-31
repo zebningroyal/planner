@@ -86,16 +86,16 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             </div>
-            <h2 class="text-teal-400 font-black uppercase tracking-[0.2em] text-[10px] mb-2">Task Reminder</h2>
+            <h2 class="text-teal-400 font-black uppercase tracking-[0.2em] text-[10px] mb-2">Strong Alert Active</h2>
             <div id="alert-time-badge" class="inline-block bg-teal-500/10 text-teal-400 px-3 py-1 rounded-full text-xs font-bold mb-4">--:--</div>
             <h3 id="alert-task-text" class="text-2xl font-black text-white leading-tight mb-8">Task Name</h3>
             
             <div class="space-y-3">
                 <button onclick="handleAlertAction('done')" class="w-full bg-teal-500 hover:bg-teal-400 text-slate-900 font-black py-4 rounded-xl transition-all active:scale-95 shadow-lg shadow-teal-500/20 uppercase tracking-widest text-xs">
-                    Mark Done & Stop
+                    I'm on it! (Stop Sound)
                 </button>
                 <button onclick="handleAlertAction('snooze')" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-xl transition-all active:scale-95 uppercase tracking-widest text-[10px] border border-white/10">
-                    Remind in 5 mins
+                    Snooze 5 mins
                 </button>
             </div>
         </div>
@@ -106,12 +106,11 @@
             <div>
                 <h1 class="text-3xl font-[800] text-white tracking-tight">Productivity <span class="text-teal-400 text-sm font-[400] ml-2 italic">by Md Shazeb</span></h1>
                 <div class="flex items-center gap-2 mt-1">
-                    <!-- AUDIO STATUS INDICATOR -->
                     <div id="audio-status" class="w-2 h-2 rounded-full bg-rose-500 transition-colors"></div>
                     <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
                         Live: <span id="clock" class="digital-clock">00:00:00</span>
                     </span>
-                    <button onclick="playAlarmSound()" class="ml-2 text-[8px] border border-teal-500/30 text-teal-500 px-2 py-0.5 rounded hover:bg-teal-500/10 transition-colors">Test Sound</button>
+                    <button onclick="playAlarmSound()" class="ml-2 text-[8px] border border-teal-500/30 text-teal-500 px-2 py-0.5 rounded hover:bg-teal-500/10 transition-colors">Test Strong Sound</button>
                 </div>
             </div>
             <div class="flex gap-3">
@@ -202,7 +201,7 @@
         let alarmInterval = null;
         let audioCtx = null;
 
-        // --- AUDIO ENGINE ---
+        // --- ENHANCED STRONG AUDIO ENGINE ---
         function unlockAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -216,9 +215,9 @@
         function updateAudioStatus() {
             const dot = document.getElementById('audio-status');
             if (audioCtx && audioCtx.state === 'running') {
-                dot.className = "w-2 h-2 rounded-full bg-teal-500 animate-pulse"; // Sound ready!
+                dot.className = "w-2 h-2 rounded-full bg-teal-500 animate-pulse";
             } else {
-                dot.className = "w-2 h-2 rounded-full bg-rose-500"; // Click to unlock
+                dot.className = "w-2 h-2 rounded-full bg-rose-500";
             }
         }
 
@@ -227,42 +226,41 @@
             if (!audioCtx || audioCtx.state !== 'running') return;
 
             const now = audioCtx.currentTime;
-            
-            // High tone
-            const osc1 = audioCtx.createOscillator();
-            const gain1 = audioCtx.createGain();
-            osc1.type = 'triangle';
-            osc1.frequency.setValueAtTime(880, now);
-            osc1.connect(gain1);
-            gain1.connect(audioCtx.destination);
-            
-            // Punchy square wave
-            const osc2 = audioCtx.createOscillator();
-            const gain2 = audioCtx.createGain();
-            osc2.type = 'square';
-            osc2.frequency.setValueAtTime(440, now);
-            osc2.connect(gain2);
-            gain2.connect(audioCtx.destination);
+            const duration = 0.8;
 
-            gain1.gain.setValueAtTime(0, now);
-            gain1.gain.linearRampToValueAtTime(0.4, now + 0.1);
-            gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+            // Frequency Layering for a "Thick" Stronger Sound
+            // Frequencies: 523.25 (C5), 659.25 (E5), 783.99 (G5) - A Major-ish Chord
+            [523.25, 659.25, 783.99].forEach((freq, index) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                // Use Square or Sawtooth for "stronger/harsher" alert profile
+                osc.type = index === 0 ? 'square' : 'sawtooth';
+                osc.frequency.setValueAtTime(freq, now);
+                
+                // Add "Vibrato" to make it annoying/hard to ignore
+                osc.frequency.exponentialRampToValueAtTime(freq * 1.05, now + 0.1);
+                osc.frequency.exponentialRampToValueAtTime(freq * 0.95, now + 0.3);
+                osc.frequency.exponentialRampToValueAtTime(freq, now + 0.5);
 
-            gain2.gain.setValueAtTime(0, now);
-            gain2.gain.linearRampToValueAtTime(0.1, now + 0.1);
-            gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.2, now + 0.05); // Rapid attack
+                gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
 
-            osc1.start(now);
-            osc2.start(now);
-            osc1.stop(now + 0.7);
-            osc2.stop(now + 0.5);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start(now);
+                osc.stop(now + duration);
+            });
         }
 
         function startAlarm() {
             if (alarmInterval) return;
             unlockAudio();
             playAlarmSound();
-            alarmInterval = setInterval(playAlarmSound, 1500);
+            // Faster interval for urgency
+            alarmInterval = setInterval(playAlarmSound, 1000);
         }
 
         function stopAlarm() {
@@ -282,7 +280,6 @@
             
             document.getElementById('clock').innerText = `${hour}:${min}:${now.getSeconds().toString().padStart(2, '0')} ${ampm}`;
 
-            // Check for tasks every minute
             if (lastAlertTime !== matchTime) {
                 const currentDay = days[now.getDay()];
                 const dayTasks = plannerData[currentDay] || [];
