@@ -76,9 +76,9 @@
         .digital-clock { font-family: monospace; letter-spacing: 1px; }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="p-4 md:p-8" onmousedown="unlockAudio()" ontouchstart="unlockAudio()">
 
-    <!-- OVERLAY ALERT -->
+    <!-- REMINDER ALERT OVERLAY -->
     <div id="alert-overlay" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[200] hidden items-center justify-center">
         <div id="pop-alert-box" class="glass pop-alert p-10 max-w-sm w-full border-2 border-teal-500/50 pulse-teal text-center">
             <div class="w-20 h-20 bg-teal-500 rounded-2xl flex items-center justify-center text-slate-900 mx-auto mb-6 shadow-xl shadow-teal-500/40">
@@ -106,8 +106,12 @@
             <div>
                 <h1 class="text-3xl font-[800] text-white tracking-tight">Productivity <span class="text-teal-400 text-sm font-[400] ml-2 italic">by Md Shazeb</span></h1>
                 <div class="flex items-center gap-2 mt-1">
-                    <div class="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></div>
-                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Live Analysis: <span id="clock" class="digital-clock">00:00:00</span></span>
+                    <!-- AUDIO STATUS INDICATOR -->
+                    <div id="audio-status" class="w-2 h-2 rounded-full bg-rose-500 transition-colors"></div>
+                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                        Live: <span id="clock" class="digital-clock">00:00:00</span>
+                    </span>
+                    <button onclick="playAlarmSound()" class="ml-2 text-[8px] border border-teal-500/30 text-teal-500 px-2 py-0.5 rounded hover:bg-teal-500/10 transition-colors">Test Sound</button>
                 </div>
             </div>
             <div class="flex gap-3">
@@ -116,7 +120,7 @@
             </div>
         </header>
 
-        <!-- Main Input -->
+        <!-- Main Task Input -->
         <div class="glass header-card p-6 mb-8">
             <div class="flex items-center gap-3 mb-4">
                 <div class="w-10 h-10 bg-teal-500 rounded-lg flex items-center justify-center text-slate-900">
@@ -133,7 +137,7 @@
             </div>
         </div>
 
-        <!-- Stats -->
+        <!-- Stats Section -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             <div class="glass p-6 flex flex-col justify-center gap-4">
                 <div>
@@ -151,7 +155,7 @@
                         <span id="xp-display" class="text-3xl font-black text-teal-400">0</span>
                     </div>
                     <div class="text-right">
-                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Lvl</span>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Level</span>
                         <span id="level-display" class="text-xl font-black text-white">1</span>
                     </div>
                 </div>
@@ -159,7 +163,7 @@
 
             <div class="glass p-6 lg:col-span-2 flex flex-col md:flex-row items-center gap-8">
                 <div class="flex-shrink-0 text-center">
-                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Distribution</h3>
+                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Day Distribution</h3>
                     <div class="pie-container mx-auto">
                         <svg id="xp-pie" width="140" height="140" viewBox="0 0 42 42">
                             <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#1e293b" stroke-width="5"></circle>
@@ -171,14 +175,14 @@
             </div>
         </div>
 
-        <!-- Grid -->
+        <!-- Weekly Planner Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-4 mb-12" id="planner-grid"></div>
     </div>
 
-    <!-- History -->
+    <!-- History Sidebar -->
     <div id="history-sidebar" class="fixed inset-y-0 right-0 w-full md:w-96 transform translate-x-full transition-transform duration-300 z-50 p-6 flex flex-col">
         <div class="flex justify-between items-center mb-8">
-            <h2 class="text-xl font-black text-white">History</h2>
+            <h2 class="text-xl font-black text-white">Week History</h2>
             <button onclick="toggleHistory()" class="text-slate-400 hover:text-white text-2xl">✕</button>
         </div>
         <div id="history-list" class="flex-1 overflow-y-auto space-y-4"></div>
@@ -196,12 +200,69 @@
         let lastAlertTime = ""; 
         let currentAlertTask = null;
         let alarmInterval = null;
+        let audioCtx = null;
+
+        // --- AUDIO ENGINE ---
+        function unlockAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            updateAudioStatus();
+        }
+
+        function updateAudioStatus() {
+            const dot = document.getElementById('audio-status');
+            if (audioCtx && audioCtx.state === 'running') {
+                dot.className = "w-2 h-2 rounded-full bg-teal-500 animate-pulse"; // Sound ready!
+            } else {
+                dot.className = "w-2 h-2 rounded-full bg-rose-500"; // Click to unlock
+            }
+        }
+
+        function playAlarmSound() {
+            unlockAudio();
+            if (!audioCtx || audioCtx.state !== 'running') return;
+
+            const now = audioCtx.currentTime;
+            
+            // High tone
+            const osc1 = audioCtx.createOscillator();
+            const gain1 = audioCtx.createGain();
+            osc1.type = 'triangle';
+            osc1.frequency.setValueAtTime(880, now);
+            osc1.connect(gain1);
+            gain1.connect(audioCtx.destination);
+            
+            // Punchy square wave
+            const osc2 = audioCtx.createOscillator();
+            const gain2 = audioCtx.createGain();
+            osc2.type = 'square';
+            osc2.frequency.setValueAtTime(440, now);
+            osc2.connect(gain2);
+            gain2.connect(audioCtx.destination);
+
+            gain1.gain.setValueAtTime(0, now);
+            gain1.gain.linearRampToValueAtTime(0.4, now + 0.1);
+            gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+
+            gain2.gain.setValueAtTime(0, now);
+            gain2.gain.linearRampToValueAtTime(0.1, now + 0.1);
+            gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+
+            osc1.start(now);
+            osc2.start(now);
+            osc1.stop(now + 0.7);
+            osc2.stop(now + 0.5);
+        }
 
         function startAlarm() {
             if (alarmInterval) return;
-            // Play sound every 1.5 seconds
-            playDing();
-            alarmInterval = setInterval(playDing, 1500);
+            unlockAudio();
+            playAlarmSound();
+            alarmInterval = setInterval(playAlarmSound, 1500);
         }
 
         function stopAlarm() {
@@ -211,23 +272,7 @@
             }
         }
 
-        function playDing() {
-            try {
-                const context = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = context.createOscillator();
-                const gain = context.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(587.33, context.currentTime); 
-                osc.connect(gain);
-                gain.connect(context.destination);
-                gain.gain.setValueAtTime(0, context.currentTime);
-                gain.gain.linearRampToValueAtTime(0.2, context.currentTime + 0.05);
-                gain.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.5);
-                osc.start();
-                osc.stop(context.currentTime + 0.5);
-            } catch(e) {}
-        }
-
+        // --- CORE LOGIC ---
         function updateClock() {
             const now = new Date();
             const hour = now.getHours() % 12 || 12;
@@ -237,6 +282,7 @@
             
             document.getElementById('clock').innerText = `${hour}:${min}:${now.getSeconds().toString().padStart(2, '0')} ${ampm}`;
 
+            // Check for tasks every minute
             if (lastAlertTime !== matchTime) {
                 const currentDay = days[now.getDay()];
                 const dayTasks = plannerData[currentDay] || [];
@@ -251,6 +297,7 @@
                     }
                 });
             }
+            updateAudioStatus();
         }
 
         function showPopAlert(task, day) {
@@ -275,9 +322,8 @@
                 const ap = now.getHours() >= 12 ? 'PM' : 'AM';
                 const newTime = `${h}:${m}${ap}`;
                 
-                // Add snoozed task
                 plannerData[currentAlertTask.day].push({
-                    text: `(Snoozed) ${currentAlertTask.text}`,
+                    text: `(Snooze) ${currentAlertTask.text}`,
                     done: false,
                     timeLabel: newTime,
                     id: Date.now()
@@ -289,21 +335,8 @@
             currentAlertTask = null;
         }
 
-        function addManualTask(day) {
-            const taskText = prompt(`Add a task for ${day}:`);
-            if (!taskText) return;
-            const timeText = prompt(`What time? (e.g. 5:00pm) Or leave blank:`, "ANYTIME");
-            
-            plannerData[day].push({
-                text: taskText,
-                done: false,
-                timeLabel: (timeText || "ANYTIME").toUpperCase().replace(/\s/g, ''),
-                id: Date.now()
-            });
-            render();
-        }
-
         function processCommand() {
+            unlockAudio();
             const input = document.getElementById('command-input');
             const val = input.value.trim();
             if (!val) return;
@@ -385,6 +418,20 @@
             localStorage.setItem('shazeb_xp_v5', xp);
         }
 
+        function addManualTask(day) {
+            const taskText = prompt(`Task for ${day}:`);
+            if (!taskText) return;
+            const timeText = prompt(`Time? (e.g. 11:58am):`, "ANYTIME");
+            
+            plannerData[day].push({
+                text: taskText,
+                done: false,
+                timeLabel: (timeText || "ANYTIME").toUpperCase().replace(/\s/g, ''),
+                id: Date.now()
+            });
+            render();
+        }
+
         function updatePie(dayXP, total) {
             const g = document.getElementById('pie-segments');
             const legend = document.getElementById('xp-legend');
@@ -417,11 +464,11 @@
                         <span class="text-teal-400">${h.score}%</span>
                     </div>
                     <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden"><div class="h-full bg-teal-500" style="width:${h.score}%"></div></div>
-                </div>`).join('') : '<p class="text-slate-500 text-xs text-center py-10 italic">Archive is empty</p>';
+                </div>`).join('') : '<p class="text-slate-500 text-xs text-center py-10 italic">No history yet.</p>';
         }
 
         function resetWeek() {
-            if(!confirm("Archive current week?")) return;
+            if(!confirm("Archive your current week and start fresh?")) return;
             let total = 0, done = 0;
             days.forEach(d => plannerData[d].forEach(t => { total++; if(t.done) done++; }));
             history.unshift({ date: new Date().toLocaleDateString(), score: total ? Math.round((done/total)*100) : 0 });
@@ -430,6 +477,7 @@
             render();
         }
 
+        // Initialize
         setInterval(updateClock, 1000);
         render();
     </script>
