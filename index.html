@@ -5,17 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Md Shazeb's Weekly Planner</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Inter:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: 45, 212, 191; /* Teal */
+            --primary-hex: #2dd4bf;
+        }
+
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background: #0f172a;
-            background-image: radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.15) 0px, transparent 50%);
+            background-image: radial-gradient(at 0% 0%, rgba(var(--primary), 0.15) 0px, transparent 50%);
             min-height: 100vh;
             color: white;
             padding-bottom: 40px;
             overflow-x: hidden;
+            transition: background-image 0.5s ease;
         }
+
+        .font-modern { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .font-classic { font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
 
         .glass {
             background: rgba(30, 41, 59, 0.7);
@@ -25,28 +35,28 @@
         }
 
         .header-card {
-            border: 1px solid rgba(45, 212, 191, 0.3);
-            box-shadow: 0 0 20px rgba(45, 212, 191, 0.05);
+            border: 1px solid rgba(var(--primary), 0.3);
+            box-shadow: 0 0 20px rgba(var(--primary), 0.05);
         }
 
         .task-done { text-decoration: line-through; opacity: 0.5; }
 
         .time-badge {
-            background: rgba(45, 212, 191, 0.15);
-            color: #2dd4bf;
+            background: rgba(var(--primary), 0.15);
+            color: var(--primary-hex);
             font-size: 9px;
             padding: 2px 6px;
             border-radius: 6px;
             font-weight: 800;
         }
 
-        .day-column { transition: all 0.2s ease; }
+        .day-column { transition: all 0.2s ease; border: 1px solid rgba(255, 255, 255, 0.05); }
         .day-column:hover {
             transform: translateY(-4px);
-            border-color: rgba(45, 212, 191, 0.4);
+            border-color: rgba(var(--primary), 0.4);
         }
 
-        #history-sidebar {
+        #history-sidebar, #menu-sidebar {
             background: rgba(15, 23, 42, 0.98);
             backdrop-filter: blur(20px);
             border-left: 1px solid rgba(255, 255, 255, 0.1);
@@ -66,29 +76,95 @@
             z-index: 300;
         }
 
-        .pulse-teal { animation: shadow-pulse 2s infinite; }
+        .pulse-primary { animation: shadow-pulse 2s infinite; }
         @keyframes shadow-pulse {
-            0% { box-shadow: 0 0 0 0px rgba(45, 212, 191, 0.4); }
-            100% { box-shadow: 0 0 0 20px rgba(45, 212, 191, 0); }
+            0% { box-shadow: 0 0 0 0px rgba(var(--primary), 0.4); }
+            100% { box-shadow: 0 0 0 20px rgba(var(--primary), 0); }
         }
 
         .digital-clock { font-family: monospace; letter-spacing: 1px; }
+        
+        .text-primary { color: var(--primary-hex); }
+        .bg-primary { background-color: var(--primary-hex); }
+        .border-primary { border-color: var(--primary-hex); }
+
+        .settings-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease-in-out;
+            opacity: 0;
+            visibility: hidden;
+        }
+        .settings-content.open {
+            max-height: 1000px;
+            opacity: 1;
+            visibility: visible;
+            margin-top: 1.25rem;
+        }
+        .chevron { transition: transform 0.3s ease; }
+        .chevron.rotated { transform: rotate(180deg); }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(var(--primary), 0.3); }
+
+        .lang-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.2s;
+        }
+        .lang-card:hover {
+            background: rgba(var(--primary), 0.1);
+            border-color: rgba(var(--primary), 0.3);
+            transform: scale(1.02);
+        }
+        .lang-card.active {
+            background: rgba(var(--primary), 0.2);
+            border-color: var(--primary-hex);
+        }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="p-4 md:p-8 font-modern" id="app-body">
+
+    <!-- LANGUAGE MODAL -->
+    <div id="language-modal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-2xl z-[300] hidden flex-col p-6 overflow-hidden">
+        <div class="max-w-4xl mx-auto w-full flex flex-col h-full">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 class="text-3xl font-black text-white uppercase tracking-tighter">Select Language</h2>
+                    <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Change UI Localization</p>
+                </div>
+                <button onclick="closeLanguageModal()" class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-rose-500/20 hover:text-rose-400 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            
+            <div class="relative mb-6">
+                <input type="text" id="lang-search" oninput="filterLanguages()" placeholder="Search 100+ languages..." class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:ring-2 focus:ring-primary transition-all">
+                <div class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                </div>
+            </div>
+
+            <div id="language-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 overflow-y-auto flex-1 pr-2 pb-10">
+                <!-- Langs injected here -->
+            </div>
+        </div>
+    </div>
 
     <!-- OVERLAY ALERT -->
     <div id="alert-overlay" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[200] hidden items-center justify-center">
-        <div id="pop-alert-box" class="glass pop-alert p-10 max-w-sm w-full border-2 border-teal-500/50 pulse-teal text-center">
-            <div class="w-20 h-20 bg-teal-500 rounded-2xl flex items-center justify-center text-slate-900 mx-auto mb-6 shadow-xl shadow-teal-500/40">
+        <div id="pop-alert-box" class="glass pop-alert p-10 max-w-sm w-full border-2 border-primary/50 pulse-primary text-center">
+            <div class="w-20 h-20 bg-primary rounded-2xl flex items-center justify-center text-slate-900 mx-auto mb-6 shadow-xl shadow-primary/40">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             </div>
-            <h2 class="text-teal-400 font-black uppercase tracking-[0.2em] text-[10px] mb-2">Incomplete Task Reminder</h2>
-            <div id="alert-time-badge" class="inline-block bg-teal-500/10 text-teal-400 px-3 py-1 rounded-full text-xs font-bold mb-4">--:--</div>
-            <h3 id="alert-task-text" class="text-2xl font-black text-white leading-tight mb-8">Task Name</h3>
-            <button onclick="dismissAlert()" class="w-full bg-teal-500 hover:bg-teal-400 text-slate-900 font-black py-4 rounded-xl transition-all active:scale-95 shadow-lg shadow-teal-500/20 uppercase tracking-widest text-xs">
+            <h2 id="lang-incomplete" class="text-primary font-black uppercase tracking-[0.2em] text-[10px] mb-2">Reminder</h2>
+            <div id="alert-time-badge" class="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold mb-4">--:--</div>
+            <h3 id="alert-task-text" class="text-2xl font-black text-white leading-tight mb-8">Task</h3>
+            <button onclick="dismissAlert()" id="lang-dismiss" class="w-full bg-primary hover:opacity-90 text-slate-900 font-black py-4 rounded-xl transition-all active:scale-95 shadow-lg shadow-primary/20 uppercase tracking-widest text-xs">
                 I'll do it now!
             </button>
         </div>
@@ -97,32 +173,37 @@
     <div class="max-w-7xl mx-auto">
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
             <div>
-                <h1 class="text-3xl font-[800] text-white tracking-tight">Productivity <span class="text-teal-400 text-sm font-[400] ml-2 italic">by Md Shazeb</span></h1>
+                <h1 class="text-3xl font-[800] text-white tracking-tight"><span id="lang-title">Productivity</span> <span class="text-primary text-sm font-[400] ml-2 italic">by Md Shazeb</span></h1>
                 <div class="flex items-center gap-2 mt-1">
-                    <div class="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></div>
-                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Live Analysis: <span id="clock" class="digital-clock">00:00:00</span></span>
+                    <div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest"><span id="lang-live">Live Analysis</span>: <span id="clock" class="digital-clock">00:00:00</span></span>
                 </div>
             </div>
             <div class="flex gap-3">
-                 <button onclick="toggleHistory()" class="bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold uppercase border border-white/10 transition-all">Archive</button>
-                <button onclick="resetWeek()" class="bg-rose-500/20 hover:bg-rose-500/40 text-rose-400 px-5 py-2.5 rounded-xl text-xs font-bold uppercase border border-rose-500/30 transition-all">Reset Week</button>
+                 <button onclick="toggleHistory()" id="lang-archive-btn" class="bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold uppercase border border-white/10 transition-all">Archive</button>
+                 <button onclick="resetWeek()" id="lang-reset-btn" class="bg-rose-500/20 hover:bg-rose-500/40 text-rose-400 px-5 py-2.5 rounded-xl text-xs font-bold uppercase border border-rose-500/30 transition-all">Reset Week</button>
+                 <button onclick="toggleMenu()" class="bg-primary/20 hover:bg-primary/40 text-primary p-2.5 rounded-xl border border-primary/30 transition-all flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                 </button>
             </div>
         </header>
 
         <!-- Input Area -->
-        <div class="glass header-card p-6 mb-8">
+        <div id="input-section" class="glass header-card p-6 mb-8 scroll-mt-8">
             <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 bg-teal-500 rounded-lg flex items-center justify-center text-slate-900">
+                <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-slate-900">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                 </div>
                 <div>
-                    <h2 class="font-[800] text-sm text-teal-400 uppercase tracking-widest">Schedule Input</h2>
-                    <p class="text-[10px] text-slate-400 font-medium uppercase tracking-tight">Example: "homework at 4:30pm"</p>
+                    <h2 id="lang-input-head" class="font-[800] text-sm text-primary uppercase tracking-widest">Schedule Input</h2>
+                    <p id="lang-input-sub" class="text-[10px] text-slate-400 font-medium uppercase tracking-tight">Example: "homework at 4:30pm"</p>
                 </div>
             </div>
             <div class="relative">
-                <textarea id="command-input" rows="2" class="w-full bg-slate-800/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all resize-none" placeholder="Enter your plan..."></textarea>
-                <button onclick="processCommand()" class="absolute bottom-3 right-3 bg-teal-500 hover:bg-teal-400 text-slate-900 font-bold text-[10px] uppercase px-4 py-2 rounded-lg transition-all active:scale-95">Analyze & Add</button>
+                <textarea id="command-input" rows="2" class="w-full bg-slate-800/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary transition-all resize-none" placeholder="Enter your plan..."></textarea>
+                <button onclick="processCommand()" id="lang-add-btn" class="absolute bottom-3 right-3 bg-primary hover:opacity-90 text-slate-900 font-bold text-[10px] uppercase px-4 py-2 rounded-lg transition-all active:scale-95">Analyze & Add</button>
             </div>
         </div>
 
@@ -131,20 +212,20 @@
             <div class="glass p-6 flex flex-col justify-center gap-4">
                 <div>
                     <div class="flex justify-between items-end mb-2">
-                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Completion</span>
+                        <span id="lang-completion" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Completion</span>
                         <span id="percent-display" class="text-sm font-black text-white">0%</span>
                     </div>
                     <div class="w-full h-3 bg-slate-800/50 rounded-full overflow-hidden border border-white/5">
-                        <div id="mastery-bar" class="h-full bg-gradient-to-r from-teal-600 to-teal-400 w-0 transition-all duration-1000"></div>
+                        <div id="mastery-bar" class="h-full bg-primary w-0 transition-all duration-1000"></div>
                     </div>
                 </div>
                 <div class="pt-4 border-t border-white/5 flex items-center justify-between">
                     <div>
-                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Total XP</span>
-                        <span id="xp-display" class="text-3xl font-black text-teal-400">0</span>
+                        <span id="lang-total-xp" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Total XP</span>
+                        <span id="xp-display" class="text-3xl font-black text-primary">0</span>
                     </div>
                     <div class="text-right">
-                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Level</span>
+                        <span id="lang-level" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Level</span>
                         <span id="level-display" class="text-xl font-black text-white">1</span>
                     </div>
                 </div>
@@ -152,7 +233,7 @@
 
             <div class="glass p-6 lg:col-span-2 flex flex-col md:flex-row items-center gap-8">
                 <div class="flex-shrink-0 text-center">
-                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Focus Distro</h3>
+                    <h3 id="lang-focus" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Focus Distro</h3>
                     <div class="pie-container mx-auto">
                         <svg id="xp-pie" width="140" height="140" viewBox="0 0 42 42">
                             <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#1e293b" stroke-width="5"></circle>
@@ -164,119 +245,293 @@
             </div>
         </div>
 
-        <!-- Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-4 mb-12" id="planner-grid"></div>
     </div>
 
-    <!-- History Sidebar -->
+    <!-- Sidebars -->
     <div id="history-sidebar" class="fixed inset-y-0 right-0 w-full md:w-96 transform translate-x-full transition-transform duration-300 z-50 p-6 flex flex-col">
         <div class="flex justify-between items-center mb-8">
-            <h2 class="text-xl font-black text-white">Archive</h2>
+            <h2 id="lang-archive-title" class="text-xl font-black text-white">Archive</h2>
             <button onclick="toggleHistory()" class="text-slate-400 hover:text-white">✕</button>
         </div>
         <div id="history-list" class="flex-1 overflow-y-auto space-y-4"></div>
     </div>
-    <div id="history-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden" onclick="toggleHistory()"></div>
+
+    <div id="menu-sidebar" class="fixed inset-y-0 right-0 w-full md:w-80 transform translate-x-full transition-transform duration-300 z-50 p-6 flex flex-col">
+        <div class="flex justify-between items-center mb-8">
+            <h2 id="lang-menu-title" class="text-xl font-black text-white">Menu</h2>
+            <button onclick="toggleMenu()" class="text-slate-400 hover:text-white">✕</button>
+        </div>
+        
+        <div class="space-y-4 overflow-y-auto flex-1 pr-2">
+            <div class="p-5 rounded-2xl bg-white/5 border border-white/10">
+                <div class="flex justify-between items-center cursor-pointer group" onclick="toggleSection('settings-content', 'settings-chevron')">
+                    <h3 id="lang-settings" class="text-[10px] font-black text-primary uppercase tracking-widest">Settings</h3>
+                    <svg id="settings-chevron" class="w-4 h-4 text-slate-500 group-hover:text-primary transition-all chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </div>
+                
+                <div id="settings-content" class="settings-content space-y-4">
+                    <button onclick="openLanguageModal()" class="w-full flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-primary/10 transition-all group">
+                        <div class="text-left">
+                            <label id="lang-select-label" class="text-[9px] text-slate-500 font-bold uppercase tracking-wider block mb-1">Current Language</label>
+                            <span id="current-lang-name" class="text-xs text-white font-bold">English</span>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-500 group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                    </button>
+
+                    <div class="space-y-1">
+                        <label id="lang-font-label" class="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Font Style</label>
+                        <select onchange="updateFont(this.value)" id="font-select" class="w-full bg-slate-800 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-primary appearance-none">
+                            <option value="font-modern">Modern Sans</option>
+                            <option value="font-classic">Classic Inter</option>
+                            <option value="font-mono">JetBrains Mono</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label id="lang-sound-label" class="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Notify Sound</label>
+                        <div class="flex gap-2">
+                            <select id="sound-select" class="flex-1 bg-slate-800 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-primary appearance-none">
+                                <option value="ding">Soft Ding</option>
+                                <option value="electronic">Pulse Scan</option>
+                                <option value="chime">Retro Chime</option>
+                            </select>
+                            <button onclick="testSound()" class="bg-primary/20 text-primary px-3 rounded-lg border border-primary/30 text-[10px] font-bold uppercase">Test</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-white/5 border border-white/10">
+                <div class="flex justify-between items-center cursor-pointer group" onclick="toggleSection('custom-content', 'custom-chevron')">
+                    <span id="lang-custom" class="text-xs font-bold text-slate-400 group-hover:text-primary uppercase tracking-widest">Customization</span>
+                    <svg id="custom-chevron" class="w-4 h-4 text-slate-500 group-hover:text-primary transition-all chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </div>
+                <div id="custom-content" class="settings-content flex flex-col gap-2">
+                    <button onclick="cycleTheme()" class="w-full py-3 bg-primary/10 hover:bg-primary/20 text-primary text-[10px] font-black uppercase tracking-widest rounded-xl transition-all border border-primary/20">
+                        Cycle Palette
+                    </button>
+                </div>
+            </div>
+
+            <div onclick="resetWeek()" class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 cursor-pointer transition-all group">
+                <span id="lang-reset-btn-menu" class="text-xs font-bold text-rose-400 uppercase tracking-widest">Wipe Progress</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="sidebar-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden" onclick="closeAllSidebars()"></div>
 
     <script>
         const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
         const dayColors = { "Monday": "#2dd4bf", "Tuesday": "#38bdf8", "Wednesday": "#818cf8", "Thursday": "#c084fc", "Friday": "#f472b6", "Saturday": "#fbbf24", "Sunday": "#4ade80" };
         
+        // Comprehensive Language Map
+        const languages = [
+            { code: 'en', name: 'English', native: 'English' },
+            { code: 'es', name: 'Spanish', native: 'Español' },
+            { code: 'fr', name: 'French', native: 'Français' },
+            { code: 'de', name: 'German', native: 'Deutsch' },
+            { code: 'it', name: 'Italian', native: 'Italiano' },
+            { code: 'pt', name: 'Portuguese', native: 'Português' },
+            { code: 'hi', name: 'Hindi', native: 'हिन्दी' },
+            { code: 'zh', name: 'Chinese', native: '中文' },
+            { code: 'ja', name: 'Japanese', native: '日本語' },
+            { code: 'ko', name: 'Korean', native: '한국어' },
+            { code: 'ru', name: 'Russian', native: 'Русский' },
+            { code: 'ar', name: 'Arabic', native: 'العربية' },
+            { code: 'bn', name: 'Bengali', native: 'বাংলা' },
+            { code: 'pa', name: 'Punjabi', native: 'ਪੰਜਾਬੀ' },
+            { code: 'tr', name: 'Turkish', native: 'Türkçe' },
+            { code: 'vi', name: 'Vietnamese', native: 'Tiếng Việt' },
+            { code: 'th', name: 'Thai', native: 'ไทย' },
+            { code: 'nl', name: 'Dutch', native: 'Nederlands' },
+            { code: 'sv', name: 'Swedish', native: 'Svenska' },
+            { code: 'pl', name: 'Polish', native: 'Polski' },
+            { code: 'id', name: 'Indonesian', native: 'Bahasa Indonesia' },
+            { code: 'he', name: 'Hebrew', native: 'עברית' },
+            { code: 'ur', name: 'Urdu', native: 'اردو' },
+            { code: 'ta', name: 'Tamil', native: 'தமிழ்' },
+            { code: 'te', name: 'Telugu', native: 'తెలుగు' },
+            { code: 'mr', name: 'Marathi', native: 'मराठी' },
+            { code: 'gu', name: 'Gujarati', native: 'ગુજરાતી' },
+            { code: 'kn', name: 'Kannada', native: 'ಕನ್ನಡ' },
+            { code: 'ml', name: 'Malayalam', native: 'മലയാളം' }
+        ];
+
+        // Core Translation Templates
+        const translationBase = {
+            en: {
+                title: "Productivity", archive: "Archive", reset: "Reset Week", inputHead: "Schedule Input",
+                inputSub: "Example: 'homework at 4:30pm'", add: "Analyze & Add", completion: "Completion",
+                totalXp: "Total XP", level: "Level", focus: "Focus Distro", menu: "Menu", settings: "Settings",
+                langLabel: "Current Language", fontLabel: "Font Style", soundLabel: "Notify Sound", custom: "Customization",
+                export: "Export Data", incomplete: "Reminder", dismiss: "I'll do it now!", live: "Live Analysis", wipe: "Wipe Progress"
+            },
+            hi: {
+                title: "उत्पादकता", archive: "संग्रह", reset: "सप्ताह रीसेट", inputHead: "शेड्यूल इनपुट",
+                inputSub: "उदा: 'शाम 4:30 बजे होमवर्क'", add: "जोड़ें", completion: "पूर्णता",
+                totalXp: "कुल XP", level: "स्तर", focus: "वितरण", menu: "मेनू", settings: "सेटिंग्स",
+                langLabel: "वर्तमान भाषा", fontLabel: "फ़ॉन्ट", soundLabel: "ध्वनि", custom: "अनुकूलन",
+                export: "डेटा", incomplete: "अनुस्मारक", dismiss: "अभी करता हूँ", live: "लाइव", wipe: "प्रगति मिटाएं"
+            }
+        };
+
+        const themes = [
+            { rgb: "45, 212, 191", hex: "#2dd4bf" },
+            { rgb: "129, 140, 248", hex: "#818cf8" },
+            { rgb: "244, 114, 182", hex: "#f472b6" },
+            { rgb: "251, 191, 36", hex: "#fbbf24" }
+        ];
+        
         let plannerData = JSON.parse(localStorage.getItem('shazeb_v4')) || days.reduce((a, d) => ({...a, [d]: []}), {});
         let history = JSON.parse(localStorage.getItem('shazeb_his_v4')) || [];
         let xp = parseInt(localStorage.getItem('shazeb_xp_v4')) || 0;
-        let lastAlertTime = ""; 
+        let config = JSON.parse(localStorage.getItem('shazeb_config')) || { lang: 'en', font: 'font-modern', sound: 'ding' };
 
-        function playDing() {
-            try {
-                const context = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = context.createOscillator();
-                const gain = context.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(587.33, context.currentTime); 
-                osc.connect(gain);
-                gain.connect(context.destination);
-                gain.gain.setValueAtTime(0, context.currentTime);
-                gain.gain.linearRampToValueAtTime(0.2, context.currentTime + 0.05);
-                gain.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.5);
-                osc.start();
-                osc.stop(context.currentTime + 0.5);
-            } catch(e) { console.log("Audio play blocked"); }
+        function openLanguageModal() {
+            document.getElementById('language-modal').classList.remove('hidden');
+            document.getElementById('language-modal').classList.add('flex');
+            renderLanguageGrid();
+        }
+
+        function closeLanguageModal() {
+            document.getElementById('language-modal').classList.add('hidden');
+            document.getElementById('language-modal').classList.remove('flex');
+        }
+
+        function filterLanguages() {
+            const term = document.getElementById('lang-search').value.toLowerCase();
+            renderLanguageGrid(term);
+        }
+
+        function renderLanguageGrid(filter = "") {
+            const grid = document.getElementById('language-grid');
+            grid.innerHTML = languages
+                .filter(l => l.name.toLowerCase().includes(filter) || l.native.toLowerCase().includes(filter))
+                .map(l => `
+                    <div onclick="selectLanguage('${l.code}')" class="lang-card p-4 rounded-2xl cursor-pointer ${config.lang === l.code ? 'active' : ''}">
+                        <div class="text-white font-black text-sm">${l.native}</div>
+                        <div class="text-slate-500 text-[10px] uppercase font-bold tracking-widest">${l.name}</div>
+                    </div>
+                `).join('');
+        }
+
+        function selectLanguage(code) {
+            config.lang = code;
+            saveConfig();
+            updateUILanguage();
+            closeLanguageModal();
+        }
+
+        function updateUILanguage() {
+            const lang = config.lang;
+            const t = translationBase[lang] || translationBase['en']; // Fallback to EN if specific translation missing
+            const selectedLang = languages.find(l => l.code === lang) || languages[0];
+            
+            document.getElementById('current-lang-name').innerText = selectedLang.native;
+            
+            // Apply text mappings
+            document.getElementById('lang-title').innerText = t.title;
+            document.getElementById('lang-archive-btn').innerText = t.archive;
+            document.getElementById('lang-archive-title').innerText = t.archive;
+            document.getElementById('lang-reset-btn').innerText = t.reset;
+            document.getElementById('lang-input-head').innerText = t.inputHead;
+            document.getElementById('lang-input-sub').innerText = t.inputSub;
+            document.getElementById('lang-add-btn').innerText = t.add;
+            document.getElementById('lang-completion').innerText = t.completion;
+            document.getElementById('lang-total-xp').innerText = t.totalXp;
+            document.getElementById('lang-level').innerText = t.level;
+            document.getElementById('lang-focus').innerText = t.focus;
+            document.getElementById('lang-menu-title').innerText = t.menu;
+            document.getElementById('lang-settings').innerText = t.settings;
+            document.getElementById('lang-select-label').innerText = t.langLabel;
+            document.getElementById('lang-font-label').innerText = t.fontLabel;
+            document.getElementById('lang-sound-label').innerText = t.soundLabel;
+            document.getElementById('lang-custom').innerText = t.custom;
+            document.getElementById('lang-incomplete').innerText = t.incomplete;
+            document.getElementById('lang-dismiss').innerText = t.dismiss;
+            document.getElementById('lang-live').innerText = t.live;
+            document.getElementById('lang-reset-btn-menu').innerText = t.wipe;
+        }
+
+        function toggleSection(contentId, chevronId) {
+            const content = document.getElementById(contentId);
+            const chevron = document.getElementById(chevronId);
+            content.classList.toggle('open');
+            chevron.classList.toggle('rotated');
+        }
+
+        function updateFont(fontClass) {
+            config.font = fontClass;
+            const body = document.getElementById('app-body');
+            body.className = `p-4 md:p-8 ${fontClass}`;
+            saveConfig();
+        }
+
+        function saveConfig() {
+            localStorage.setItem('shazeb_config', JSON.stringify(config));
+        }
+
+        function cycleTheme() {
+            const theme = themes[Math.floor(Math.random()*themes.length)];
+            document.documentElement.style.setProperty('--primary', theme.rgb);
+            document.documentElement.style.setProperty('--primary-hex', theme.hex);
+            render();
+        }
+
+        function testSound() {
+            const sound = document.getElementById('sound-select').value;
+            const context = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = context.createOscillator();
+            const gain = context.createGain();
+            osc.connect(gain); gain.connect(context.destination);
+            osc.frequency.setValueAtTime(sound === 'ding' ? 587 : sound === 'electronic' ? 880 : 440, context.currentTime);
+            gain.gain.setValueAtTime(0.1, context.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.5);
+            osc.start(); osc.stop(context.currentTime + 0.5);
         }
 
         function updateClock() {
             const now = new Date();
-            const hour = now.getHours() % 12 || 12;
-            const min = now.getMinutes().toString().padStart(2, '0');
-            const sec = now.getSeconds().toString().padStart(2, '0');
+            const h = now.getHours() % 12 || 12;
+            const m = now.getMinutes().toString().padStart(2, '0');
+            const s = now.getSeconds().toString().padStart(2, '0');
             const ampm = now.getHours() >= 12 ? 'PM' : 'AM';
-            
-            const displayTime = `${hour}:${min}:${sec} ${ampm}`;
-            const matchTime = `${hour}:${min}${ampm}`;
-            
-            document.getElementById('clock').innerText = displayTime;
-
-            if (lastAlertTime !== matchTime) {
-                const currentDay = days[now.getDay()];
-                const dayTasks = plannerData[currentDay] || [];
-                dayTasks.forEach(t => {
-                    if (!t.done) {
-                        const cleanTaskTime = t.timeLabel.replace(/[:\s]/g, '').toUpperCase();
-                        const cleanCurrentTime = matchTime.replace(/[:\s]/g, '').toUpperCase();
-                        
-                        if (cleanTaskTime === cleanCurrentTime) {
-                            showPopAlert(t.text, t.timeLabel);
-                            lastAlertTime = matchTime;
-                        }
-                    }
-                });
-            }
-        }
-
-        function showPopAlert(text, time) {
-            playDing();
-            document.getElementById('alert-task-text').innerText = text;
-            document.getElementById('alert-time-badge').innerText = time;
-            document.getElementById('alert-overlay').classList.remove('hidden');
-            document.getElementById('alert-overlay').classList.add('flex');
+            document.getElementById('clock').innerText = `${h}:${m}:${s} ${ampm}`;
         }
 
         function dismissAlert() {
             document.getElementById('alert-overlay').classList.add('hidden');
-            document.getElementById('alert-overlay').classList.remove('flex');
+        }
+
+        function addTaskForDay(day) {
+            const input = document.getElementById('command-input');
+            input.value = day + ": ";
+            input.focus();
+            document.getElementById('input-section').scrollIntoView({ behavior: 'smooth' });
         }
 
         function processCommand() {
             const input = document.getElementById('command-input');
             const val = input.value.trim();
             if (!val) return;
-
             const timeMatch = val.match(/(\d{1,2}(:\d{2})?\s*(am|pm))/i);
             const timeLabel = timeMatch ? timeMatch[0].toUpperCase().replace(/\s/g, '') : "ANYTIME";
-            
             let dayMatch = days.find(d => val.toLowerCase().includes(d.toLowerCase())) || days[new Date().getDay()];
-            let taskName = val.replace(timeLabel, '')
-                             .replace(new RegExp(dayMatch, 'gi'), '')
-                             .replace(/at/gi, '')
-                             .trim();
-
-            plannerData[dayMatch].push({ 
-                text: taskName || "New Task", 
-                done: false, 
-                timeLabel, 
-                id: Date.now() 
-            });
-            
+            let taskName = val.replace(timeLabel, '').replace(new RegExp(dayMatch, 'gi'), '').replace(/at/gi, '').replace(/:/g, '').trim();
+            plannerData[dayMatch].push({ text: taskName || "New Task", done: false, timeLabel, id: Date.now() });
             input.value = "";
             render();
         }
 
         function toggleTask(day, id) {
             const task = plannerData[day].find(t => t.id === id);
-            if (task) {
-                task.done = !task.done;
-                xp += (task.done ? 10 : -10);
-            }
+            if (task) { task.done = !task.done; xp += (task.done ? 10 : -10); }
             render();
         }
 
@@ -292,13 +547,13 @@
         function render() {
             const grid = document.getElementById('planner-grid');
             grid.innerHTML = "";
-            let total = 0, done = 0, currentXP = 0, dayXP = {};
+            let total = 0, done = 0, dayXP = {};
 
             days.forEach(day => {
                 dayXP[day] = 0;
                 const tasks = plannerData[day] || [];
                 const tasksHtml = tasks.map(t => {
-                    total++; if(t.done) { done++; dayXP[day] += 10; currentXP += 10; }
+                    total++; if(t.done) { done++; dayXP[day] += 10; }
                     return `
                     <div class="flex flex-col gap-1 py-3 border-b border-white/5 last:border-0 group">
                         <div class="flex items-center justify-between">
@@ -306,7 +561,7 @@
                             <button onclick="deleteTask('${day}', ${t.id})" class="text-slate-600 hover:text-rose-400 text-xs opacity-0 group-hover:opacity-100 transition">✕</button>
                         </div>
                         <div class="flex items-center gap-2 cursor-pointer mt-1" onclick="toggleTask('${day}', ${t.id})">
-                            <div class="w-4 h-4 rounded border ${t.done ? 'bg-teal-500 border-teal-500 shadow-[0_0_10px_rgba(45,212,191,0.4)]' : 'border-slate-500'} flex items-center justify-center transition-all">
+                            <div class="w-4 h-4 rounded border ${t.done ? 'bg-primary border-primary shadow-[0_0_10px_rgba(var(--primary),0.4)]' : 'border-slate-500'} flex items-center justify-center transition-all">
                                 ${t.done ? '<span class="text-[8px] text-slate-900 font-bold">✓</span>' : ''}
                             </div>
                             <span class="text-xs font-semibold ${t.done ? 'task-done text-slate-500' : 'text-slate-200'}">${t.text}</span>
@@ -315,9 +570,12 @@
                 }).join('');
 
                 grid.innerHTML += `
-                <div class="glass day-column p-4 flex flex-col min-h-[220px]">
-                    <h3 class="text-[10px] font-black text-teal-400 uppercase tracking-widest mb-4 pb-2 border-b border-white/10">${day}</h3>
-                    <div class="flex-1">${tasksHtml || '<p class="text-[9px] opacity-20 text-center py-8 italic font-medium">Free Day</p>'}</div>
+                <div class="glass day-column p-4 flex flex-col min-h-[200px]">
+                    <div class="flex justify-between items-center mb-4 pb-2 border-b border-white/10">
+                        <h3 class="text-[10px] font-black text-primary uppercase tracking-widest">${day}</h3>
+                        <button onclick="addTaskForDay('${day}')" class="w-5 h-5 flex items-center justify-center rounded-full bg-white/5 hover:bg-primary/20 hover:text-primary transition-all text-slate-500 text-xs font-bold border border-white/5">+ </button>
+                    </div>
+                    <div class="flex-1">${tasksHtml || '<p class="text-[9px] opacity-20 text-center py-8 italic">Empty</p>'}</div>
                 </div>`;
             });
 
@@ -326,8 +584,7 @@
             document.getElementById('level-display').innerText = Math.floor(xp / 100) + 1;
             document.getElementById('mastery-bar').style.width = percent + "%";
             document.getElementById('percent-display').innerText = percent + "%";
-            
-            updatePie(dayXP, currentXP);
+            updatePie(dayXP, xp);
             localStorage.setItem('shazeb_v4', JSON.stringify(plannerData));
             localStorage.setItem('shazeb_xp_v4', xp);
         }
@@ -346,39 +603,45 @@
                     circle.setAttribute("stroke-dasharray", `${perc} ${100 - perc}`); circle.setAttribute("stroke-dashoffset", -acc);
                     g.appendChild(circle); acc += perc;
                 }
-                legend.innerHTML += `<div class="text-[9px] flex items-center gap-1"><div class="w-1.5 h-1.5 rounded-sm" style="background:${dayColors[day]}"></div><span class="text-slate-400 font-medium">${day.substring(0,3)}:</span> <span class="text-white font-bold">${dayXP[day]}</span></div>`;
+                legend.innerHTML += `<div class="text-[9px] flex items-center gap-1"><div class="w-1.5 h-1.5 rounded-sm" style="background:${dayColors[day]}</div><span class="text-slate-400 font-medium">${day.substring(0,3)}:</span> <span class="text-white font-bold">${dayXP[day]}</span></div>`;
             });
         }
 
         function toggleHistory() {
+            document.getElementById('menu-sidebar').classList.add('translate-x-full');
             document.getElementById('history-sidebar').classList.toggle('translate-x-full');
-            document.getElementById('history-backdrop').classList.toggle('hidden');
-            if(!document.getElementById('history-sidebar').classList.contains('translate-x-full')) renderHistory();
+            updateBackdrop();
         }
 
-        function renderHistory() {
-            document.getElementById('history-list').innerHTML = history.map(h => `
-                <div class="glass p-4 border border-white/5">
-                    <div class="flex justify-between text-[10px] mb-2 font-bold uppercase tracking-widest">
-                        <span class="text-slate-400">${h.date}</span>
-                        <span class="text-teal-400">${h.score}% Efficiency</span>
-                    </div>
-                    <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                        <div class="h-full bg-teal-500" style="width:${h.score}%"></div>
-                    </div>
-                </div>`).join('');
+        function toggleMenu() {
+            document.getElementById('history-sidebar').classList.add('translate-x-full');
+            document.getElementById('menu-sidebar').classList.toggle('translate-x-full');
+            updateBackdrop();
+        }
+
+        function updateBackdrop() {
+            const hOpen = !document.getElementById('history-sidebar').classList.contains('translate-x-full');
+            const mOpen = !document.getElementById('menu-sidebar').classList.contains('translate-x-full');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            if (hOpen || mOpen) backdrop.classList.remove('hidden'); else backdrop.classList.add('hidden');
+        }
+
+        function closeAllSidebars() {
+            document.getElementById('history-sidebar').classList.add('translate-x-full');
+            document.getElementById('menu-sidebar').classList.add('translate-x-full');
+            document.getElementById('sidebar-backdrop').classList.add('hidden');
         }
 
         function resetWeek() {
-            if(!confirm("Reset the week? All current tasks will be moved to Archive.")) return;
-            let total = 0, done = 0;
-            days.forEach(d => plannerData[d].forEach(t => { total++; if(t.done) done++; }));
-            history.unshift({ date: new Date().toLocaleDateString(), score: total ? Math.round((done/total)*100) : 0 });
-            localStorage.setItem('shazeb_his_v4', JSON.stringify(history.slice(0, 15)));
+            if(!confirm("Wipe all progress?")) return;
             plannerData = days.reduce((a, d) => ({...a, [d]: []}), {});
             render();
         }
 
+        // Init
+        document.getElementById('font-select').value = config.font;
+        updateUILanguage();
+        updateFont(config.font);
         setInterval(updateClock, 1000);
         render();
     </script>
