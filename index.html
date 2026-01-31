@@ -327,8 +327,9 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Setup - These constants need to be set or injected
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { /* Paste your config here for manual use */ };
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "", authDomain: "", projectId: "", storageBucket: "", messagingSenderId: "", appId: ""
+        };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -337,7 +338,6 @@
         const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
         const dayColors = { "Monday": "#2dd4bf", "Tuesday": "#38bdf8", "Wednesday": "#818cf8", "Thursday": "#c084fc", "Friday": "#f472b6", "Saturday": "#fbbf24", "Sunday": "#4ade80" };
         
-        // App State
         let plannerData = JSON.parse(localStorage.getItem('shazeb_v4')) || days.reduce((a, d) => ({...a, [d]: []}), {});
         let historyData = JSON.parse(localStorage.getItem('shazeb_history_v4')) || [];
         let xp = parseInt(localStorage.getItem('shazeb_xp_v4')) || 0;
@@ -349,14 +349,10 @@
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         const initAuth = async () => {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    return signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    return signInAnonymously(auth);
-                }
-            } catch (err) {
-                console.error("Auth failed:", err);
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                return signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                return signInAnonymously(auth);
             }
         };
 
@@ -366,8 +362,7 @@
         window.generateSyncCode = async () => {
             const btn = document.getElementById('lang-copy-btn');
             const btnText = document.getElementById('copy-btn-text');
-            btn.disabled = true;
-            btnText.innerText = "Connecting...";
+            btn.disabled = true; btnText.innerText = "Connecting...";
             if (!user) await authPromise;
             if (!user) { alert("Cloud connection unavailable."); btn.disabled = false; btnText.innerText = "Retry"; return; }
             btnText.innerText = "Syncing...";
@@ -385,8 +380,7 @@
                 btnText.innerText = "Copy Code";
                 btn.onclick = () => {
                     const input = document.getElementById('sync-code-display');
-                    input.select();
-                    document.execCommand('copy');
+                    input.select(); document.execCommand('copy');
                     btnText.innerText = "Copied!";
                     setTimeout(() => { btnText.innerText = "Copy Code"; }, 2000);
                 };
