@@ -327,12 +327,12 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Setup
-        const firebaseConfig = JSON.parse(__firebase_config);
+        // Firebase Setup - These constants need to be set or injected
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { /* Paste your config here for manual use */ };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'shazeb-planner';
 
         const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
         const dayColors = { "Monday": "#2dd4bf", "Tuesday": "#38bdf8", "Wednesday": "#818cf8", "Thursday": "#c084fc", "Friday": "#f472b6", "Saturday": "#fbbf24", "Sunday": "#4ade80" };
@@ -348,7 +348,6 @@
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-        // Improved Auth Handler
         const initAuth = async () => {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -362,32 +361,19 @@
         };
 
         authPromise = initAuth();
-        onAuthStateChanged(auth, (u) => { 
-            user = u; 
-        });
+        onAuthStateChanged(auth, (u) => { user = u; });
 
-        // Functions exposed to window
         window.generateSyncCode = async () => {
             const btn = document.getElementById('lang-copy-btn');
             const btnText = document.getElementById('copy-btn-text');
-            
             btn.disabled = true;
             btnText.innerText = "Connecting...";
-
-            // Ensure we are logged in first
             if (!user) await authPromise;
-            if (!user) {
-                alert("Cloud connection unavailable. Please refresh.");
-                btn.disabled = false;
-                btnText.innerText = "Retry";
-                return;
-            }
-
+            if (!user) { alert("Cloud connection unavailable."); btn.disabled = false; btnText.innerText = "Retry"; return; }
             btnText.innerText = "Syncing...";
             const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
             let code = '';
             for (let i = 0; i < 6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
-
             try {
                 const syncDoc = doc(db, 'artifacts', appId, 'public', 'data', 'sync-codes', code);
                 await setDoc(syncDoc, {
@@ -395,7 +381,6 @@
                     timestamp: Date.now(),
                     createdBy: user.uid
                 });
-
                 document.getElementById('sync-code-display').value = code;
                 btnText.innerText = "Copy Code";
                 btn.onclick = () => {
@@ -405,74 +390,35 @@
                     btnText.innerText = "Copied!";
                     setTimeout(() => { btnText.innerText = "Copy Code"; }, 2000);
                 };
-            } catch (e) {
-                console.error("Cloud save error:", e);
-                alert("Failed to save to cloud. Ensure you have internet.");
-                btnText.innerText = "Retry";
-            } finally {
-                btn.disabled = false;
-            }
+            } catch (e) { alert("Failed to save to cloud."); btnText.innerText = "Retry"; } finally { btn.disabled = false; }
         };
 
         window.importSyncCode = async () => {
             const code = document.getElementById('sync-code-input').value.trim().toUpperCase();
-            if (code.length !== 6) { alert("Enter a valid 6-digit code"); return; }
-
+            if (code.length !== 6) { alert("Enter 6-digit code"); return; }
             const btn = document.getElementById('lang-sync-btn');
-            btn.disabled = true;
-            btn.innerText = "...";
-
+            btn.disabled = true; btn.innerText = "...";
             if (!user) await authPromise;
-
             try {
-                const syncDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'sync-codes', code);
-                const snap = await getDoc(syncDocRef);
-
-                if (!snap.exists()) {
-                    alert("Invalid Code. Please try again.");
-                    return;
-                }
-
+                const snap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sync-codes', code));
+                if (!snap.exists()) { alert("Invalid Code"); return; }
                 const payload = JSON.parse(snap.data().payload);
-                plannerData = payload.plannerData;
-                historyData = payload.historyData;
-                xp = payload.xp;
-                config = payload.config;
-                profilePic = payload.profilePic;
-
+                plannerData = payload.plannerData; historyData = payload.historyData; xp = payload.xp; config = payload.config; profilePic = payload.profilePic;
                 localStorage.setItem('shazeb_v4', JSON.stringify(plannerData));
                 localStorage.setItem('shazeb_history_v4', JSON.stringify(historyData));
                 localStorage.setItem('shazeb_xp_v4', xp);
                 localStorage.setItem('shazeb_config', JSON.stringify(config));
                 localStorage.setItem('shazeb_profile_v4', profilePic);
-
-                applyTranslations();
-                updateSoundUI();
-                updateFont(config.font);
-                updateProfileDisplay();
-                render();
-                alert("Success! Your data is now synced.");
-                document.getElementById('sync-code-input').value = "";
-            } catch (e) {
-                console.error("Sync error:", e);
-                alert("Import failed. Check your connection.");
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Sync";
-            }
+                applyTranslations(); updateSoundUI(); updateFont(config.font); updateProfileDisplay(); render();
+                alert("Synced successfully!");
+            } catch (e) { alert("Import failed."); } finally { btn.disabled = false; btn.innerText = "Sync"; }
         };
 
         window.triggerUpload = () => document.getElementById('profile-upload').click();
-        
-        window.handleProfileUpload = (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
+        window.handleProfileUpload = (e) => {
+            const file = e.target.files[0]; if (!file) return;
             const reader = new FileReader();
-            reader.onload = (e) => {
-                profilePic = e.target.result;
-                localStorage.setItem('shazeb_profile_v4', profilePic);
-                updateProfileDisplay();
-            };
+            reader.onload = (ev) => { profilePic = ev.target.result; localStorage.setItem('shazeb_profile_v4', profilePic); updateProfileDisplay(); };
             reader.readAsDataURL(file);
         };
 
@@ -485,42 +431,21 @@
             if (!config.sound) return;
             const oscillator = audioCtx.createOscillator();
             const gainNode = audioCtx.createGain();
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); 
+            oscillator.connect(gainNode); gainNode.connect(audioCtx.destination);
+            oscillator.type = 'sine'; oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); 
             oscillator.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.1);
-            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-            oscillator.start();
-            oscillator.stop(audioCtx.currentTime + 0.1);
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            oscillator.start(); oscillator.stop(audioCtx.currentTime + 0.1);
         }
 
-        window.toggleSound = () => {
-            config.sound = !config.sound;
-            localStorage.setItem('shazeb_config', JSON.stringify(config));
-            updateSoundUI();
-        };
-
+        window.toggleSound = () => { config.sound = !config.sound; localStorage.setItem('shazeb_config', JSON.stringify(config)); updateSoundUI(); };
         function updateSoundUI() {
-            const knob = document.getElementById('sound-knob');
-            const btn = document.getElementById('sound-toggle-btn');
-            if (config.sound) {
-                knob.style.transform = "translateX(20px)";
-                btn.style.backgroundColor = "var(--primary-hex)";
-            } else {
-                knob.style.transform = "translateX(0px)";
-                btn.style.backgroundColor = "#334155";
-            }
+            const knob = document.getElementById('sound-knob'); const btn = document.getElementById('sound-toggle-btn');
+            if (config.sound) { knob.style.transform = "translateX(20px)"; btn.style.backgroundColor = "var(--primary-hex)"; }
+            else { knob.style.transform = "translateX(0px)"; btn.style.backgroundColor = "#334155"; }
         }
 
-        window.changeLanguage = (langCode) => {
-            config.lang = langCode;
-            localStorage.setItem('shazeb_config', JSON.stringify(config));
-            applyTranslations();
-            render();
-        };
-
+        window.changeLanguage = (langCode) => { config.lang = langCode; localStorage.setItem('shazeb_config', JSON.stringify(config)); applyTranslations(); render(); };
         const translations = {
             en: { title: "Productivity", live: "Live Analysis", input: "Schedule Input", sub: "Example: 'homework at 4:30pm'", add: "Analyze & Add", completion: "Completion", totalxp: "Total XP", level: "Level", distro: "Focus Distro", tools: "Tools & Settings", syncCode: "My Sync Code", copy: "Generate", import: "Import from Device", sync: "Sync", custom: "Visual & Audio", lang: "Language", font: "Font Selection", sound: "Sound Effects", theme: "Interface Theme", wipe: "Wipe Data", empty: "Empty", history: "History" },
             hi: { title: "कार्यक्षमता", live: "लाइव विश्लेषण", input: "अनुसूची इनपुट", sub: "उदाहरण: 'शाम 4:30 बजे होमवर्क'", add: "विश्लेषण और जोड़ें", completion: "पूर्णता", totalxp: "कुल XP", level: "स्तर", distro: "फोकस वितरण", tools: "उपकरण और सेटिंग्स", syncCode: "मेरा सिंक कोड", copy: "जनरेट करें", import: "डिवाइस से आयात", sync: "सिंक", custom: "दृश्य और ऑडियो", lang: "भाषा", font: "फ़ॉन्ट चयन", sound: "ध्वनि प्रभाव", theme: "इंटरफ़ेस थीम", wipe: "डेटा मिटाएं", empty: "खाली", history: "इतिहास" },
@@ -529,153 +454,65 @@
 
         function applyTranslations() {
             const t = translations[config.lang] || translations.en;
-            document.getElementById('lang-title-text').innerText = t.title;
-            document.getElementById('lang-live-text').innerText = t.live;
-            document.getElementById('lang-input-title').innerText = t.input;
-            document.getElementById('lang-input-sub').innerText = t.sub;
-            document.getElementById('lang-add-btn').innerText = t.add;
-            document.getElementById('lang-completion-label').innerText = t.completion;
-            document.getElementById('lang-total-xp-label').innerText = t.totalxp;
-            document.getElementById('lang-level-label').innerText = t.level;
-            document.getElementById('lang-distro-label').innerText = t.distro;
-            document.getElementById('lang-menu-title').innerText = t.tools;
-            document.getElementById('lang-sync-code-label').innerText = t.syncCode;
-            document.getElementById('lang-import-label').innerText = t.import;
-            document.getElementById('lang-sync-btn').innerText = t.sync;
-            document.getElementById('lang-custom-label').innerText = t.custom;
-            document.getElementById('lang-selector-label').innerText = t.lang;
-            document.getElementById('lang-font-label').innerText = t.font;
-            document.getElementById('lang-sound-label').innerText = t.sound;
-            document.getElementById('lang-wipe-label').innerText = t.wipe;
-            document.getElementById('lang-history-label').innerText = t.history || "History";
-            document.getElementById('language-select').value = config.lang;
+            document.getElementById('lang-title-text').innerText = t.title; document.getElementById('lang-live-text').innerText = t.live;
+            document.getElementById('lang-input-title').innerText = t.input; document.getElementById('lang-input-sub').innerText = t.sub;
+            document.getElementById('lang-add-btn').innerText = t.add; document.getElementById('lang-completion-label').innerText = t.completion;
+            document.getElementById('lang-total-xp-label').innerText = t.totalxp; document.getElementById('lang-level-label').innerText = t.level;
+            document.getElementById('lang-distro-label').innerText = t.distro; document.getElementById('lang-menu-title').innerText = t.tools;
+            document.getElementById('lang-sync-code-label').innerText = t.syncCode; document.getElementById('lang-import-label').innerText = t.import;
+            document.getElementById('lang-sync-btn').innerText = t.sync; document.getElementById('lang-custom-label').innerText = t.custom;
+            document.getElementById('lang-selector-label').innerText = t.lang; document.getElementById('lang-font-label').innerText = t.font;
+            document.getElementById('lang-sound-label').innerText = t.sound; document.getElementById('lang-wipe-label').innerText = t.wipe;
+            document.getElementById('lang-history-label').innerText = t.history || "History"; document.getElementById('language-select').value = config.lang;
         }
 
-        window.toggleSection = (contentId, chevronId) => {
-            const el = document.getElementById(contentId);
-            const isOpen = el.classList.toggle('open');
-            document.getElementById(chevronId).classList.toggle('rotated');
-            if (contentId === 'history-content' && isOpen) renderHistory();
-        };
-
-        window.updateFont = (fontClass) => {
-            config.font = fontClass;
-            document.getElementById('app-body').className = `p-4 md:p-8 ${fontClass}`;
-            localStorage.setItem('shazeb_config', JSON.stringify(config));
-        };
-
-        function updateClock() {
-            const now = new Date();
-            const el = document.getElementById('clock');
-            if (el) el.innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        }
+        window.toggleSection = (cid, chid) => { const isOpen = document.getElementById(cid).classList.toggle('open'); document.getElementById(chid).classList.toggle('rotated'); if (cid === 'history-content' && isOpen) renderHistory(); };
+        window.updateFont = (fc) => { config.font = fc; document.getElementById('app-body').className = `p-4 md:p-8 ${fc}`; localStorage.setItem('shazeb_config', JSON.stringify(config)); };
+        function updateClock() { document.getElementById('clock').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }); }
 
         window.processCommand = () => {
-            const input = document.getElementById('command-input');
-            const val = input.value.trim();
-            if (!val) return;
-            const timeMatch = val.match(/(\d{1,2}(:\d{2})?\s*(am|pm))/i);
-            const timeLabel = timeMatch ? timeMatch[0].toUpperCase() : "ANYTIME";
+            const input = document.getElementById('command-input'); const val = input.value.trim(); if (!val) return;
+            const timeMatch = val.match(/(\d{1,2}(:\d{2})?\s*(am|pm))/i); const timeLabel = timeMatch ? timeMatch[0].toUpperCase() : "ANYTIME";
             let dayMatch = days.find(d => val.toLowerCase().includes(d.toLowerCase())) || days[new Date().getDay()];
             plannerData[dayMatch].push({ text: val.split('at')[0].replace(dayMatch, '').trim() || "Task", done: false, timeLabel, id: Date.now() });
-            input.value = "";
-            render();
-            playNotification();
+            input.value = ""; render(); playNotification();
         };
 
-        window.prepareDayAdd = (day) => {
-            const input = document.getElementById('command-input');
-            input.value = day + " ";
-            input.focus();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        };
-
-        window.toggleTask = (day, id) => {
-            const task = plannerData[day].find(t => t.id === id);
-            if (task) { 
-                task.done = !task.done; 
-                xp += (task.done ? 10 : -10); 
-                if (task.done) playNotification();
-            }
-            render();
-        };
-
-        window.deleteTask = (day, id) => {
-            plannerData[day] = plannerData[day].filter(t => t.id !== id);
-            render();
-        };
-
+        window.prepareDayAdd = (day) => { const input = document.getElementById('command-input'); input.value = day + " "; input.focus(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+        window.toggleTask = (day, id) => { const task = plannerData[day].find(t => t.id === id); if (task) { task.done = !task.done; xp += (task.done ? 10 : -10); if (task.done) playNotification(); } render(); };
+        window.deleteTask = (day, id) => { plannerData[day] = plannerData[day].filter(t => t.id !== id); render(); };
         window.resetWeek = () => { 
-            if(confirm("Save to history and wipe current tasks?")) { 
-                let total = 0, done = 0;
-                days.forEach(day => { plannerData[day].forEach(t => { total++; if(t.done) done++; }); });
-                if (total > 0) {
-                    historyData.unshift({ date: new Date().toLocaleDateString(), completion: Math.round((done/total)*100), tasks: `${done}/${total}`, xp });
-                    localStorage.setItem('shazeb_history_v4', JSON.stringify(historyData));
-                }
-                plannerData = days.reduce((a, d) => ({...a, [d]: []}), {}); 
-                xp = 0; 
-                render(); 
+            if(confirm("Save to history and wipe?")) { 
+                let total = 0, done = 0; days.forEach(d => plannerData[d].forEach(t => { total++; if(t.done) done++; }));
+                if (total > 0) historyData.unshift({ date: new Date().toLocaleDateString(), completion: Math.round((done/total)*100), tasks: `${done}/${total}`, xp });
+                localStorage.setItem('shazeb_history_v4', JSON.stringify(historyData)); plannerData = days.reduce((a, d) => ({...a, [d]: []}), {}); xp = 0; render(); 
             } 
         };
 
         function renderHistory() {
-            const list = document.getElementById('history-list');
-            if (historyData.length === 0) { list.innerHTML = `<p class="text-[10px] text-slate-500 italic py-4">No history saved</p>`; return; }
-            list.innerHTML = historyData.map(item => `
-                <div class="history-item">
-                    <div class="flex justify-between items-center mb-1"><span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">${item.date}</span><span class="text-[10px] font-bold text-primary">${item.completion}%</span></div>
-                    <div class="flex justify-between items-center"><span class="text-[10px] text-slate-200">${item.tasks} Tasks</span><span class="text-[9px] text-slate-500 uppercase">XP: ${item.xp}</span></div>
-                </div>`).join('');
+            const list = document.getElementById('history-list'); if (historyData.length === 0) { list.innerHTML = `<p class="text-[10px] text-slate-500 italic py-4">No history saved</p>`; return; }
+            list.innerHTML = historyData.map(i => `<div class="history-item"><div class="flex justify-between mb-1"><span class="text-[9px] font-black text-slate-400 uppercase">${i.date}</span><span class="text-[10px] text-primary">${i.completion}%</span></div><div class="flex justify-between"><span class="text-[10px] text-slate-200">${i.tasks} Tasks</span><span class="text-[9px] text-slate-500">XP: ${i.xp}</span></div></div>`).join('');
         }
 
         function render() {
-            const grid = document.getElementById('planner-grid');
-            if (!grid) return;
-            grid.innerHTML = "";
-            let total = 0, done = 0, dayXP = {};
-            const tText = translations[config.lang] || translations.en;
-
+            const grid = document.getElementById('planner-grid'); if (!grid) return; grid.innerHTML = "";
+            let total = 0, done = 0, dayXP = {}; const tText = translations[config.lang] || translations.en;
             days.forEach(day => {
-                dayXP[day] = 0;
-                const tasksHtml = (plannerData[day] || []).map(t => {
+                dayXP[day] = 0; const tasksHtml = (plannerData[day] || []).map(t => {
                     total++; if(t.done) { done++; dayXP[day] += 10; }
-                    return `
-                    <div class="flex flex-col gap-1 py-3 border-b border-white/5 last:border-0 group">
-                        <div class="flex items-center justify-between"><span class="time-badge">${t.timeLabel}</span><button onclick="deleteTask('${day}', ${t.id})" class="text-slate-600 hover:text-rose-400 text-[10px] opacity-0 group-hover:opacity-100 transition">✕</button></div>
-                        <div class="flex items-center gap-2 cursor-pointer mt-1" onclick="toggleTask('${day}', ${t.id})">
-                            <div class="w-3.5 h-3.5 rounded border ${t.done ? 'bg-primary border-primary' : 'border-slate-500'}"></div>
-                            <span class="text-[11px] font-semibold ${t.done ? 'task-done text-slate-500' : 'text-slate-200'}">${t.text}</span>
-                        </div>
-                    </div>`;
+                    return `<div class="flex flex-col gap-1 py-3 border-b border-white/5 last:border-0 group"><div class="flex justify-between"><span class="time-badge">${t.timeLabel}</span><button onclick="deleteTask('${day}', ${t.id})" class="text-slate-600 hover:text-rose-400 text-[10px] opacity-0 group-hover:opacity-100">✕</button></div><div class="flex items-center gap-2 cursor-pointer mt-1" onclick="toggleTask('${day}', ${t.id})"><div class="w-3.5 h-3.5 rounded border ${t.done ? 'bg-primary border-primary' : 'border-slate-500'}"></div><span class="text-[11px] font-semibold ${t.done ? 'task-done text-slate-500' : 'text-slate-200'}">${t.text}</span></div></div>`;
                 }).join('');
-
-                grid.innerHTML += `
-                <div class="glass day-column p-4 flex flex-col min-h-[200px]">
-                    <div class="flex items-center justify-between mb-4 pb-2 border-b border-white/10">
-                        <h3 class="text-[10px] font-black text-primary uppercase tracking-widest">${day}</h3>
-                        <button onclick="prepareDayAdd('${day}')" class="w-5 h-5 rounded-full bg-primary/10 hover:bg-primary/30 text-primary flex items-center justify-center transition-all"><span>+</span></button>
-                    </div>
-                    <div class="flex-1">${tasksHtml || `<p class="text-[9px] opacity-20 text-center py-8">${tText.empty}</p>`}</div>
-                </div>`;
+                grid.innerHTML += `<div class="glass day-column p-4 flex flex-col min-h-[200px]"><div class="flex justify-between mb-4 pb-2 border-b border-white/10"><h3 class="text-[10px] font-black text-primary uppercase tracking-widest">${day}</h3><button onclick="prepareDayAdd('${day}')" class="w-5 h-5 rounded-full bg-primary/10 hover:bg-primary/30 text-primary flex items-center justify-center">+</button></div><div class="flex-1">${tasksHtml || `<p class="text-[9px] opacity-20 text-center py-8">${tText.empty}</p>`}</div></div>`;
             });
-
-            const percent = total === 0 ? 0 : Math.round((done / total) * 100);
-            document.getElementById('xp-display').innerText = xp;
-            document.getElementById('level-display').innerText = Math.floor(xp / 100) + 1;
-            document.getElementById('mastery-bar').style.width = percent + "%";
-            document.getElementById('percent-display').innerText = percent + "%";
-            updatePie(dayXP, xp);
-            localStorage.setItem('shazeb_v4', JSON.stringify(plannerData));
-            localStorage.setItem('shazeb_xp_v4', xp);
+            const p = total === 0 ? 0 : Math.round((done / total) * 100);
+            document.getElementById('xp-display').innerText = xp; document.getElementById('level-display').innerText = Math.floor(xp / 100) + 1;
+            document.getElementById('mastery-bar').style.width = p + "%"; document.getElementById('percent-display').innerText = p + "%";
+            updatePie(dayXP, xp); localStorage.setItem('shazeb_v4', JSON.stringify(plannerData)); localStorage.setItem('shazeb_xp_v4', xp);
         }
 
         function updatePie(dayXP, total) {
-            const g = document.getElementById('pie-segments');
-            const legend = document.getElementById('xp-legend');
-            if (!g || !legend) return;
-            g.innerHTML = ''; legend.innerHTML = '';
-            let acc = 0;
+            const g = document.getElementById('pie-segments'); const legend = document.getElementById('xp-legend'); if (!g || !legend) return;
+            g.innerHTML = ''; legend.innerHTML = ''; let acc = 0;
             days.forEach(day => {
                 const perc = total === 0 ? 0 : (dayXP[day] / total) * 100;
                 if (perc > 0) {
@@ -685,25 +522,14 @@
                     circle.setAttribute("stroke-dasharray", `${perc} ${100 - perc}`); circle.setAttribute("stroke-dashoffset", -acc);
                     g.appendChild(circle); acc += perc;
                 }
-                legend.innerHTML += `
-                    <div class="flex items-center gap-3 p-2 rounded-lg bg-white/5 border border-white/5">
-                        <div class="w-3.5 h-3.5 rounded-sm flex-shrink-0" style="background:${dayColors[day]}"></div>
-                        <div class="flex flex-col"><span class="text-slate-400 font-bold uppercase text-[10px] tracking-tighter">${day}</span><span class="text-white font-black text-[13px] leading-none">${dayXP[day]} <span class="text-[9px] text-slate-500 font-medium">XP</span></span></div>
-                    </div>`;
+                legend.innerHTML += `<div class="flex items-center gap-3 p-2 rounded-lg bg-white/5 border border-white/5"><div class="w-3.5 h-3.5 rounded-sm" style="background:${dayColors[day]}"></div><div class="flex flex-col"><span class="text-slate-400 font-bold uppercase text-[10px]">${day}</span><span class="text-white font-black text-[13px] leading-none">${dayXP[day]} <span class="text-[9px] text-slate-500 font-medium">XP</span></span></div></div>`;
             });
         }
 
         window.toggleMenu = () => { document.getElementById('menu-sidebar').classList.toggle('translate-x-full'); document.getElementById('sidebar-backdrop').classList.toggle('hidden'); };
         window.closeAllSidebars = () => { document.getElementById('menu-sidebar').classList.add('translate-x-full'); document.getElementById('sidebar-backdrop').classList.add('hidden'); };
 
-        // Init
-        setInterval(updateClock, 1000);
-        updateClock();
-        updateProfileDisplay();
-        updateFont(config.font);
-        applyTranslations();
-        updateSoundUI();
-        render();
+        setInterval(updateClock, 1000); updateClock(); updateProfileDisplay(); updateFont(config.font); applyTranslations(); updateSoundUI(); render();
     </script>
 </body>
 </html>
