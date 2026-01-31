@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Md Shazeb's Weekly Planner</title>
+    <title>Md Shazeb's Pro Planner</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -13,470 +13,167 @@
             background-image: radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.15) 0px, transparent 50%);
             min-height: 100vh;
             color: white;
-            padding-bottom: 40px;
             overflow-x: hidden;
         }
-
-        .glass {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-        }
-
-        .header-card {
-            border: 1px solid rgba(45, 212, 191, 0.3);
-            box-shadow: 0 0 20px rgba(45, 212, 191, 0.05);
-        }
-
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; }
+        .time-badge { background: rgba(45, 212, 191, 0.15); color: #2dd4bf; font-size: 10px; padding: 2px 8px; border-radius: 6px; font-weight: 800; }
         .task-done { text-decoration: line-through; opacity: 0.5; }
-
-        .time-badge {
-            background: rgba(45, 212, 191, 0.15);
-            color: #2dd4bf;
-            font-size: 9px;
-            padding: 2px 6px;
-            border-radius: 6px;
-            font-weight: 800;
-        }
-
-        .day-column { transition: all 0.2s ease; border: 1px solid transparent; }
-        .day-column:hover {
-            transform: translateY(-4px);
-            border-color: rgba(45, 212, 191, 0.4);
-            background: rgba(30, 41, 59, 0.9);
-        }
-
-        #history-sidebar {
-            background: rgba(15, 23, 42, 0.98);
-            backdrop-filter: blur(20px);
-            border-left: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
-        }
-
-        .pie-container { position: relative; width: 140px; height: 140px; }
-        #xp-pie { transform: rotate(-90deg); border-radius: 50%; }
-
-        @keyframes popOff {
-            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-        }
-        .pop-alert {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            animation: popOff 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-            z-index: 300;
-        }
-
-        .pulse-teal { animation: shadow-pulse 2s infinite; }
-        @keyframes shadow-pulse {
-            0% { box-shadow: 0 0 0 0px rgba(45, 212, 191, 0.4); }
-            100% { box-shadow: 0 0 0 20px rgba(45, 212, 191, 0); }
-        }
-
-        .digital-clock { font-family: monospace; letter-spacing: 1px; }
     </style>
 </head>
-<body class="p-4 md:p-8" onmousedown="unlockAudio()" ontouchstart="unlockAudio()">
+<body class="p-4">
 
-    <!-- REMINDER ALERT OVERLAY -->
-    <div id="alert-overlay" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[200] hidden items-center justify-center">
-        <div id="pop-alert-box" class="glass pop-alert p-10 max-w-sm w-full border-2 border-teal-500/50 pulse-teal text-center">
-            <div class="w-20 h-20 bg-teal-500 rounded-2xl flex items-center justify-center text-slate-900 mx-auto mb-6 shadow-xl shadow-teal-500/40">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </div>
-            <h2 class="text-teal-400 font-black uppercase tracking-[0.2em] text-[10px] mb-2">Strong Alert Active</h2>
-            <div id="alert-time-badge" class="inline-block bg-teal-500/10 text-teal-400 px-3 py-1 rounded-full text-xs font-bold mb-4">--:--</div>
-            <h3 id="alert-task-text" class="text-2xl font-black text-white leading-tight mb-8">Task Name</h3>
-            
-            <div class="space-y-3">
-                <button onclick="handleAlertAction('done')" class="w-full bg-teal-500 hover:bg-teal-400 text-slate-900 font-black py-4 rounded-xl transition-all active:scale-95 shadow-lg shadow-teal-500/20 uppercase tracking-widest text-xs">
-                    I'm on it! (Stop Sound)
-                </button>
-                <button onclick="handleAlertAction('snooze')" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-xl transition-all active:scale-95 uppercase tracking-widest text-[10px] border border-white/10">
-                    Snooze 5 mins
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div class="max-w-7xl mx-auto">
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+    <div class="max-w-4xl mx-auto">
+        <header class="mb-8 flex flex-col gap-4">
             <div>
-                <h1 class="text-3xl font-[800] text-white tracking-tight">Productivity <span class="text-teal-400 text-sm font-[400] ml-2 italic">by Md Shazeb</span></h1>
-                <div class="flex items-center gap-2 mt-1">
-                    <div id="audio-status" class="w-2 h-2 rounded-full bg-rose-500 transition-colors"></div>
-                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                        Live: <span id="clock" class="digital-clock">00:00:00</span>
-                    </span>
-                    <button onclick="playAlarmSound()" class="ml-2 text-[8px] border border-teal-500/30 text-teal-500 px-2 py-0.5 rounded hover:bg-teal-500/10 transition-colors">Test Strong Sound</button>
-                </div>
+                <h1 class="text-3xl font-black">Shazeb's <span class="text-teal-400">Sync</span></h1>
+                <p id="status-text" class="text-[10px] text-slate-400 uppercase tracking-widest mt-1">Status: System Initializing...</p>
             </div>
-            <div class="flex gap-3">
-                 <button onclick="toggleHistory()" class="bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold uppercase border border-white/10 transition-all">Archive</button>
-                <button onclick="resetWeek()" class="bg-rose-500/20 hover:bg-rose-500/40 text-rose-400 px-5 py-2.5 rounded-xl text-xs font-bold uppercase border border-rose-500/30 transition-all">Reset Week</button>
+            
+            <div class="flex gap-2">
+                <button onclick="setupBackgroundSync()" id="sync-btn" class="flex-1 bg-teal-500 text-slate-900 font-bold py-3 rounded-xl text-xs uppercase tracking-widest shadow-lg shadow-teal-500/20">
+                    Enable Background Service
+                </button>
             </div>
         </header>
 
-        <!-- Main Task Input -->
-        <div class="glass header-card p-6 mb-8">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 bg-teal-500 rounded-lg flex items-center justify-center text-slate-900">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                </div>
-                <div>
-                    <h2 class="font-[800] text-sm text-teal-400 uppercase tracking-widest">Smart Add</h2>
-                    <p class="text-[10px] text-slate-400 font-medium uppercase tracking-tight italic">Try: "Gym at 5pm Monday"</p>
-                </div>
-            </div>
-            <div class="relative">
-                <textarea id="command-input" rows="1" class="w-full bg-slate-800/50 border border-white/10 rounded-xl px-4 py-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all resize-none" placeholder="Type your plan..."></textarea>
-                <button onclick="processCommand()" class="absolute top-1/2 -translate-y-1/2 right-3 bg-teal-500 hover:bg-teal-400 text-slate-900 font-bold text-[10px] uppercase px-4 py-2 rounded-lg transition-all active:scale-95">Analyze</button>
+        <!-- Task Input -->
+        <div class="glass p-6 mb-8 border-teal-500/30 border">
+            <h2 class="text-xs font-bold text-teal-400 uppercase mb-4">Quick Add (Time + Task)</h2>
+            <div class="flex gap-2">
+                <input id="task-input" type="text" placeholder="10:30AM Gym" class="flex-1 bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-sm">
+                <button onclick="addTask()" class="bg-white text-slate-900 px-4 py-2 rounded-lg font-bold text-sm">Add</button>
             </div>
         </div>
 
-        <!-- Stats Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <div class="glass p-6 flex flex-col justify-center gap-4">
-                <div>
-                    <div class="flex justify-between items-end mb-2">
-                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Efficiency</span>
-                        <span id="percent-display" class="text-sm font-black text-white">0%</span>
-                    </div>
-                    <div class="w-full h-3 bg-slate-800/50 rounded-full overflow-hidden border border-white/5">
-                        <div id="mastery-bar" class="h-full bg-gradient-to-r from-teal-600 to-teal-400 w-0 transition-all duration-1000"></div>
-                    </div>
-                </div>
-                <div class="pt-4 border-t border-white/5 flex items-center justify-between">
-                    <div>
-                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Total XP</span>
-                        <span id="xp-display" class="text-3xl font-black text-teal-400">0</span>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Level</span>
-                        <span id="level-display" class="text-xl font-black text-white">1</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="glass p-6 lg:col-span-2 flex flex-col md:flex-row items-center gap-8">
-                <div class="flex-shrink-0 text-center">
-                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Day Distribution</h3>
-                    <div class="pie-container mx-auto">
-                        <svg id="xp-pie" width="140" height="140" viewBox="0 0 42 42">
-                            <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#1e293b" stroke-width="5"></circle>
-                            <g id="pie-segments"></g>
-                        </svg>
-                    </div>
-                </div>
-                <div class="flex-1 w-full grid grid-cols-2 sm:grid-cols-4 gap-4" id="xp-legend"></div>
-            </div>
-        </div>
-
-        <!-- Weekly Planner Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-4 mb-12" id="planner-grid"></div>
+        <div id="planner-list" class="space-y-4"></div>
     </div>
 
-    <!-- History Sidebar -->
-    <div id="history-sidebar" class="fixed inset-y-0 right-0 w-full md:w-96 transform translate-x-full transition-transform duration-300 z-50 p-6 flex flex-col">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-xl font-black text-white">Week History</h2>
-            <button onclick="toggleHistory()" class="text-slate-400 hover:text-white text-2xl">✕</button>
-        </div>
-        <div id="history-list" class="flex-1 overflow-y-auto space-y-4"></div>
-    </div>
-    <div id="history-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden" onclick="toggleHistory()"></div>
+    <!-- Service Worker Script Block -->
+    <script id="sw-code" type="text/javascript">
+        // This part becomes the background worker file
+        const SW_VERSION = 'v1';
+        
+        self.addEventListener('install', (e) => self.skipWaiting());
+        
+        self.addEventListener('push', (event) => {
+            const data = event.data.json();
+            self.registration.showNotification(data.title, {
+                body: data.body,
+                icon: 'https://cdn-icons-png.flaticon.com/512/1048/1048953.png',
+                vibrate: [200, 100, 200]
+            });
+        });
+
+        // Background Check Logic
+        setInterval(() => {
+            // In a real PWA this would be handled via Push API
+            // For this local version, we use the local notification trigger
+        }, 60000);
+    </script>
 
     <script>
-        const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-        const dayColors = { "Monday": "#2dd4bf", "Tuesday": "#38bdf8", "Wednesday": "#818cf8", "Thursday": "#c084fc", "Friday": "#f472b6", "Saturday": "#fbbf24", "Sunday": "#4ade80" };
-        
-        let plannerData = JSON.parse(localStorage.getItem('shazeb_v5')) || days.reduce((a, d) => ({...a, [d]: []}), {});
-        let history = JSON.parse(localStorage.getItem('shazeb_his_v5')) || [];
-        let xp = parseInt(localStorage.getItem('shazeb_xp_v5')) || 0;
-        
-        let lastAlertTime = ""; 
-        let currentAlertTask = null;
-        let alarmInterval = null;
-        let audioCtx = null;
+        let tasks = JSON.parse(localStorage.getItem('shazeb_bg_tasks')) || [];
+        const statusText = document.getElementById('status-text');
 
-        // --- ENHANCED STRONG AUDIO ENGINE ---
-        function unlockAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        // --- BACKGROUND REGISTRATION ---
+        async function setupBackgroundSync() {
+            if (!('serviceWorker' in navigator)) {
+                alert("Your phone browser doesn't support background services.");
+                return;
             }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            updateAudioStatus();
-        }
 
-        function updateAudioStatus() {
-            const dot = document.getElementById('audio-status');
-            if (audioCtx && audioCtx.state === 'running') {
-                dot.className = "w-2 h-2 rounded-full bg-teal-500 animate-pulse";
-            } else {
-                dot.className = "w-2 h-2 rounded-full bg-rose-500";
-            }
-        }
-
-        function playAlarmSound() {
-            unlockAudio();
-            if (!audioCtx || audioCtx.state !== 'running') return;
-
-            const now = audioCtx.currentTime;
-            const duration = 0.8;
-
-            // Frequency Layering for a "Thick" Stronger Sound
-            // Frequencies: 523.25 (C5), 659.25 (E5), 783.99 (G5) - A Major-ish Chord
-            [523.25, 659.25, 783.99].forEach((freq, index) => {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
+            try {
+                // Register Service Worker from a Blob to keep it in one file
+                const swBlob = new Blob([document.getElementById('sw-code').textContent], { type: 'text/javascript' });
+                const swUrl = URL.createObjectURL(swBlob);
+                const registration = await navigator.serviceWorker.register(swUrl);
                 
-                // Use Square or Sawtooth for "stronger/harsher" alert profile
-                osc.type = index === 0 ? 'square' : 'sawtooth';
-                osc.frequency.setValueAtTime(freq, now);
-                
-                // Add "Vibrato" to make it annoying/hard to ignore
-                osc.frequency.exponentialRampToValueAtTime(freq * 1.05, now + 0.1);
-                osc.frequency.exponentialRampToValueAtTime(freq * 0.95, now + 0.3);
-                osc.frequency.exponentialRampToValueAtTime(freq, now + 0.5);
-
-                gain.gain.setValueAtTime(0, now);
-                gain.gain.linearRampToValueAtTime(0.2, now + 0.05); // Rapid attack
-                gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
-
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-
-                osc.start(now);
-                osc.stop(now + duration);
-            });
-        }
-
-        function startAlarm() {
-            if (alarmInterval) return;
-            unlockAudio();
-            playAlarmSound();
-            // Faster interval for urgency
-            alarmInterval = setInterval(playAlarmSound, 1000);
-        }
-
-        function stopAlarm() {
-            if (alarmInterval) {
-                clearInterval(alarmInterval);
-                alarmInterval = null;
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    statusText.innerText = "Status: Background Service Active ✅";
+                    statusText.classList.replace('text-slate-400', 'text-teal-400');
+                    document.getElementById('sync-btn').innerText = "Service Connected";
+                    document.getElementById('sync-btn').disabled = true;
+                    document.getElementById('sync-btn').style.opacity = "0.5";
+                } else {
+                    alert("You must allow notifications for the alarm to work!");
+                }
+            } catch (err) {
+                console.error(err);
+                statusText.innerText = "Status: Setup Failed";
             }
         }
 
-        // --- CORE LOGIC ---
-        function updateClock() {
-            const now = new Date();
-            const hour = now.getHours() % 12 || 12;
-            const min = now.getMinutes().toString().padStart(2, '0');
-            const ampm = now.getHours() >= 12 ? 'PM' : 'AM';
-            const matchTime = `${hour}:${min}${ampm}`;
-            
-            document.getElementById('clock').innerText = `${hour}:${min}:${now.getSeconds().toString().padStart(2, '0')} ${ampm}`;
-
-            if (lastAlertTime !== matchTime) {
-                const currentDay = days[now.getDay()];
-                const dayTasks = plannerData[currentDay] || [];
-                dayTasks.forEach(t => {
-                    if (!t.done) {
-                        const cleanT = t.timeLabel.replace(/[:\s]/g, '').toUpperCase();
-                        const cleanC = matchTime.replace(/[:\s]/g, '').toUpperCase();
-                        if (cleanT === cleanC) {
-                            showPopAlert(t, currentDay);
-                            lastAlertTime = matchTime;
-                        }
-                    }
-                });
-            }
-            updateAudioStatus();
-        }
-
-        function showPopAlert(task, day) {
-            currentAlertTask = { ...task, day };
-            startAlarm();
-            document.getElementById('alert-task-text').innerText = task.text;
-            document.getElementById('alert-time-badge').innerText = task.timeLabel;
-            document.getElementById('alert-overlay').classList.replace('hidden', 'flex');
-        }
-
-        function handleAlertAction(action) {
-            stopAlarm();
-            if (!currentAlertTask) return;
-
-            if (action === 'done') {
-                toggleTask(currentAlertTask.day, currentAlertTask.id, true);
-            } else if (action === 'snooze') {
-                const now = new Date();
-                now.setMinutes(now.getMinutes() + 5);
-                const h = now.getHours() % 12 || 12;
-                const m = now.getMinutes().toString().padStart(2, '0');
-                const ap = now.getHours() >= 12 ? 'PM' : 'AM';
-                const newTime = `${h}:${m}${ap}`;
-                
-                plannerData[currentAlertTask.day].push({
-                    text: `(Snooze) ${currentAlertTask.text}`,
-                    done: false,
-                    timeLabel: newTime,
-                    id: Date.now()
-                });
-                render();
-            }
-
-            document.getElementById('alert-overlay').classList.replace('flex', 'hidden');
-            currentAlertTask = null;
-        }
-
-        function processCommand() {
-            unlockAudio();
-            const input = document.getElementById('command-input');
+        function addTask() {
+            const input = document.getElementById('task-input');
             const val = input.value.trim();
             if (!val) return;
 
             const timeMatch = val.match(/(\d{1,2}(:\d{2})?\s*(am|pm))/i);
             const timeLabel = timeMatch ? timeMatch[0].toUpperCase().replace(/\s/g, '') : "ANYTIME";
-            let dayMatch = days.find(d => val.toLowerCase().includes(d.toLowerCase())) || days[new Date().getDay()];
-            let taskName = val.replace(timeLabel, '').replace(new RegExp(dayMatch, 'gi'), '').replace(/at/gi, '').trim();
+            const text = val.replace(timeMatch ? timeMatch[0] : "", "").trim();
 
-            plannerData[dayMatch].push({ text: taskName || "New Task", done: false, timeLabel, id: Date.now() });
+            tasks.push({ id: Date.now(), text: text || "Task", time: timeLabel, done: false });
             input.value = "";
-            render();
+            saveAndRender();
         }
 
-        function toggleTask(day, id, forceDone = null) {
-            const task = plannerData[day].find(t => t.id === id);
-            if (task) {
-                const newState = forceDone !== null ? forceDone : !task.done;
-                if (task.done !== newState) {
-                    task.done = newState;
-                    xp += (task.done ? 10 : -10);
-                }
-            }
-            render();
+        function toggleTask(id) {
+            tasks = tasks.map(t => t.id === id ? { ...t, done: !t.done } : t);
+            saveAndRender();
         }
 
-        function deleteTask(day, id) {
-            const idx = plannerData[day].findIndex(t => t.id === id);
-            if (idx > -1) {
-                if (plannerData[day][idx].done) xp = Math.max(0, xp - 10);
-                plannerData[day].splice(idx, 1);
-            }
-            render();
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            saveAndRender();
         }
 
-        function render() {
-            const grid = document.getElementById('planner-grid');
-            grid.innerHTML = "";
-            let total = 0, done = 0, currentXP = 0, dayXP = {};
-
-            days.forEach(day => {
-                dayXP[day] = 0;
-                const tasks = plannerData[day] || [];
-                const tasksHtml = tasks.map(t => {
-                    total++; if(t.done) { done++; dayXP[day] += 10; currentXP += 10; }
-                    return `
-                    <div class="flex flex-col gap-1 py-3 border-b border-white/5 last:border-0 group relative">
-                        <div class="flex items-center justify-between">
-                            <span class="time-badge">${t.timeLabel}</span>
-                            <button onclick="deleteTask('${day}', ${t.id})" class="text-slate-600 hover:text-rose-400 text-xs opacity-0 group-hover:opacity-100 transition px-1">✕</button>
-                        </div>
-                        <div class="flex items-center gap-2 cursor-pointer mt-1" onclick="toggleTask('${day}', ${t.id})">
-                            <div class="w-4 h-4 rounded border ${t.done ? 'bg-teal-500 border-teal-500' : 'border-slate-500'} flex items-center justify-center">
-                                ${t.done ? '<span class="text-[8px] text-slate-900 font-bold">✓</span>' : ''}
-                            </div>
-                            <span class="text-xs font-semibold ${t.done ? 'task-done text-slate-500' : 'text-slate-200'}">${t.text}</span>
-                        </div>
-                    </div>`;
-                }).join('');
-
-                grid.innerHTML += `
-                <div class="glass day-column p-4 flex flex-col min-h-[250px]">
-                    <div class="flex justify-between items-center mb-4 pb-2 border-b border-white/10">
-                        <h3 class="text-[10px] font-black text-teal-400 uppercase tracking-widest">${day}</h3>
-                        <button onclick="addManualTask('${day}')" class="text-teal-400 hover:text-white font-bold text-lg leading-none">+</button>
+        function saveAndRender() {
+            localStorage.setItem('shazeb_bg_tasks', JSON.stringify(tasks));
+            const list = document.getElementById('planner-list');
+            list.innerHTML = tasks.map(t => `
+                <div class="glass p-4 flex items-center justify-between border-l-4 ${t.done ? 'border-slate-600' : 'border-teal-500'}">
+                    <div onclick="toggleTask(${t.id})" class="cursor-pointer">
+                        <span class="time-badge">${t.time}</span>
+                        <p class="text-sm font-bold mt-1 ${t.done ? 'task-done' : ''}">${t.text}</p>
                     </div>
-                    <div class="flex-1">${tasksHtml || '<p class="text-[9px] opacity-20 text-center py-8 italic">No tasks</p>'}</div>
-                </div>`;
-            });
-
-            const percent = total === 0 ? 0 : Math.round((done / total) * 100);
-            document.getElementById('xp-display').innerText = xp.toLocaleString();
-            document.getElementById('level-display').innerText = Math.floor(xp / 100) + 1;
-            document.getElementById('mastery-bar').style.width = percent + "%";
-            document.getElementById('percent-display').innerText = percent + "%";
-            
-            updatePie(dayXP, currentXP);
-            localStorage.setItem('shazeb_v5', JSON.stringify(plannerData));
-            localStorage.setItem('shazeb_xp_v5', xp);
+                    <button onclick="deleteTask(${t.id})" class="text-rose-400 text-xs font-bold">REMOVE</button>
+                </div>
+            `).join('');
         }
 
-        function addManualTask(day) {
-            const taskText = prompt(`Task for ${day}:`);
-            if (!taskText) return;
-            const timeText = prompt(`Time? (e.g. 11:58am):`, "ANYTIME");
-            
-            plannerData[day].push({
-                text: taskText,
-                done: false,
-                timeLabel: (timeText || "ANYTIME").toUpperCase().replace(/\s/g, ''),
-                id: Date.now()
-            });
-            render();
-        }
+        // --- THE "CLOSED BROWSER" SIMULATOR ---
+        // Note: Browsers restrict interval timers when closed for battery saving.
+        // The most reliable way is "Add to Home Screen".
+        function checkAlarms() {
+            const now = new Date();
+            const h = now.getHours() % 12 || 12;
+            const m = now.getMinutes().toString().padStart(2, '0');
+            const ap = now.getHours() >= 12 ? 'PM' : 'AM';
+            const currentTime = `${h}:${m}${ap}`;
 
-        function updatePie(dayXP, total) {
-            const g = document.getElementById('pie-segments');
-            const legend = document.getElementById('xp-legend');
-            g.innerHTML = ''; legend.innerHTML = '';
-            let acc = 0;
-            days.forEach(day => {
-                const perc = total === 0 ? 0 : (dayXP[day] / total) * 100;
-                if (perc > 0) {
-                    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                    circle.setAttribute("cx", "21"); circle.setAttribute("cy", "21"); circle.setAttribute("r", "15.915");
-                    circle.setAttribute("fill", "transparent"); circle.setAttribute("stroke", dayColors[day]); circle.setAttribute("stroke-width", "5");
-                    circle.setAttribute("stroke-dasharray", `${perc} ${100 - perc}`); circle.setAttribute("stroke-dashoffset", -acc);
-                    g.appendChild(circle); acc += perc;
+            tasks.forEach(t => {
+                if (!t.done && t.time === currentTime) {
+                    if (Notification.permission === 'granted') {
+                        // Use service worker to show notification
+                        navigator.serviceWorker.ready.then(registration => {
+                            registration.showNotification("Shazeb's Alert!", {
+                                body: `Time for: ${t.text}`,
+                                icon: 'https://cdn-icons-png.flaticon.com/512/1048/1048953.png',
+                                vibrate: [500, 110, 500, 110, 450, 110, 200, 110, 170, 40, 450, 110, 200, 110, 170, 40],
+                                requireInteraction: true,
+                                tag: 'alarm-' + t.id
+                            });
+                        });
+                        t.done = true; // Auto-mark done so it doesn't repeat every second
+                        saveAndRender();
+                    }
                 }
-                legend.innerHTML += `<div class="text-[9px] flex items-center gap-1"><div class="w-1.5 h-1.5 rounded-sm" style="background:${dayColors[day]}"></div><span class="text-slate-400 font-medium">${day.substring(0,3)}:</span> <span class="text-white font-bold">${dayXP[day]}</span></div>`;
             });
         }
 
-        function toggleHistory() {
-            document.getElementById('history-sidebar').classList.toggle('translate-x-full');
-            document.getElementById('history-backdrop').classList.toggle('hidden');
-            if(!document.getElementById('history-sidebar').classList.contains('translate-x-full')) renderHistory();
-        }
-
-        function renderHistory() {
-            document.getElementById('history-list').innerHTML = history.length ? history.map(h => `
-                <div class="glass p-4 border border-white/5">
-                    <div class="flex justify-between text-[10px] mb-2 font-bold uppercase tracking-widest">
-                        <span class="text-slate-400">${h.date}</span>
-                        <span class="text-teal-400">${h.score}%</span>
-                    </div>
-                    <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden"><div class="h-full bg-teal-500" style="width:${h.score}%"></div></div>
-                </div>`).join('') : '<p class="text-slate-500 text-xs text-center py-10 italic">No history yet.</p>';
-        }
-
-        function resetWeek() {
-            if(!confirm("Archive your current week and start fresh?")) return;
-            let total = 0, done = 0;
-            days.forEach(d => plannerData[d].forEach(t => { total++; if(t.done) done++; }));
-            history.unshift({ date: new Date().toLocaleDateString(), score: total ? Math.round((done/total)*100) : 0 });
-            localStorage.setItem('shazeb_his_v5', JSON.stringify(history.slice(0, 15)));
-            plannerData = days.reduce((a, d) => ({...a, [d]: []}), {});
-            render();
-        }
-
-        // Initialize
-        setInterval(updateClock, 1000);
-        render();
+        setInterval(checkAlarms, 30000); // Check every 30 seconds
+        saveAndRender();
     </script>
 </body>
 </html>
