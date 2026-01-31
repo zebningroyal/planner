@@ -89,9 +89,15 @@
             <h2 class="text-teal-400 font-black uppercase tracking-[0.2em] text-[10px] mb-2">Task Reminder</h2>
             <div id="alert-time-badge" class="inline-block bg-teal-500/10 text-teal-400 px-3 py-1 rounded-full text-xs font-bold mb-4">--:--</div>
             <h3 id="alert-task-text" class="text-2xl font-black text-white leading-tight mb-8">Task Name</h3>
-            <button onclick="dismissAlert()" class="w-full bg-teal-500 hover:bg-teal-400 text-slate-900 font-black py-4 rounded-xl transition-all active:scale-95 shadow-lg shadow-teal-500/20 uppercase tracking-widest text-xs">
-                Got it!
-            </button>
+            
+            <div class="space-y-3">
+                <button onclick="handleAlertAction('done')" class="w-full bg-teal-500 hover:bg-teal-400 text-slate-900 font-black py-4 rounded-xl transition-all active:scale-95 shadow-lg shadow-teal-500/20 uppercase tracking-widest text-xs">
+                    Mark Done & Stop
+                </button>
+                <button onclick="handleAlertAction('snooze')" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-xl transition-all active:scale-95 uppercase tracking-widest text-[10px] border border-white/10">
+                    Remind in 5 mins
+                </button>
+            </div>
         </div>
     </div>
 
@@ -186,7 +192,24 @@
         let plannerData = JSON.parse(localStorage.getItem('shazeb_v5')) || days.reduce((a, d) => ({...a, [d]: []}), {});
         let history = JSON.parse(localStorage.getItem('shazeb_his_v5')) || [];
         let xp = parseInt(localStorage.getItem('shazeb_xp_v5')) || 0;
+        
         let lastAlertTime = ""; 
+        let currentAlertTask = null;
+        let alarmInterval = null;
+
+        function startAlarm() {
+            if (alarmInterval) return;
+            // Play sound every 1.5 seconds
+            playDing();
+            alarmInterval = setInterval(playDing, 1500);
+        }
+
+        function stopAlarm() {
+            if (alarmInterval) {
+                clearInterval(alarmInterval);
+                alarmInterval = null;
+            }
+        }
 
         function playDing() {
             try {
@@ -215,13 +238,14 @@
             document.getElementById('clock').innerText = `${hour}:${min}:${now.getSeconds().toString().padStart(2, '0')} ${ampm}`;
 
             if (lastAlertTime !== matchTime) {
-                const dayTasks = plannerData[days[now.getDay()]] || [];
+                const currentDay = days[now.getDay()];
+                const dayTasks = plannerData[currentDay] || [];
                 dayTasks.forEach(t => {
                     if (!t.done) {
                         const cleanT = t.timeLabel.replace(/[:\s]/g, '').toUpperCase();
                         const cleanC = matchTime.replace(/[:\s]/g, '').toUpperCase();
                         if (cleanT === cleanC) {
-                            showPopAlert(t.text, t.timeLabel);
+                            showPopAlert(t, currentDay);
                             lastAlertTime = matchTime;
                         }
                     }
@@ -229,15 +253,40 @@
             }
         }
 
-        function showPopAlert(text, time) {
-            playDing();
-            document.getElementById('alert-task-text').innerText = text;
-            document.getElementById('alert-time-badge').innerText = time;
+        function showPopAlert(task, day) {
+            currentAlertTask = { ...task, day };
+            startAlarm();
+            document.getElementById('alert-task-text').innerText = task.text;
+            document.getElementById('alert-time-badge').innerText = task.timeLabel;
             document.getElementById('alert-overlay').classList.replace('hidden', 'flex');
         }
 
-        function dismissAlert() {
+        function handleAlertAction(action) {
+            stopAlarm();
+            if (!currentAlertTask) return;
+
+            if (action === 'done') {
+                toggleTask(currentAlertTask.day, currentAlertTask.id, true);
+            } else if (action === 'snooze') {
+                const now = new Date();
+                now.setMinutes(now.getMinutes() + 5);
+                const h = now.getHours() % 12 || 12;
+                const m = now.getMinutes().toString().padStart(2, '0');
+                const ap = now.getHours() >= 12 ? 'PM' : 'AM';
+                const newTime = `${h}:${m}${ap}`;
+                
+                // Add snoozed task
+                plannerData[currentAlertTask.day].push({
+                    text: `(Snoozed) ${currentAlertTask.text}`,
+                    done: false,
+                    timeLabel: newTime,
+                    id: Date.now()
+                });
+                render();
+            }
+
             document.getElementById('alert-overlay').classList.replace('flex', 'hidden');
+            currentAlertTask = null;
         }
 
         function addManualTask(day) {
@@ -269,11 +318,14 @@
             render();
         }
 
-        function toggleTask(day, id) {
+        function toggleTask(day, id, forceDone = null) {
             const task = plannerData[day].find(t => t.id === id);
             if (task) {
-                task.done = !task.done;
-                xp += (task.done ? 10 : -10);
+                const newState = forceDone !== null ? forceDone : !task.done;
+                if (task.done !== newState) {
+                    task.done = newState;
+                    xp += (task.done ? 10 : -10);
+                }
             }
             render();
         }
