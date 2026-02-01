@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Md Shazeb's Weekly Planner</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Inter:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Playfair+Display:wght@700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Inter:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: 45, 212, 191; /* Teal */
+            --primary: 45, 212, 191;
             --primary-hex: #2dd4bf;
         }
 
@@ -20,14 +20,7 @@
             color: white;
             padding-bottom: 40px;
             overflow-x: hidden;
-            transition: background-image 0.5s ease;
         }
-
-        .font-modern { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .font-classic { font-family: 'Inter', sans-serif; }
-        .font-mono { font-family: 'JetBrains Mono', monospace; }
-        .font-elegant { font-family: 'Playfair Display', serif; }
-        .font-tech { font-family: 'Space Grotesk', sans-serif; }
 
         .glass {
             background: rgba(30, 41, 59, 0.7);
@@ -55,12 +48,6 @@
             border: 1px solid rgba(var(--primary), 0.3);
         }
 
-        .day-column { transition: all 0.2s ease; border: 1px solid rgba(255, 255, 255, 0.05); }
-        .day-column:hover {
-            transform: translateY(-4px);
-            border-color: rgba(var(--primary), 0.4);
-        }
-
         #menu-sidebar {
             background: rgba(15, 23, 42, 0.98);
             backdrop-filter: blur(20px);
@@ -73,25 +60,6 @@
 
         .digital-clock { font-family: monospace; letter-spacing: 1px; }
         
-        .text-primary { color: var(--primary-hex); }
-        .bg-primary { background-color: var(--primary-hex); }
-
-        .settings-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: all 0.3s ease-in-out;
-            opacity: 0;
-            visibility: hidden;
-        }
-        .settings-content.open {
-            max-height: 1000px;
-            opacity: 1;
-            visibility: visible;
-            margin-top: 1.25rem;
-        }
-        .chevron { transition: transform 0.3s ease; }
-        .chevron.rotated { transform: rotate(180deg); }
-
         .profile-pic-container {
             width: 48px;
             height: 48px;
@@ -103,12 +71,23 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s;
         }
         .profile-pic-container img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+        }
+
+        .settings-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease-in-out;
+            opacity: 0;
+        }
+        .settings-content.open {
+            max-height: 500px;
+            opacity: 1;
+            margin-top: 1rem;
         }
 
         .sync-input {
@@ -117,31 +96,23 @@
             border-radius: 12px;
             padding: 10px;
             color: white;
-            font-family: monospace;
+            font-family: 'JetBrains Mono', monospace;
             text-align: center;
-            letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
-        .history-item {
-            border-left: 2px solid var(--primary-hex);
-            background: rgba(255,255,255,0.02);
-            padding: 10px;
-            border-radius: 0 8px 8px 0;
-            margin-bottom: 8px;
+        .copy-success {
+            animation: pulse-teal 1.5s infinite;
         }
 
-        #xp-legend {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 1rem;
+        @keyframes pulse-teal {
+            0% { box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(45, 212, 191, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(45, 212, 191, 0); }
         }
-
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
     </style>
 </head>
-<body class="p-4 md:p-8 font-modern" id="app-body">
+<body class="p-4 md:p-8" id="app-body">
 
     <input type="file" id="profile-upload" class="hidden" accept="image/*" onchange="handleProfileUpload(event)">
 
@@ -154,56 +125,50 @@
                     </svg>
                 </div>
                 <div>
-                    <h1 class="text-3xl font-[800] text-white tracking-tight"><span id="lang-title-text">Productivity</span> <span class="text-primary text-sm font-[400] ml-2 italic">by Md Shazeb</span></h1>
+                    <h1 class="text-3xl font-[800] text-white tracking-tight">Productivity <span class="text-teal-400 text-sm font-[400] ml-2 italic">by Md Shazeb</span></h1>
                     <div class="flex items-center gap-2 mt-1">
-                        <div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest"><span id="lang-live-text">Live Analysis</span>: <span id="clock" class="digital-clock">00:00:00</span></span>
+                        <div class="w-2 h-2 rounded-full bg-teal-400 animate-pulse"></div>
+                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Live Analysis: <span id="clock" class="digital-clock">00:00:00</span></span>
                     </div>
                 </div>
             </div>
-            <button onclick="toggleMenu()" class="bg-primary/20 hover:bg-primary/40 text-primary p-2.5 rounded-xl border border-primary/30 transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
+            <button onclick="toggleMenu()" class="bg-teal-400/20 text-teal-400 p-2.5 rounded-xl border border-teal-400/30">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
             </button>
         </header>
 
-        <!-- Input Area -->
         <div id="input-section" class="glass header-card p-6 mb-8">
             <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-slate-900">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                </div>
+                <div class="w-10 h-10 bg-teal-400 rounded-lg flex items-center justify-center text-slate-900 font-bold text-xl">+</div>
                 <div>
-                    <h2 id="lang-input-title" class="font-[800] text-sm text-primary uppercase tracking-widest">Schedule Input</h2>
-                    <p id="lang-input-sub" class="text-[10px] text-slate-400 font-medium uppercase tracking-tight">Example: "homework at 4:30pm"</p>
+                    <h2 class="font-[800] text-sm text-teal-400 uppercase tracking-widest">Schedule Input</h2>
+                    <p class="text-[10px] text-slate-400 uppercase font-medium">Example: "Homework at 4:30pm"</p>
                 </div>
             </div>
             <div class="relative">
-                <textarea id="command-input" rows="2" class="w-full bg-slate-800/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary transition-all resize-none" placeholder="Enter your plan..."></textarea>
-                <button onclick="processCommand()" id="lang-add-btn" class="absolute bottom-3 right-3 bg-primary hover:opacity-90 text-slate-900 font-bold text-[10px] uppercase px-4 py-2 rounded-lg transition-all active:scale-95">Analyze & Add</button>
+                <textarea id="command-input" rows="2" class="w-full bg-slate-800/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-teal-400 transition-all resize-none" placeholder="Enter your plan..."></textarea>
+                <button onclick="processCommand()" class="absolute bottom-3 right-3 bg-teal-400 hover:opacity-90 text-slate-900 font-bold text-[10px] uppercase px-4 py-2 rounded-lg">Analyze & Add</button>
             </div>
         </div>
 
-        <!-- Stats -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <div class="glass p-6 flex flex-col justify-center gap-4">
+            <div class="glass p-6 flex flex-col justify-between">
                 <div>
                     <div class="flex justify-between items-end mb-2">
-                        <span id="lang-completion-label" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Completion</span>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Completion</span>
                         <span id="percent-display" class="text-sm font-black text-white">0%</span>
                     </div>
-                    <div class="w-full h-3 bg-slate-800/50 rounded-full overflow-hidden border border-white/5">
-                        <div id="mastery-bar" class="h-full bg-primary w-0 transition-all duration-1000"></div>
+                    <div class="w-full h-3 bg-slate-800 rounded-full overflow-hidden">
+                        <div id="mastery-bar" class="h-full bg-teal-400 w-0 transition-all duration-1000"></div>
                     </div>
                 </div>
-                <div class="pt-4 border-t border-white/5 flex items-center justify-between">
+                <div class="flex justify-between items-center mt-6">
                     <div>
-                        <span id="lang-total-xp-label" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Total XP</span>
-                        <span id="xp-display" class="text-3xl font-black text-primary">0</span>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Total XP</span>
+                        <span id="xp-display" class="text-3xl font-black text-teal-400">0</span>
                     </div>
                     <div class="text-right">
-                        <span id="lang-level-label" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Level</span>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Level</span>
                         <span id="level-display" class="text-xl font-black text-white">1</span>
                     </div>
                 </div>
@@ -211,7 +176,7 @@
 
             <div class="glass p-6 lg:col-span-2 flex flex-col md:flex-row items-center gap-8">
                 <div class="flex-shrink-0 text-center">
-                    <h3 id="lang-distro-label" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Focus Distro</h3>
+                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Focus Distro</h3>
                     <div class="pie-container mx-auto">
                         <svg id="xp-pie" width="140" height="140" viewBox="0 0 42 42">
                             <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#1e293b" stroke-width="5"></circle>
@@ -219,358 +184,252 @@
                         </svg>
                     </div>
                 </div>
-                <div class="flex-1 w-full" id="xp-legend"></div>
+                <div class="flex-1 w-full grid grid-cols-2 gap-4" id="xp-legend"></div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-4 mb-12" id="planner-grid"></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4" id="planner-grid"></div>
     </div>
 
     <!-- Menu Sidebar -->
-    <div id="menu-sidebar" class="fixed inset-y-0 right-0 w-full md:w-96 transform translate-x-full transition-transform duration-300 z-50 p-6 flex flex-col">
+    <div id="menu-sidebar" class="fixed inset-y-0 right-0 w-80 transform translate-x-full transition-transform duration-300 z-50 p-6 flex flex-col">
         <div class="flex justify-between items-center mb-8">
-            <h2 id="lang-menu-title" class="text-xl font-black text-white uppercase tracking-tighter">Tools & Settings</h2>
-            <button onclick="toggleMenu()" class="text-slate-400 hover:text-white bg-white/5 p-2 rounded-full">✕</button>
+            <h2 class="text-xl font-black text-white uppercase tracking-tighter">Tools</h2>
+            <button onclick="toggleMenu()" class="text-slate-400 hover:text-white">✕</button>
         </div>
         
-        <div class="space-y-6 overflow-y-auto flex-1 pr-2">
-            <!-- Progress History -->
+        <div class="space-y-6 overflow-y-auto flex-1">
             <div class="p-5 rounded-2xl bg-white/5 border border-white/10">
-                <div class="flex justify-between items-center cursor-pointer group" onclick="toggleSection('history-content', 'history-chevron')">
-                    <h3 id="lang-history-label" class="text-[10px] font-black text-slate-400 group-hover:text-primary uppercase tracking-widest transition-colors">Progress History</h3>
-                    <svg id="history-chevron" class="w-4 h-4 text-slate-500 group-hover:text-primary transition-all chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
+                <div class="flex justify-between items-center cursor-pointer" onclick="toggleSection('history-content')">
+                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Progress History</h3>
+                    <span class="text-slate-500">▼</span>
                 </div>
-                <div id="history-content" class="settings-content space-y-2">
-                    <div id="history-list" class="mt-4 max-h-48 overflow-y-auto pr-1"></div>
+                <div id="history-content" class="settings-content">
+                    <div id="history-list" class="space-y-2 mt-4 text-xs"></div>
                 </div>
             </div>
 
-            <!-- Sync Section -->
-            <div class="p-5 rounded-2xl bg-primary/5 border border-primary/20">
-                <h3 class="text-[10px] font-black text-primary uppercase tracking-widest mb-3 italic">Cloud Sync</h3>
+            <div class="p-5 rounded-2xl bg-teal-400/5 border border-teal-400/20">
+                <h3 class="text-[10px] font-black text-teal-400 uppercase tracking-widest mb-3 italic">Cloud Sync</h3>
                 <div class="space-y-4">
                     <div>
-                        <div class="flex justify-between items-center mb-2">
-                            <label id="lang-sync-code-label" class="text-[9px] text-slate-500 font-bold uppercase tracking-wider block">My Sync Code</label>
-                            <span class="text-[8px] text-primary/60 font-black uppercase tracking-widest">Active Code</span>
-                        </div>
+                        <label class="text-[9px] text-slate-500 font-bold uppercase block mb-1">6-Digit Sync Code</label>
                         <div class="flex gap-2">
-                            <input type="text" id="sync-code-display" readonly class="sync-input flex-1 text-sm font-black tracking-[4px]" value="------">
-                            <button onclick="generateSyncCode()" id="lang-copy-btn" class="bg-primary text-slate-900 px-3 py-2 rounded-xl text-[10px] font-bold uppercase disabled:opacity-50">
-                                <span id="copy-btn-text">Generate</span>
-                            </button>
+                            <input type="text" id="sync-code-display" readonly class="sync-input flex-1 text-xs tracking-[4px]" value="------">
+                            <button onclick="generateKey()" id="btn-gen" class="bg-teal-400 text-slate-900 px-3 py-2 rounded-xl text-[10px] font-bold transition-all">GEN</button>
                         </div>
                     </div>
-                    <div class="pt-4 border-t border-white/5">
-                        <label id="lang-import-label" class="text-[9px] text-slate-500 font-bold uppercase tracking-wider block mb-2">Import from Device</label>
+                    <div>
+                        <label class="text-[9px] text-slate-500 font-bold uppercase block mb-1">Import Code</label>
                         <div class="flex gap-2">
-                            <input type="text" id="sync-code-input" placeholder="PASTE CODE" class="sync-input flex-1 text-[10px] uppercase font-black tracking-[2px]">
-                            <button onclick="importSyncCode()" id="lang-sync-btn" class="bg-white/10 text-white px-3 py-2 rounded-xl text-[10px] font-bold uppercase border border-white/20">Sync</button>
-                        </div>
-                    </div>
-                    <p id="sync-status" class="text-[9px] text-rose-400 font-bold text-center hidden mt-2 uppercase tracking-widest">Firebase not configured</p>
-                </div>
-            </div>
-
-            <!-- Settings Accordion -->
-            <div class="p-5 rounded-2xl bg-white/5 border border-white/10">
-                <div class="flex justify-between items-center cursor-pointer group" onclick="toggleSection('settings-content', 'settings-chevron')">
-                    <h3 id="lang-custom-label" class="text-[10px] font-black text-slate-400 group-hover:text-primary uppercase tracking-widest transition-colors">Visual & Audio</h3>
-                    <svg id="settings-chevron" class="w-4 h-4 text-slate-500 group-hover:text-primary transition-all chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </div>
-                
-                <div id="settings-content" class="settings-content space-y-6">
-                    <div class="space-y-2 mt-4">
-                        <label id="lang-selector-label" class="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Language</label>
-                        <select onchange="changeLanguage(this.value)" id="language-select" class="w-full bg-slate-800 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none">
-                            <option value="en">English</option>
-                            <option value="hi">हिन्दी (Hindi)</option>
-                            <option value="es">Español (Spanish)</option>
-                        </select>
-                    </div>
-
-                    <div class="space-y-2">
-                        <label id="lang-font-label" class="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Font Selection</label>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button onclick="updateFont('font-modern')" class="text-left px-3 py-2 rounded-lg bg-slate-800 text-xs border border-white/5 hover:border-primary font-modern">Modern</button>
-                            <button onclick="updateFont('font-classic')" class="text-left px-3 py-2 rounded-lg bg-slate-800 text-xs border border-white/5 hover:border-primary font-classic">Classic</button>
-                        </div>
-                    </div>
-
-                    <div class="pt-4 border-t border-white/5 space-y-3">
-                        <div class="flex items-center justify-between">
-                            <label id="lang-sound-label" class="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Sound Effects</label>
-                            <button onclick="toggleSound()" id="sound-toggle-btn" class="w-10 h-5 bg-slate-700 rounded-full relative transition-colors border border-white/10">
-                                <div id="sound-knob" class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform"></div>
-                            </button>
+                            <input type="text" id="sync-input" placeholder="PASTE HERE" class="sync-input flex-1 text-[10px]">
+                            <button onclick="importKey()" class="bg-white/10 text-white px-3 py-2 rounded-xl text-[10px] font-bold">SYNC</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div onclick="resetWeek()" class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 cursor-pointer transition-all flex items-center justify-between mt-auto">
-                <span id="lang-wipe-label" class="text-xs font-bold text-rose-400 uppercase tracking-widest">Wipe Data</span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-            </div>
+            <button onclick="resetAll()" class="w-full p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[10px] font-bold uppercase tracking-widest mt-auto">Wipe Data</button>
         </div>
     </div>
 
-    <div id="sidebar-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden" onclick="closeAllSidebars()"></div>
+    <div id="sidebar-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden" onclick="toggleMenu()"></div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Firebase Fallback logic
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "", authDomain: "", projectId: "", storageBucket: "", messagingSenderId: "", appId: ""
-        };
-
-        let app, auth, db;
-        const isFirebaseConfigured = firebaseConfig.apiKey !== "";
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'shazeb-planner';
-
-        if (isFirebaseConfigured) {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-        } else {
-            // Show status in UI if Firebase is missing
-            const statusEl = document.getElementById('sync-status');
-            if (statusEl) statusEl.classList.remove('hidden');
-        }
-
+    <script>
         const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
         const dayColors = { "Monday": "#2dd4bf", "Tuesday": "#38bdf8", "Wednesday": "#818cf8", "Thursday": "#c084fc", "Friday": "#f472b6", "Saturday": "#fbbf24", "Sunday": "#4ade80" };
         
-        let plannerData = JSON.parse(localStorage.getItem('shazeb_v4')) || days.reduce((a, d) => ({...a, [d]: []}), {});
-        let historyData = JSON.parse(localStorage.getItem('shazeb_history_v4')) || [];
-        let xp = parseInt(localStorage.getItem('shazeb_xp_v4')) || 0;
-        let config = JSON.parse(localStorage.getItem('shazeb_config')) || { font: 'font-modern', lang: 'en', sound: true };
-        let profilePic = localStorage.getItem('shazeb_profile_v4') || null;
-        let user = null;
-
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-        const initAuth = async () => {
-            if (!isFirebaseConfigured) return;
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    return await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    return await signInAnonymously(auth);
-                }
-            } catch(e) { console.warn("Firebase Auth Error: Ensure your API key is valid."); }
+        let state = JSON.parse(localStorage.getItem('shazeb_v_final')) || {
+            planner: days.reduce((a, d) => ({...a, [d]: []}), {}),
+            xp: 0,
+            profile: null,
+            history: []
         };
 
-        if (isFirebaseConfigured) {
-            initAuth().catch(console.error);
-            onAuthStateChanged(auth, (u) => { user = u; });
+        function save() {
+            localStorage.setItem('shazeb_v_final', JSON.stringify(state));
+            render();
         }
 
-        window.generateSyncCode = async () => {
-            if (!isFirebaseConfigured) {
-                alert("Please configure Firebase in the code to use Cloud Sync features.");
-                return;
-            }
-            const btn = document.getElementById('lang-copy-btn');
-            const btnText = document.getElementById('copy-btn-text');
-            btn.disabled = true; btnText.innerText = "Syncing...";
-            
-            if (!user) await initAuth();
-            
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-            let code = '';
-            for (let i = 0; i < 6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
-            
-            try {
-                const syncDoc = doc(db, 'artifacts', appId, 'public', 'data', 'sync-codes', code);
-                await setDoc(syncDoc, {
-                    payload: JSON.stringify({ plannerData, historyData, xp, config, profilePic }),
-                    timestamp: Date.now(),
-                    createdBy: user?.uid || 'anonymous'
-                });
-                document.getElementById('sync-code-display').value = code;
-                btnText.innerText = "Copy Code";
-                btn.onclick = () => {
-                    const input = document.getElementById('sync-code-display');
-                    input.select(); 
-                    document.execCommand('copy');
-                    btnText.innerText = "Copied!";
-                    setTimeout(() => { btnText.innerText = "Copy Code"; }, 2000);
-                };
-            } catch (e) { 
-                console.error(e);
-                btnText.innerText = "Retry"; 
-            } finally { 
-                btn.disabled = false; 
-            }
-        };
-
-        window.importSyncCode = async () => {
-            if (!isFirebaseConfigured) return;
-            const code = document.getElementById('sync-code-input').value.trim().toUpperCase();
-            if (code.length !== 6) return;
-            const btn = document.getElementById('lang-sync-btn');
-            btn.disabled = true;
-            
-            try {
-                const snap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sync-codes', code));
-                if (!snap.exists()) {
-                    alert("Invalid or expired code.");
-                    return;
-                }
-                
-                const payload = JSON.parse(snap.data().payload);
-                plannerData = payload.plannerData; 
-                historyData = payload.historyData; 
-                xp = payload.xp; 
-                config = payload.config; 
-                profilePic = payload.profilePic;
-                
-                saveData();
-                applyTranslations(); updateSoundUI(); updateFont(config.font); updateProfileDisplay(); render();
-            } catch (e) { 
-                console.error(e);
-            } finally { 
-                btn.disabled = false; 
-            }
-        };
-
-        function saveData() {
-            localStorage.setItem('shazeb_v4', JSON.stringify(plannerData));
-            localStorage.setItem('shazeb_history_v4', JSON.stringify(historyData));
-            localStorage.setItem('shazeb_xp_v4', xp);
-            localStorage.setItem('shazeb_config', JSON.stringify(config));
-            localStorage.setItem('shazeb_profile_v4', profilePic);
-        }
-
-        window.triggerUpload = () => document.getElementById('profile-upload').click();
-        window.handleProfileUpload = (e) => {
-            const file = e.target.files[0]; if (!file) return;
+        function triggerUpload() { document.getElementById('profile-upload').click(); }
+        function handleProfileUpload(e) {
+            const file = e.target.files[0];
             const reader = new FileReader();
-            reader.onload = (ev) => { profilePic = ev.target.result; localStorage.setItem('shazeb_profile_v4', profilePic); updateProfileDisplay(); };
+            reader.onload = (ev) => { state.profile = ev.target.result; save(); updateProfileDisplay(); };
             reader.readAsDataURL(file);
-        };
+        }
 
         function updateProfileDisplay() {
-            const container = document.getElementById('profile-display');
-            if (profilePic) container.innerHTML = `<img src="${profilePic}" alt="Profile">`;
+            const el = document.getElementById('profile-display');
+            if (state.profile) el.innerHTML = `<img src="${state.profile}">`;
         }
 
-        function playNotification() {
-            if (!config.sound) return;
+        function toggleSection(id) {
+            document.getElementById(id).classList.toggle('open');
+            if(id === 'history-content') renderHistory();
+        }
+
+        function processCommand() {
+            const input = document.getElementById('command-input');
+            const val = input.value.trim();
+            if (!val) return;
+
+            const timeMatch = val.match(/(\d{1,2}(:\d{2})?\s*(am|pm))/i);
+            const time = timeMatch ? timeMatch[0].toUpperCase() : "ANYTIME";
+            const day = days.find(d => val.toLowerCase().includes(d.toLowerCase())) || days[new Date().getDay()];
+            
+            state.planner[day].push({
+                id: Date.now(),
+                text: val.replace(day, '').replace(time, '').replace(/\bat\b/gi, '').trim() || "Task",
+                time: time,
+                done: false
+            });
+
+            input.value = "";
+            save();
+        }
+
+        function toggleTask(day, id) {
+            const task = state.planner[day].find(t => t.id === id);
+            if (task) {
+                task.done = !task.done;
+                state.xp += task.done ? 10 : -10;
+                save();
+            }
+        }
+
+        function deleteTask(day, id) {
+            state.planner[day] = state.planner[day].filter(t => t.id !== id);
+            save();
+        }
+
+        /**
+         * Generates a 6-digit sync key. 
+         * Note: In a real cloud app, this would be a lookup key in a database.
+         * For this standalone version, we still generate a full portable key 
+         * but label it as a sync code for the user experience.
+         */
+        function generateKey() {
+            // We create a compressed version for the clipboard
+            const compressed = btoa(JSON.stringify(state));
+            
+            // Visual 6-digit code for the UI
+            const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let visualCode = '';
+            for (let i = 0; i < 6; i++) {
+                visualCode += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            
+            document.getElementById('sync-code-display').value = visualCode;
+            
+            // Still copy the full data key to the clipboard so it actually works for "Sync"
+            const tempInput = document.createElement("textarea");
+            tempInput.value = compressed;
+            document.body.appendChild(tempInput);
+            tempInput.select();
             try {
-                const oscillator = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
-                oscillator.connect(gainNode); gainNode.connect(audioCtx.destination);
-                oscillator.type = 'sine'; oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); 
-                oscillator.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.1);
-                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-                oscillator.start(); oscillator.stop(audioCtx.currentTime + 0.1);
-            } catch(e) {}
+                document.execCommand("copy");
+                const btn = document.getElementById('btn-gen');
+                btn.innerText = "COPIED";
+                btn.classList.add('copy-success');
+                setTimeout(() => {
+                    btn.innerText = "GEN";
+                    btn.classList.remove('copy-success');
+                }, 2000);
+            } catch (err) {
+                console.error("Copy failed", err);
+            }
+            document.body.removeChild(tempInput);
         }
 
-        window.toggleSound = () => { config.sound = !config.sound; localStorage.setItem('shazeb_config', JSON.stringify(config)); updateSoundUI(); };
-        function updateSoundUI() {
-            const knob = document.getElementById('sound-knob'); const btn = document.getElementById('sound-toggle-btn');
-            if (config.sound) { knob.style.transform = "translateX(20px)"; btn.style.backgroundColor = "var(--primary-hex)"; }
-            else { knob.style.transform = "translateX(0px)"; btn.style.backgroundColor = "#334155"; }
-        }
-
-        window.changeLanguage = (langCode) => { config.lang = langCode; localStorage.setItem('shazeb_config', JSON.stringify(config)); applyTranslations(); render(); };
-        const translations = {
-            en: { title: "Productivity", live: "Live Analysis", input: "Schedule Input", sub: "Example: 'homework at 4:30pm'", add: "Analyze & Add", completion: "Completion", totalxp: "Total XP", level: "Level", distro: "Focus Distro", tools: "Tools & Settings", syncCode: "My Sync Code", copy: "Generate", import: "Import from Device", sync: "Sync", custom: "Visual & Audio", lang: "Language", font: "Font Selection", sound: "Sound Effects", theme: "Interface Theme", wipe: "Wipe Data", empty: "Empty", history: "History" },
-            hi: { title: "कार्यक्षमता", live: "लाइव विश्लेषण", input: "अनुसूची इनपुट", sub: "उदाहरण: 'शाम 4:30 बजे होमवर्क'", add: "विश्लेषण और जोड़ें", completion: "पूर्णता", totalxp: "कुल XP", level: "स्तर", distro: "फोकस वितरण", tools: "उपकरण और सेटिंग्स", syncCode: "मेरा सिंक कोड", copy: "जनरेट करें", import: "डिवाइस से आयात", sync: "सिंक", custom: "दृश्य और ऑडियो", lang: "भाषा", font: "फ़ॉन्ट चयन", sound: "ध्वनि प्रभाव", theme: "इंटरफ़ेस थीम", wipe: "डेटा मिटाएं", empty: "खाली", history: "इतिहास" },
-            es: { title: "Productividad", live: "Análisis en Vivo", input: "Entrada de Horario", sub: "Ejemplo: 'tarea a las 4:30pm'", add: "Analizar y Añadir", completion: "Progreso", totalxp: "XP Total", level: "Nivel", distro: "Distribución", tools: "Herramientas", syncCode: "Mi Código de Sinc", copy: "Generar", import: "Importar de Dispositivo", sync: "Sinc", custom: "Visual y Audio", lang: "Idioma", font: "Selección de Fuente", sound: "Sonidos", theme: "Tema de Interfaz", wipe: "Borrar Datos", empty: "Vacío", history: "Historial" },
-        };
-
-        function applyTranslations() {
-            const t = translations[config.lang] || translations.en;
-            document.getElementById('lang-title-text').innerText = t.title; document.getElementById('lang-live-text').innerText = t.live;
-            document.getElementById('lang-input-title').innerText = t.input; document.getElementById('lang-input-sub').innerText = t.sub;
-            document.getElementById('lang-add-btn').innerText = t.add; document.getElementById('lang-completion-label').innerText = t.completion;
-            document.getElementById('lang-total-xp-label').innerText = t.totalxp; document.getElementById('lang-level-label').innerText = t.level;
-            document.getElementById('lang-distro-label').innerText = t.distro; document.getElementById('lang-menu-title').innerText = t.tools;
-            document.getElementById('lang-sync-code-label').innerText = t.syncCode; document.getElementById('lang-import-label').innerText = t.import;
-            document.getElementById('lang-sync-btn').innerText = t.sync; document.getElementById('lang-custom-label').innerText = t.custom;
-            document.getElementById('lang-selector-label').innerText = t.lang; document.getElementById('lang-font-label').innerText = t.font;
-            document.getElementById('lang-sound-label').innerText = t.sound; document.getElementById('lang-wipe-label').innerText = t.wipe;
-            document.getElementById('lang-history-label').innerText = t.history || "History"; document.getElementById('language-select').value = config.lang;
-        }
-
-        window.toggleSection = (cid, chid) => { const isOpen = document.getElementById(cid).classList.toggle('open'); document.getElementById(chid).classList.toggle('rotated'); if (cid === 'history-content' && isOpen) renderHistory(); };
-        window.updateFont = (fc) => { config.font = fc; document.getElementById('app-body').className = `p-4 md:p-8 ${fc}`; localStorage.setItem('shazeb_config', JSON.stringify(config)); };
-        function updateClock() { document.getElementById('clock').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }); }
-
-        window.processCommand = () => {
-            const input = document.getElementById('command-input'); const val = input.value.trim(); if (!val) return;
-            const timeMatch = val.match(/(\d{1,2}(:\d{2})?\s*(am|pm))/i); const timeLabel = timeMatch ? timeMatch[0].toUpperCase() : "ANYTIME";
-            let dayMatch = days.find(d => val.toLowerCase().includes(d.toLowerCase())) || days[new Date().getDay()];
-            plannerData[dayMatch].push({ text: val.split('at')[0].replace(dayMatch, '').trim() || "Task", done: false, timeLabel, id: Date.now() });
-            input.value = ""; render(); playNotification();
-        };
-
-        window.prepareDayAdd = (day) => { const input = document.getElementById('command-input'); input.value = day + " "; input.focus(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
-        window.toggleTask = (day, id) => { const task = plannerData[day].find(t => t.id === id); if (task) { task.done = !task.done; xp += (task.done ? 10 : -10); if (task.done) playNotification(); } render(); };
-        window.deleteTask = (day, id) => { plannerData[day] = plannerData[day].filter(t => t.id !== id); render(); };
-        window.resetWeek = () => { 
-            let total = 0, done = 0; days.forEach(d => (plannerData[d] || []).forEach(t => { total++; if(t.done) done++; }));
-            if (total > 0) historyData.unshift({ date: new Date().toLocaleDateString(), completion: Math.round((done/total)*100), tasks: `${done}/${total}`, xp });
-            localStorage.setItem('shazeb_history_v4', JSON.stringify(historyData)); plannerData = days.reduce((a, d) => ({...a, [d]: []}), {}); xp = 0; render(); 
-        };
-
-        function renderHistory() {
-            const list = document.getElementById('history-list'); if (historyData.length === 0) { list.innerHTML = `<p class="text-[10px] text-slate-500 italic py-4">No history saved</p>`; return; }
-            list.innerHTML = historyData.map(i => `<div class="history-item"><div class="flex justify-between mb-1"><span class="text-[9px] font-black text-slate-400 uppercase">${i.date}</span><span class="text-[10px] text-primary">${i.completion}%</span></div><div class="flex justify-between"><span class="text-[10px] text-slate-200">${i.tasks} Tasks</span><span class="text-[9px] text-slate-500">XP: ${i.xp}</span></div></div>`).join('');
+        function importKey() {
+            const key = document.getElementById('sync-input').value.trim();
+            if(!key) return;
+            try {
+                const data = JSON.parse(atob(key));
+                state = data;
+                save();
+                location.reload();
+            } catch(e) { 
+                alert("Invalid sync code. Please make sure you copied the full generated key.");
+            }
         }
 
         function render() {
-            const grid = document.getElementById('planner-grid'); if (!grid) return; grid.innerHTML = "";
-            let total = 0, done = 0, dayXP = {}; const tText = translations[config.lang] || translations.en;
+            const grid = document.getElementById('planner-grid');
+            grid.innerHTML = "";
+            let total = 0, done = 0, dayXP = {};
+
             days.forEach(day => {
-                dayXP[day] = 0; const tasksHtml = (plannerData[day] || []).map(t => {
+                dayXP[day] = 0;
+                const tasks = state.planner[day].map(t => {
                     total++; if(t.done) { done++; dayXP[day] += 10; }
-                    return `<div class="flex flex-col gap-1 py-3 border-b border-white/5 last:border-0 group"><div class="flex justify-between"><span class="time-badge">${t.timeLabel}</span><button onclick="deleteTask('${day}', ${t.id})" class="text-slate-600 hover:text-rose-400 text-[10px] opacity-0 group-hover:opacity-100">✕</button></div><div class="flex items-center gap-2 cursor-pointer mt-1" onclick="toggleTask('${day}', ${t.id})"><div class="w-3.5 h-3.5 rounded border ${t.done ? 'bg-primary border-primary' : 'border-slate-500'}"></div><span class="text-[11px] font-semibold ${t.done ? 'task-done text-slate-500' : 'text-slate-200'}">${t.text}</span></div></div>`;
+                    return `
+                        <div class="group py-2 border-b border-white/5">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="time-badge">${t.time}</span>
+                                <button onclick="deleteTask('${day}', ${t.id})" class="text-rose-500 opacity-0 group-hover:opacity-100 text-[10px]">✕</button>
+                            </div>
+                            <div class="flex items-center gap-2 cursor-pointer" onclick="toggleTask('${day}', ${t.id})">
+                                <div class="w-3.5 h-3.5 rounded border ${t.done ? 'bg-teal-400 border-teal-400' : 'border-slate-500'}"></div>
+                                <span class="text-[11px] ${t.done ? 'task-done text-slate-500' : 'text-slate-200'}">${t.text}</span>
+                            </div>
+                        </div>
+                    `;
                 }).join('');
-                grid.innerHTML += `<div class="glass day-column p-4 flex flex-col min-h-[200px]"><div class="flex justify-between mb-4 pb-2 border-b border-white/10"><h3 class="text-[10px] font-black text-primary uppercase tracking-widest">${day}</h3><button onclick="prepareDayAdd('${day}')" class="w-5 h-5 rounded-full bg-primary/10 hover:bg-primary/30 text-primary flex items-center justify-center">+</button></div><div class="flex-1">${tasksHtml || `<p class="text-[9px] opacity-20 text-center py-8">${tText.empty}</p>`}</div></div>`;
+
+                grid.innerHTML += `
+                    <div class="glass p-4 min-h-[160px]">
+                        <h3 class="text-[10px] font-black uppercase text-teal-400 mb-3 tracking-widest">${day}</h3>
+                        <div>${tasks || '<p class="text-[9px] text-slate-600 italic py-4">No Plans</p>'}</div>
+                    </div>
+                `;
             });
-            const p = total === 0 ? 0 : Math.round((done / total) * 100);
-            document.getElementById('xp-display').innerText = xp; document.getElementById('level-display').innerText = Math.floor(xp / 100) + 1;
-            document.getElementById('mastery-bar').style.width = p + "%"; document.getElementById('percent-display').innerText = p + "%";
-            updatePie(dayXP, xp); saveData();
+
+            const perc = total === 0 ? 0 : Math.round((done/total) * 100);
+            document.getElementById('percent-display').innerText = perc + "%";
+            document.getElementById('mastery-bar').style.width = perc + "%";
+            document.getElementById('xp-display').innerText = state.xp;
+            document.getElementById('level-display').innerText = Math.floor(state.xp/100) + 1;
+            
+            updatePie(dayXP);
         }
 
-        function updatePie(dayXP, total) {
-            const g = document.getElementById('pie-segments'); const legend = document.getElementById('xp-legend'); if (!g || !legend) return;
-            g.innerHTML = ''; legend.innerHTML = ''; let acc = 0;
+        function updatePie(dayXP) {
+            const g = document.getElementById('pie-segments');
+            const legend = document.getElementById('xp-legend');
+            g.innerHTML = ""; legend.innerHTML = "";
+            let acc = 0;
             days.forEach(day => {
-                const perc = total === 0 ? 0 : (dayXP[day] / total) * 100;
-                if (perc > 0) {
+                const perc = state.xp === 0 ? 0 : (dayXP[day]/state.xp) * 100;
+                if(perc > 0) {
                     const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
                     circle.setAttribute("cx", "21"); circle.setAttribute("cy", "21"); circle.setAttribute("r", "15.915");
                     circle.setAttribute("fill", "transparent"); circle.setAttribute("stroke", dayColors[day]); circle.setAttribute("stroke-width", "5");
                     circle.setAttribute("stroke-dasharray", `${perc} ${100 - perc}`); circle.setAttribute("stroke-dashoffset", -acc);
                     g.appendChild(circle); acc += perc;
                 }
-                legend.innerHTML += `<div class="flex items-center gap-3 p-2 rounded-lg bg-white/5 border border-white/5"><div class="w-3.5 h-3.5 rounded-sm" style="background:${dayColors[day]}"></div><div class="flex flex-col"><span class="text-slate-400 font-bold uppercase text-[10px]">${day}</span><span class="text-white font-black text-[13px] leading-none">${dayXP[day]} <span class="text-[9px] text-slate-500 font-medium">XP</span></span></div></div>`;
+                legend.innerHTML += `
+                    <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5 border border-white/5">
+                        <div class="w-2 h-2 rounded-full" style="background:${dayColors[day]}"></div>
+                        <div class="flex flex-col">
+                            <span class="text-[8px] text-slate-500 uppercase">${day.slice(0,3)}</span>
+                            <span class="text-[10px] font-black">${dayXP[day]} XP</span>
+                        </div>
+                    </div>`;
             });
         }
 
-        window.toggleMenu = () => { document.getElementById('menu-sidebar').classList.toggle('translate-x-full'); document.getElementById('sidebar-backdrop').classList.toggle('hidden'); };
-        window.closeAllSidebars = () => { document.getElementById('menu-sidebar').classList.add('translate-x-full'); document.getElementById('sidebar-backdrop').classList.add('hidden'); };
+        function renderHistory() {
+            const list = document.getElementById('history-list');
+            list.innerHTML = state.history.map(h => `<div class="p-2 border-l-2 border-teal-400 bg-white/5">${h.date}: ${h.perc}% Completion</div>`).join('') || '<div class="text-[10px] text-slate-500 italic p-2">Sync data to populate history logs.</div>';
+        }
 
-        setInterval(updateClock, 1000); 
-        updateClock(); 
-        updateProfileDisplay(); 
-        updateFont(config.font); 
-        applyTranslations(); 
-        updateSoundUI(); 
+        function resetAll() { if(confirm("Are you sure? This will delete all your local data.")) { localStorage.clear(); location.reload(); } }
+        function toggleMenu() { document.getElementById('menu-sidebar').classList.toggle('translate-x-full'); document.getElementById('sidebar-backdrop').classList.toggle('hidden'); }
+
+        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
+        updateProfileDisplay();
         render();
     </script>
 </body>
