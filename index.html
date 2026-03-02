@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Md Shazeb's Weekly Planner | Live Cloud Sync</title>
+    <title>Md Shazeb's Weekly Planner | GitHub Ready</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -280,12 +280,31 @@
         import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Environment globals
-        const firebaseConfig = JSON.parse(__firebase_config);
+        // ==========================================
+        // CONFIGURATION FOR GITHUB / EXTERNAL HOSTING
+        // ==========================================
+        // If moving to GitHub, replace the values in 'myConfig' with your Firebase Console values.
+        const githubConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // This logic detects if we are in the Preview environment or on an external site like GitHub
+        const isPreviewEnv = typeof __firebase_config !== 'undefined';
+        const firebaseConfig = isPreviewEnv ? JSON.parse(__firebase_config) : githubConfig;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'shazeb-planner-prod';
+        
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'shazeb-planner-v2';
+
+        // ==========================================
+        // APP LOGIC
+        // ==========================================
 
         const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
         const dayColors = { "Monday": "#2dd4bf", "Tuesday": "#38bdf8", "Wednesday": "#818cf8", "Thursday": "#c084fc", "Friday": "#f472b6", "Saturday": "#fbbf24", "Sunday": "#4ade80" };
@@ -301,12 +320,11 @@
         let isInitialLoad = true;
         let activeInputDay = null;
         let currentUnsubscribe = null;
-        let activeSyncId = null; // Tracks which document ID we are currently listening to
+        let activeSyncId = null;
 
-        // AUTH & SYNC INITIALIZATION
         const init = async () => {
             try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                if (isPreviewEnv && typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
                     await signInAnonymously(auth);
@@ -320,24 +338,17 @@
         onAuthStateChanged(auth, (u) => {
             if (u) {
                 user = u;
-                // Default to user's own UID unless we have a manually loaded ID
                 if (!activeSyncId) activeSyncId = user.uid;
-                
                 document.getElementById('sync-code-display').value = activeSyncId;
                 document.getElementById('status-dot').className = "w-1.5 h-1.5 rounded-full bg-teal-400";
                 document.getElementById('status-text').innerText = "Cloud Active";
-                
                 setupSync(activeSyncId);
             }
         });
 
-        // LIVE FIRESTORE SYNC
         function setupSync(targetId) {
             if (!user) return;
-            
-            // Clean up old listener if it exists
             if (currentUnsubscribe) currentUnsubscribe();
-
             const docRef = doc(db, 'artifacts', appId, 'users', targetId, 'settings', 'data');
             
             currentUnsubscribe = onSnapshot(docRef, (snap) => {
@@ -345,18 +356,16 @@
                     state = snap.data();
                     render();
                 } else if (targetId === user.uid) {
-                    // Create initial doc only for the current user's own ID
                     setDoc(docRef, state);
                 }
-                
                 if (isInitialLoad) {
                     document.getElementById('loading-screen').style.display = 'none';
                     isInitialLoad = false;
                 }
             }, (err) => {
                 console.error("Sync Error:", err);
-                document.getElementById('status-text').innerText = "Sync Interrupted";
-                document.getElementById('status-dot').classList.replace('bg-teal-400', 'bg-rose-500');
+                document.getElementById('status-text').innerText = "Sync Error";
+                document.getElementById('status-dot').className = "w-1.5 h-1.5 rounded-full bg-rose-500";
             });
         }
 
@@ -370,12 +379,10 @@
             }
         }
 
-        // APP ACTIONS
         window.importSharedData = async () => {
             const key = document.getElementById('sync-input').value.trim();
             if (!key) return;
-            
-            if (confirm(`Switching to Session: ${key}\n\nThis will live-sync your view to this device key.`)) {
+            if (confirm(`Switch to session: ${key}?`)) {
                 activeSyncId = key;
                 document.getElementById('sync-code-display').value = key;
                 setupSync(key);
@@ -387,18 +394,10 @@
             const input = document.getElementById('command-input');
             const val = input.value.trim();
             if (!val) return;
-
             const timeMatch = val.match(/(\d{1,2}(:\d{2})?\s*(am|pm))/i);
             const time = timeMatch ? timeMatch[0].toUpperCase() : "ANYTIME";
             const day = days.find(d => val.toLowerCase().includes(d.toLowerCase())) || days[new Date().getDay()];
-            
-            state.planner[day].push({
-                id: Date.now(),
-                text: val.replace(day, '').replace(time, '').replace(/\bat\b/gi, '').trim() || "Task",
-                time: time,
-                done: false
-            });
-
+            state.planner[day].push({ id: Date.now(), text: val.replace(day, '').replace(time, '').replace(/\bat\b/gi, '').trim() || "Task", time: time, done: false });
             input.value = "";
             pushState();
         };
@@ -406,9 +405,7 @@
         window.toggleDayInput = (day) => {
             activeInputDay = (activeInputDay === day) ? null : day;
             render();
-            if (activeInputDay) {
-                setTimeout(() => document.getElementById(`input-${day}`)?.focus(), 50);
-            }
+            if (activeInputDay) setTimeout(() => document.getElementById(`input-${day}`)?.focus(), 50);
         };
 
         window.addDayTask = (day, event) => {
@@ -440,9 +437,7 @@
             const perc = total === 0 ? 0 : Math.round((done/total) * 100);
             if (perc === 100) {
                 const todayStr = new Date().toLocaleDateString();
-                if (!state.history.some(h => h.date === todayStr)) {
-                    state.history.unshift({ date: todayStr, perc: 100 });
-                }
+                if (!state.history.some(h => h.date === todayStr)) state.history.unshift({ date: todayStr, perc: 100 });
             }
         }
 
@@ -454,27 +449,18 @@
         window.copyKey = () => {
             const val = document.getElementById('sync-code-display').value;
             const temp = document.createElement('textarea');
-            temp.value = val;
-            document.body.appendChild(temp);
-            temp.select();
-            document.execCommand('copy');
-            document.body.removeChild(temp);
-            const btn = document.getElementById('btn-copy');
-            btn.innerText = "COPIED";
-            btn.classList.add('copy-success');
-            setTimeout(() => { btn.innerText = "COPY"; btn.classList.remove('copy-success'); }, 2000);
+            temp.value = val; document.body.appendChild(temp);
+            temp.select(); document.execCommand('copy'); document.body.removeChild(temp);
+            const btn = document.getElementById('btn-copy'); btn.innerText = "COPIED";
+            btn.classList.add('copy-success'); setTimeout(() => { btn.innerText = "COPY"; btn.classList.remove('copy-success'); }, 2000);
         };
 
         window.render = () => {
             const grid = document.getElementById('planner-grid');
             if(!grid) return;
-            
             grid.innerHTML = "";
             let total = 0, done = 0, dayXP = {};
-
-            const prof = document.getElementById('profile-display');
-            if (state.profile) prof.innerHTML = `<img src="${state.profile}">`;
-
+            if (state.profile) document.getElementById('profile-display').innerHTML = `<img src="${state.profile}">`;
             days.forEach(day => {
                 dayXP[day] = 0;
                 const tasks = state.planner[day].map(t => {
@@ -489,10 +475,8 @@
                                 <div class="w-3.5 h-3.5 rounded border ${t.done ? 'bg-teal-400 border-teal-400' : 'border-slate-500'}"></div>
                                 <span class="text-[11px] ${t.done ? 'task-done text-slate-500' : 'text-slate-200'}">${t.text}</span>
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                 }).join('');
-
                 grid.innerHTML += `
                     <div class="glass p-4 min-h-[160px] flex flex-col">
                         <div class="flex justify-between items-center mb-3">
@@ -501,10 +485,8 @@
                         </div>
                         ${activeInputDay === day ? `<input type="text" id="input-${day}" class="day-add-input" placeholder="Add..." onkeydown="addDayTask('${day}', event)">` : ''}
                         <div class="flex-1">${tasks || '<p class="text-[9px] text-slate-600 italic py-4">No Plans</p>'}</div>
-                    </div>
-                `;
+                    </div>`;
             });
-
             const perc = total === 0 ? 0 : Math.round((done/total) * 100);
             document.getElementById('percent-display').innerText = perc + "%";
             document.getElementById('mastery-bar').style.width = perc + "%";
@@ -528,12 +510,7 @@
                     circle.setAttribute("stroke-dasharray", `${p} ${100 - p}`); circle.setAttribute("stroke-dashoffset", -acc);
                     g.appendChild(circle); acc += p;
                 }
-                legend.innerHTML += `
-                    <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5 border border-white/5">
-                        <div class="w-2 h-2 rounded-full" style="background:${dayColors[day]}"></div>
-                        <span class="text-[8px] text-slate-500 uppercase">${day.slice(0,3)}</span>
-                        <span class="text-[10px] font-black">${dayXP[day]} XP</span>
-                    </div>`;
+                legend.innerHTML += `<div class="flex items-center gap-2 p-2 rounded-lg bg-white/5 border border-white/5"><div class="w-2 h-2 rounded-full" style="background:${dayColors[day]}"></div><span class="text-[8px] text-slate-500 uppercase">${day.slice(0,3)}</span><span class="text-[10px] font-black">${dayXP[day]} XP</span></div>`;
             });
         }
 
@@ -542,30 +519,11 @@
             list.innerHTML = state.history.map(h => `<div class="p-2 border-l-2 border-teal-400 bg-white/5">${h.date}: ${h.perc}%</div>`).join('') || '<div class="text-[10px] text-slate-500 p-2 italic">No history yet.</div>';
         };
 
-        window.resetAll = async () => { 
-            if(confirm("Wipe all data? This will reset the cloud record too.")) { 
-                state = { planner: days.reduce((a, d) => ({...a, [d]: []}), {}), xp: 0, profile: null, history: [] };
-                await pushState();
-                location.reload(); 
-            } 
-        };
-        
-        window.toggleMenu = () => { 
-            document.getElementById('menu-sidebar').classList.toggle('translate-x-full'); 
-            document.getElementById('sidebar-backdrop').classList.toggle('hidden'); 
-        };
-
+        window.resetAll = async () => { if(confirm("Wipe all data?")) { state = { planner: days.reduce((a, d) => ({...a, [d]: []}), {}), xp: 0, profile: null, history: [] }; await pushState(); location.reload(); } };
+        window.toggleMenu = () => { document.getElementById('menu-sidebar').classList.toggle('translate-x-full'); document.getElementById('sidebar-backdrop').classList.toggle('hidden'); };
         window.triggerUpload = () => document.getElementById('profile-upload').click();
-        window.handleProfileUpload = (e) => {
-            const file = e.target.files[0];
-            const reader = new FileReader();
-            reader.onload = (ev) => { state.profile = ev.target.result; pushState(); };
-            reader.readAsDataURL(file);
-        };
-        window.toggleSection = (id) => {
-            document.getElementById(id).classList.toggle('open');
-            if(id === 'history-content') renderHistory();
-        };
+        window.handleProfileUpload = (e) => { const reader = new FileReader(); reader.onload = (ev) => { state.profile = ev.target.result; pushState(); }; reader.readAsDataURL(e.target.files[0]); };
+        window.toggleSection = (id) => { document.getElementById(id).classList.toggle('open'); if(id === 'history-content') renderHistory(); };
 
         init();
         setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
