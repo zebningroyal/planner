@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Md Shazeb's Weekly Planner</title>
+    <title>Md Shazeb's Weekly Planner | Live Cloud Sync</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Inter:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: 45, 212, 191;
@@ -58,7 +58,7 @@
         .pie-container { position: relative; width: 140px; height: 140px; }
         #xp-pie { transform: rotate(-90deg); border-radius: 50%; }
 
-        .digital-clock { font-family: monospace; letter-spacing: 1px; }
+        .digital-clock { font-family: 'JetBrains Mono', monospace; letter-spacing: 1px; }
         
         .profile-pic-container {
             width: 48px;
@@ -98,7 +98,6 @@
             color: white;
             font-family: 'JetBrains Mono', monospace;
             text-align: center;
-            text-transform: uppercase;
         }
 
         .copy-success {
@@ -110,9 +109,41 @@
             70% { box-shadow: 0 0 0 10px rgba(45, 212, 191, 0); }
             100% { box-shadow: 0 0 0 0 rgba(45, 212, 191, 0); }
         }
+
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: #0f172a;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .day-add-input {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(45, 212, 191, 0.3);
+            border-radius: 8px;
+            padding: 4px 8px;
+            font-size: 11px;
+            width: 100%;
+            color: white;
+            margin-bottom: 8px;
+            outline: none;
+        }
+        .day-add-input:focus {
+            border-color: rgba(45, 212, 191, 0.8);
+        }
     </style>
 </head>
-<body class="p-4 md:p-8" id="app-body">
+<body class="p-4 md:p-8">
+
+    <div id="loading-screen" class="loading-overlay">
+        <div class="w-12 h-12 border-4 border-teal-400 border-t-transparent rounded-full animate-spin"></div>
+        <p class="text-teal-400 font-bold uppercase tracking-widest text-xs">Syncing Cloud Data...</p>
+    </div>
 
     <input type="file" id="profile-upload" class="hidden" accept="image/*" onchange="handleProfileUpload(event)">
 
@@ -132,11 +163,18 @@
                     </div>
                 </div>
             </div>
-            <button onclick="toggleMenu()" class="bg-teal-400/20 text-teal-400 p-2.5 rounded-xl border border-teal-400/30">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
-            </button>
+            <div class="flex gap-2">
+                <div id="sync-status" class="bg-slate-800 text-slate-400 text-[10px] px-3 py-2 rounded-xl border border-white/5 flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-500" id="status-dot"></span>
+                    <span id="status-text">Connecting...</span>
+                </div>
+                <button onclick="toggleMenu()" class="bg-teal-400/20 text-teal-400 p-2.5 rounded-xl border border-teal-400/30 transition-all hover:bg-teal-400/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                </button>
+            </div>
         </header>
 
+        <!-- Command Input -->
         <div id="input-section" class="glass header-card p-6 mb-8">
             <div class="flex items-center gap-3 mb-4">
                 <div class="w-10 h-10 bg-teal-400 rounded-lg flex items-center justify-center text-slate-900 font-bold text-xl">+</div>
@@ -151,6 +189,7 @@
             </div>
         </div>
 
+        <!-- Stats -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             <div class="glass p-6 flex flex-col justify-between">
                 <div>
@@ -188,6 +227,7 @@
             </div>
         </div>
 
+        <!-- Planner Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4" id="planner-grid"></div>
     </div>
 
@@ -210,66 +250,140 @@
             </div>
 
             <div class="p-5 rounded-2xl bg-teal-400/5 border border-teal-400/20">
-                <h3 class="text-[10px] font-black text-teal-400 uppercase tracking-widest mb-3 italic">Cloud Sync</h3>
+                <h3 class="text-[10px] font-black text-teal-400 uppercase tracking-widest mb-3 italic">Cloud Identity</h3>
                 <div class="space-y-4">
                     <div>
-                        <label class="text-[9px] text-slate-500 font-bold uppercase block mb-1">6-Digit Sync Code</label>
+                        <label class="text-[9px] text-slate-500 font-bold uppercase block mb-1">Your ID (To share with other devices)</label>
                         <div class="flex gap-2">
-                            <input type="text" id="sync-code-display" readonly class="sync-input flex-1 text-xs tracking-[4px]" value="------">
-                            <button onclick="generateKey()" id="btn-gen" class="bg-teal-400 text-slate-900 px-3 py-2 rounded-xl text-[10px] font-bold transition-all">GEN</button>
+                            <input type="text" id="sync-code-display" readonly class="sync-input flex-1 text-[9px]" value="Checking...">
+                            <button onclick="copyKey()" id="btn-copy" class="bg-teal-400 text-slate-900 px-3 py-2 rounded-xl text-[10px] font-bold transition-all">COPY</button>
                         </div>
                     </div>
                     <div>
-                        <label class="text-[9px] text-slate-500 font-bold uppercase block mb-1">Import Code</label>
+                        <label class="text-[9px] text-slate-500 font-bold uppercase block mb-1">Join another device session</label>
                         <div class="flex gap-2">
-                            <input type="text" id="sync-input" placeholder="PASTE HERE" class="sync-input flex-1 text-[10px]">
-                            <button onclick="importKey()" class="bg-white/10 text-white px-3 py-2 rounded-xl text-[10px] font-bold">SYNC</button>
+                            <input type="text" id="sync-input" placeholder="PASTE KEY HERE" class="sync-input flex-1 text-[10px]">
+                            <button onclick="importSharedData()" class="bg-white/10 text-white px-3 py-2 rounded-xl text-[10px] font-bold hover:bg-white/20">SYNC</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <button onclick="resetAll()" class="w-full p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[10px] font-bold uppercase tracking-widest mt-auto">Wipe Data</button>
+            <button onclick="resetAll()" class="w-full p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[10px] font-bold uppercase tracking-widest mt-auto">Reset Account</button>
         </div>
     </div>
 
     <div id="sidebar-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden" onclick="toggleMenu()"></div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Environment globals
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'shazeb-planner-v2';
+
         const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
         const dayColors = { "Monday": "#2dd4bf", "Tuesday": "#38bdf8", "Wednesday": "#818cf8", "Thursday": "#c084fc", "Friday": "#f472b6", "Saturday": "#fbbf24", "Sunday": "#4ade80" };
         
-        let state = JSON.parse(localStorage.getItem('shazeb_v_final')) || {
+        let state = {
             planner: days.reduce((a, d) => ({...a, [d]: []}), {}),
             xp: 0,
             profile: null,
             history: []
         };
+        
+        let user = null;
+        let isInitialLoad = true;
+        let activeInputDay = null;
+        let currentUnsubscribe = null;
+        let activeSyncId = null; // Tracks which document ID we are currently listening to
 
-        function save() {
-            localStorage.setItem('shazeb_v_final', JSON.stringify(state));
-            render();
+        // AUTH & SYNC INITIALIZATION
+        const init = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Auth failed:", error);
+                document.getElementById('status-text').innerText = "Auth Error";
+            }
+        };
+
+        onAuthStateChanged(auth, (u) => {
+            if (u) {
+                user = u;
+                // Default to user's own UID unless we have a manually loaded ID
+                if (!activeSyncId) activeSyncId = user.uid;
+                
+                document.getElementById('sync-code-display').value = activeSyncId;
+                document.getElementById('status-dot').className = "w-1.5 h-1.5 rounded-full bg-teal-400";
+                document.getElementById('status-text').innerText = "Cloud Active";
+                
+                setupSync(activeSyncId);
+            }
+        });
+
+        // LIVE FIRESTORE SYNC
+        function setupSync(targetId) {
+            if (!user) return;
+            
+            // Clean up old listener if it exists
+            if (currentUnsubscribe) currentUnsubscribe();
+
+            const docRef = doc(db, 'artifacts', appId, 'users', targetId, 'settings', 'data');
+            
+            currentUnsubscribe = onSnapshot(docRef, (snap) => {
+                if (snap.exists()) {
+                    state = snap.data();
+                    render();
+                } else if (targetId === user.uid) {
+                    // Create initial doc only for the current user's own ID
+                    setDoc(docRef, state);
+                }
+                
+                if (isInitialLoad) {
+                    document.getElementById('loading-screen').style.display = 'none';
+                    isInitialLoad = false;
+                }
+            }, (err) => {
+                console.error("Sync Error:", err);
+                document.getElementById('status-text').innerText = "Sync Interrupted";
+                document.getElementById('status-dot').classList.replace('bg-teal-400', 'bg-rose-500');
+            });
         }
 
-        function triggerUpload() { document.getElementById('profile-upload').click(); }
-        function handleProfileUpload(e) {
-            const file = e.target.files[0];
-            const reader = new FileReader();
-            reader.onload = (ev) => { state.profile = ev.target.result; save(); updateProfileDisplay(); };
-            reader.readAsDataURL(file);
+        async function pushState() {
+            if (!user || !activeSyncId) return;
+            const docRef = doc(db, 'artifacts', appId, 'users', activeSyncId, 'settings', 'data');
+            try {
+                await setDoc(docRef, state);
+            } catch (e) {
+                console.error("Failed to push update:", e);
+            }
         }
 
-        function updateProfileDisplay() {
-            const el = document.getElementById('profile-display');
-            if (state.profile) el.innerHTML = `<img src="${state.profile}">`;
-        }
+        // APP ACTIONS
+        window.importSharedData = async () => {
+            const key = document.getElementById('sync-input').value.trim();
+            if (!key) return;
+            
+            if (confirm(`Switching to Session: ${key}\n\nThis will live-sync your view to this device key.`)) {
+                activeSyncId = key;
+                document.getElementById('sync-code-display').value = key;
+                setupSync(key);
+                toggleMenu();
+            }
+        };
 
-        function toggleSection(id) {
-            document.getElementById(id).classList.toggle('open');
-            if(id === 'history-content') renderHistory();
-        }
-
-        function processCommand() {
+        window.processCommand = () => {
             const input = document.getElementById('command-input');
             const val = input.value.trim();
             if (!val) return;
@@ -286,79 +400,80 @@
             });
 
             input.value = "";
-            save();
-        }
+            pushState();
+        };
 
-        function toggleTask(day, id) {
+        window.toggleDayInput = (day) => {
+            activeInputDay = (activeInputDay === day) ? null : day;
+            render();
+            if (activeInputDay) {
+                setTimeout(() => document.getElementById(`input-${day}`)?.focus(), 50);
+            }
+        };
+
+        window.addDayTask = (day, event) => {
+            if (event.key === 'Enter') {
+                const val = event.target.value.trim();
+                if (!val) return;
+                state.planner[day].push({ id: Date.now(), text: val, time: "ANYTIME", done: false });
+                activeInputDay = null;
+                pushState();
+            } else if (event.key === 'Escape') {
+                activeInputDay = null;
+                render();
+            }
+        };
+
+        window.toggleTask = (day, id) => {
             const task = state.planner[day].find(t => t.id === id);
             if (task) {
                 task.done = !task.done;
                 state.xp += task.done ? 10 : -10;
-                save();
+                checkHistoryLog();
+                pushState();
+            }
+        };
+
+        function checkHistoryLog() {
+            let total = 0, done = 0;
+            days.forEach(d => state.planner[d].forEach(t => { total++; if(t.done) done++; }));
+            const perc = total === 0 ? 0 : Math.round((done/total) * 100);
+            if (perc === 100) {
+                const todayStr = new Date().toLocaleDateString();
+                if (!state.history.some(h => h.date === todayStr)) {
+                    state.history.unshift({ date: todayStr, perc: 100 });
+                }
             }
         }
 
-        function deleteTask(day, id) {
+        window.deleteTask = (day, id) => {
             state.planner[day] = state.planner[day].filter(t => t.id !== id);
-            save();
-        }
+            pushState();
+        };
 
-        /**
-         * Generates a 6-digit sync key. 
-         * Note: In a real cloud app, this would be a lookup key in a database.
-         * For this standalone version, we still generate a full portable key 
-         * but label it as a sync code for the user experience.
-         */
-        function generateKey() {
-            // We create a compressed version for the clipboard
-            const compressed = btoa(JSON.stringify(state));
-            
-            // Visual 6-digit code for the UI
-            const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-            let visualCode = '';
-            for (let i = 0; i < 6; i++) {
-                visualCode += characters.charAt(Math.floor(Math.random() * characters.length));
-            }
-            
-            document.getElementById('sync-code-display').value = visualCode;
-            
-            // Still copy the full data key to the clipboard so it actually works for "Sync"
-            const tempInput = document.createElement("textarea");
-            tempInput.value = compressed;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            try {
-                document.execCommand("copy");
-                const btn = document.getElementById('btn-gen');
-                btn.innerText = "COPIED";
-                btn.classList.add('copy-success');
-                setTimeout(() => {
-                    btn.innerText = "GEN";
-                    btn.classList.remove('copy-success');
-                }, 2000);
-            } catch (err) {
-                console.error("Copy failed", err);
-            }
-            document.body.removeChild(tempInput);
-        }
+        window.copyKey = () => {
+            const val = document.getElementById('sync-code-display').value;
+            const temp = document.createElement('textarea');
+            temp.value = val;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(temp);
+            const btn = document.getElementById('btn-copy');
+            btn.innerText = "COPIED";
+            btn.classList.add('copy-success');
+            setTimeout(() => { btn.innerText = "COPY"; btn.classList.remove('copy-success'); }, 2000);
+        };
 
-        function importKey() {
-            const key = document.getElementById('sync-input').value.trim();
-            if(!key) return;
-            try {
-                const data = JSON.parse(atob(key));
-                state = data;
-                save();
-                location.reload();
-            } catch(e) { 
-                alert("Invalid sync code. Please make sure you copied the full generated key.");
-            }
-        }
-
-        function render() {
+        window.render = () => {
             const grid = document.getElementById('planner-grid');
+            if(!grid) return;
+            
             grid.innerHTML = "";
             let total = 0, done = 0, dayXP = {};
+
+            const prof = document.getElementById('profile-display');
+            if (state.profile) prof.innerHTML = `<img src="${state.profile}">`;
 
             days.forEach(day => {
                 dayXP[day] = 0;
@@ -379,9 +494,13 @@
                 }).join('');
 
                 grid.innerHTML += `
-                    <div class="glass p-4 min-h-[160px]">
-                        <h3 class="text-[10px] font-black uppercase text-teal-400 mb-3 tracking-widest">${day}</h3>
-                        <div>${tasks || '<p class="text-[9px] text-slate-600 italic py-4">No Plans</p>'}</div>
+                    <div class="glass p-4 min-h-[160px] flex flex-col">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-[10px] font-black uppercase text-teal-400 tracking-widest">${day}</h3>
+                            <button onclick="toggleDayInput('${day}')" class="w-5 h-5 flex items-center justify-center rounded-md bg-teal-400/10 text-teal-400 hover:bg-teal-400/20">+</button>
+                        </div>
+                        ${activeInputDay === day ? `<input type="text" id="input-${day}" class="day-add-input" placeholder="Add..." onkeydown="addDayTask('${day}', event)">` : ''}
+                        <div class="flex-1">${tasks || '<p class="text-[9px] text-slate-600 italic py-4">No Plans</p>'}</div>
                     </div>
                 `;
             });
@@ -391,46 +510,65 @@
             document.getElementById('mastery-bar').style.width = perc + "%";
             document.getElementById('xp-display').innerText = state.xp;
             document.getElementById('level-display').innerText = Math.floor(state.xp/100) + 1;
-            
             updatePie(dayXP);
-        }
+        };
 
         function updatePie(dayXP) {
             const g = document.getElementById('pie-segments');
             const legend = document.getElementById('xp-legend');
+            if(!g || !legend) return;
             g.innerHTML = ""; legend.innerHTML = "";
             let acc = 0;
             days.forEach(day => {
-                const perc = state.xp === 0 ? 0 : (dayXP[day]/state.xp) * 100;
-                if(perc > 0) {
+                const p = state.xp === 0 ? 0 : (dayXP[day]/state.xp) * 100;
+                if(p > 0) {
                     const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
                     circle.setAttribute("cx", "21"); circle.setAttribute("cy", "21"); circle.setAttribute("r", "15.915");
                     circle.setAttribute("fill", "transparent"); circle.setAttribute("stroke", dayColors[day]); circle.setAttribute("stroke-width", "5");
-                    circle.setAttribute("stroke-dasharray", `${perc} ${100 - perc}`); circle.setAttribute("stroke-dashoffset", -acc);
-                    g.appendChild(circle); acc += perc;
+                    circle.setAttribute("stroke-dasharray", `${p} ${100 - p}`); circle.setAttribute("stroke-dashoffset", -acc);
+                    g.appendChild(circle); acc += p;
                 }
                 legend.innerHTML += `
                     <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5 border border-white/5">
                         <div class="w-2 h-2 rounded-full" style="background:${dayColors[day]}"></div>
-                        <div class="flex flex-col">
-                            <span class="text-[8px] text-slate-500 uppercase">${day.slice(0,3)}</span>
-                            <span class="text-[10px] font-black">${dayXP[day]} XP</span>
-                        </div>
+                        <span class="text-[8px] text-slate-500 uppercase">${day.slice(0,3)}</span>
+                        <span class="text-[10px] font-black">${dayXP[day]} XP</span>
                     </div>`;
             });
         }
 
-        function renderHistory() {
+        window.renderHistory = () => {
             const list = document.getElementById('history-list');
-            list.innerHTML = state.history.map(h => `<div class="p-2 border-l-2 border-teal-400 bg-white/5">${h.date}: ${h.perc}% Completion</div>`).join('') || '<div class="text-[10px] text-slate-500 italic p-2">Sync data to populate history logs.</div>';
-        }
+            list.innerHTML = state.history.map(h => `<div class="p-2 border-l-2 border-teal-400 bg-white/5">${h.date}: ${h.perc}%</div>`).join('') || '<div class="text-[10px] text-slate-500 p-2 italic">No history yet.</div>';
+        };
 
-        function resetAll() { if(confirm("Are you sure? This will delete all your local data.")) { localStorage.clear(); location.reload(); } }
-        function toggleMenu() { document.getElementById('menu-sidebar').classList.toggle('translate-x-full'); document.getElementById('sidebar-backdrop').classList.toggle('hidden'); }
+        window.resetAll = async () => { 
+            if(confirm("Wipe all data? This will reset the cloud record too.")) { 
+                state = { planner: days.reduce((a, d) => ({...a, [d]: []}), {}), xp: 0, profile: null, history: [] };
+                await pushState();
+                location.reload(); 
+            } 
+        };
+        
+        window.toggleMenu = () => { 
+            document.getElementById('menu-sidebar').classList.toggle('translate-x-full'); 
+            document.getElementById('sidebar-backdrop').classList.toggle('hidden'); 
+        };
 
+        window.triggerUpload = () => document.getElementById('profile-upload').click();
+        window.handleProfileUpload = (e) => {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = (ev) => { state.profile = ev.target.result; pushState(); };
+            reader.readAsDataURL(file);
+        };
+        window.toggleSection = (id) => {
+            document.getElementById(id).classList.toggle('open');
+            if(id === 'history-content') renderHistory();
+        };
+
+        init();
         setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
-        updateProfileDisplay();
-        render();
     </script>
 </body>
 </html>
