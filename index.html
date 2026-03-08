@@ -22,8 +22,7 @@
         .settings-content { max-height: 0; overflow: hidden; transition: all 0.3s ease-in-out; opacity: 0; }
         .settings-content.open { max-height: 500px; opacity: 1; margin-top: 1rem; }
         .sync-input { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 10px; color: white; font-family: 'JetBrains Mono', monospace; text-align: center; text-transform: uppercase; }
-        .copy-success { animation: pulse-teal 1.5s infinite; }
-        @keyframes pulse-teal { 0% { box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(45, 212, 191, 0); } 100% { box-shadow: 0 0 0 0 rgba(45, 212, 191, 0); } }
+        .date-sub { font-size: 9px; color: #94a3b8; font-weight: 600; margin-top: 2px; display: block; }
     </style>
 </head>
 <body class="p-4 md:p-8" id="app-body">
@@ -51,13 +50,13 @@
             <div class="flex items-center gap-3 mb-4">
                 <div class="w-10 h-10 bg-teal-400 rounded-lg flex items-center justify-center text-slate-900 font-bold text-xl">+</div>
                 <div>
-                    <h2 class="font-[800] text-sm text-teal-400 uppercase tracking-widest">Schedule Input</h2>
-                    <p class="text-[10px] text-slate-400 uppercase font-medium">Example: "Homework at 4:30pm"</p>
+                    <h2 class="font-[800] text-sm text-teal-400 uppercase tracking-widest">Add Routine Task</h2>
+                    <p class="text-[10px] text-slate-400 uppercase font-medium italic">Tasks will repeat every week unless deleted.</p>
                 </div>
             </div>
             <div class="relative">
-                <textarea id="command-input" rows="2" class="w-full bg-slate-800/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-teal-400 transition-all resize-none" placeholder="Enter your plan..."></textarea>
-                <button onclick="processCommand()" class="absolute bottom-3 right-3 bg-teal-400 hover:opacity-90 text-slate-900 font-bold text-[10px] uppercase px-4 py-2 rounded-lg">Analyze & Add</button>
+                <textarea id="command-input" rows="2" class="w-full bg-slate-800/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-teal-400 transition-all resize-none" placeholder="Example: Gym at 6:00pm on Monday"></textarea>
+                <button onclick="processCommand()" class="absolute bottom-3 right-3 bg-teal-400 hover:opacity-90 text-slate-900 font-bold text-[10px] uppercase px-4 py-2 rounded-lg">Set Routine</button>
             </div>
         </div>
 
@@ -65,12 +64,10 @@
             <div class="glass p-6 flex flex-col justify-between">
                 <div>
                     <div class="flex justify-between items-end mb-2">
-                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Completion</span>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Weekly Mastery</span>
                         <span id="percent-display" class="text-sm font-black text-white">0%</span>
                     </div>
-                    <div class="w-full h-3 bg-slate-800 rounded-full overflow-hidden">
-                        <div id="mastery-bar" class="h-full bg-teal-400 w-0 transition-all duration-1000"></div>
-                    </div>
+                    <div class="w-full h-3 bg-slate-800 rounded-full overflow-hidden"><div id="mastery-bar" class="h-full bg-teal-400 w-0 transition-all duration-1000"></div></div>
                 </div>
                 <div class="flex justify-between items-center mt-6">
                     <div><span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Total XP</span><span id="xp-display" class="text-3xl font-black text-teal-400">0</span></div>
@@ -79,7 +76,7 @@
             </div>
             <div class="glass p-6 lg:col-span-2 flex flex-col md:flex-row items-center gap-8">
                 <div class="flex-shrink-0 text-center">
-                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Focus Distro</h3>
+                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Efficiency Distro</h3>
                     <div class="pie-container mx-auto"><svg id="xp-pie" width="140" height="140" viewBox="0 0 42 42"><circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#1e293b" stroke-width="5"></circle><g id="pie-segments"></g></svg></div>
                 </div>
                 <div class="flex-1 w-full grid grid-cols-2 gap-4" id="xp-legend"></div>
@@ -89,62 +86,43 @@
     </div>
 
     <div id="menu-sidebar" class="fixed inset-y-0 right-0 w-80 transform translate-x-full transition-transform duration-300 z-50 p-6 flex flex-col">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-xl font-black text-white uppercase tracking-tighter">Tools</h2>
-            <button onclick="toggleMenu()" class="text-slate-400 hover:text-white">✕</button>
-        </div>
-        <div class="space-y-6 overflow-y-auto flex-1">
-            <div class="p-5 rounded-2xl bg-white/5 border border-white/10">
-                <div class="flex justify-between items-center cursor-pointer" onclick="toggleSection('history-content')">
-                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Progress History</h3>
-                    <span class="text-slate-500">▼</span>
-                </div>
-                <div id="history-content" class="settings-content"><div id="history-list" class="space-y-2 mt-4 text-xs"></div></div>
-            </div>
-            <div class="p-5 rounded-2xl bg-teal-400/5 border border-teal-400/20">
-                <h3 class="text-[10px] font-black text-teal-400 uppercase tracking-widest mb-3 italic">Cloud Sync</h3>
-                <div class="space-y-4">
-                    <div>
-                        <label class="text-[9px] text-slate-500 font-bold uppercase block mb-1">6-Digit Sync Code</label>
-                        <div class="flex gap-2">
-                            <input type="text" id="sync-code-display" readonly class="sync-input flex-1 text-xs tracking-[4px]" value="------">
-                            <button onclick="generateKey()" id="btn-gen" class="bg-teal-400 text-slate-900 px-3 py-2 rounded-xl text-[10px] font-bold transition-all">GEN</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <button onclick="resetAll()" class="w-full p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[10px] font-bold uppercase tracking-widest mt-auto">Wipe Data</button>
-        </div>
+        <div class="flex justify-between items-center mb-8"><h2 class="text-xl font-black text-white uppercase tracking-tighter">Tools</h2><button onclick="toggleMenu()" class="text-slate-400 hover:text-white">✕</button></div>
+        <button onclick="resetChecks()" class="w-full mb-4 p-4 rounded-xl bg-teal-400/10 border border-teal-400/20 text-teal-400 text-[10px] font-bold uppercase tracking-widest">Reset Done Status</button>
+        <button onclick="resetAll()" class="w-full p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[10px] font-bold uppercase tracking-widest mt-auto">Wipe Everything</button>
     </div>
     <div id="sidebar-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden" onclick="toggleMenu()"></div>
 
     <script>
         const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
         const dayColors = { "Monday": "#2dd4bf", "Tuesday": "#38bdf8", "Wednesday": "#818cf8", "Thursday": "#c084fc", "Friday": "#f472b6", "Saturday": "#fbbf24", "Sunday": "#4ade80" };
-        let state = JSON.parse(localStorage.getItem('shazeb_v_final')) || { planner: days.reduce((a, d) => ({...a, [d]: []}), {}), xp: 0, profile: null, history: [] };
+        
+        let state = JSON.parse(localStorage.getItem('shazeb_v_final')) || { planner: days.reduce((a, d) => ({...a, [d]: []}), {}), xp: 0, profile: null };
 
-        // --- ENHANCED AI ALARM SYSTEM ---
-        function triggerAlarm(title, body) {
-            if ("Notification" in window && Notification.permission === "granted") {
-                new Notification(title, { body: body, icon: "https://cdn-icons-png.flaticon.com/512/1827/1827347.png" });
-                try {
-                    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-                    audio.play();
-                } catch(e) {}
-            }
+        // Helper to get actual dates for the current week
+        function getDateForDay(dayName) {
+            const today = new Date();
+            const currentDayIndex = today.getDay();
+            const targetDayIndex = days.indexOf(dayName);
+            const diff = targetDayIndex - currentDayIndex;
+            const targetDate = new Date(today);
+            targetDate.setDate(today.getDate() + diff);
+            return targetDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         }
 
+        // --- AI NOTIFICATION & ROUTINE LOGIC ---
         function checkAlarms() {
             const now = new Date();
             const currentDay = days[now.getDay()];
-            // Standardize format to 12h without spaces (e.g., "5:00PM")
             const timeStr = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }).replace(/\s/g, '').toUpperCase();
 
             state.planner[currentDay].forEach(task => {
                 const taskTimeClean = task.time.replace(/\s/g, '').toUpperCase();
                 if (taskTimeClean !== "ANYTIME" && !task.done && !task.alarmFired) {
                     if (taskTimeClean === timeStr) {
-                        triggerAlarm("Task Time!", task.text);
+                        if ("Notification" in window && Notification.permission === "granted") {
+                            new Notification("Routine Reminder", { body: task.text });
+                            new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play().catch(()=>{});
+                        }
                         task.alarmFired = true;
                         save();
                     }
@@ -153,18 +131,13 @@
         }
 
         function save() { localStorage.setItem('shazeb_v_final', JSON.stringify(state)); render(); }
-        
+
         function processCommand() {
             const input = document.getElementById('command-input');
             const val = input.value.trim();
             if (!val) return;
 
-            // Diagnostic: Request perms and send test notification immediately
-            if (Notification.permission !== "granted") {
-                Notification.requestPermission().then(p => { if(p === 'granted') triggerAlarm("AI Active", "Notifications are now enabled!"); });
-            } else {
-                triggerAlarm("Task Registered", "I will notify you when it's time!");
-            }
+            if (Notification.permission !== "granted") Notification.requestPermission();
 
             const timeMatch = val.match(/(\d{1,2}(:\d{2})?\s*(am|pm))/i);
             const time = timeMatch ? timeMatch[0].toUpperCase() : "ANYTIME";
@@ -175,36 +148,38 @@
             save();
         }
 
-        // Loop checks every 30 seconds
-        setInterval(checkAlarms, 30000);
-        // --------------------------------
+        function toggleTask(day, id) {
+            const task = state.planner[day].find(t => t.id === id);
+            if (task) { task.done = !task.done; state.xp += task.done ? 10 : -10; save(); }
+        }
 
-        function triggerUpload() { document.getElementById('profile-upload').click(); }
-        function handleProfileUpload(e) {
-            const file = e.target.files[0];
-            const reader = new FileReader();
-            reader.onload = (ev) => { state.profile = ev.target.result; save(); updateProfileDisplay(); };
-            reader.readAsDataURL(file);
-        }
-        function updateProfileDisplay() {
-            const el = document.getElementById('profile-display');
-            if (state.profile) el.innerHTML = `<img src="${state.profile}">`;
-        }
-        function toggleSection(id) { document.getElementById(id).classList.toggle('open'); if(id === 'history-content') renderHistory(); }
-        function toggleTask(day, id) { const task = state.planner[day].find(t => t.id === id); if (task) { task.done = !task.done; state.xp += task.done ? 10 : -10; save(); } }
         function deleteTask(day, id) { state.planner[day] = state.planner[day].filter(t => t.id !== id); save(); }
-        function generateKey() { const compressed = btoa(JSON.stringify(state)); document.getElementById('sync-code-display').value = "COPIED"; const temp = document.createElement("textarea"); temp.value = compressed; document.body.appendChild(temp); temp.select(); document.execCommand("copy"); document.body.removeChild(temp); }
+
+        function resetChecks() {
+            days.forEach(d => state.planner[d].forEach(t => { t.done = false; t.alarmFired = false; }));
+            save();
+            alert("Week reset! All routine tasks are now active again.");
+        }
+
         function render() {
             const grid = document.getElementById('planner-grid'); grid.innerHTML = "";
             let total = 0, done = 0, dayXP = {};
+            
             days.forEach(day => {
                 dayXP[day] = 0;
+                const dateStr = getDateForDay(day);
                 const tasks = state.planner[day].map(t => {
                     total++; if(t.done) { done++; dayXP[day] += 10; }
                     return `<div class="group py-2 border-b border-white/5"><div class="flex justify-between items-center mb-1"><span class="time-badge">${t.time}</span><button onclick="deleteTask('${day}', ${t.id})" class="text-rose-500 opacity-0 group-hover:opacity-100 text-[10px]">✕</button></div><div class="flex items-center gap-2 cursor-pointer" onclick="toggleTask('${day}', ${t.id})"><div class="w-3.5 h-3.5 rounded border ${t.done ? 'bg-teal-400 border-teal-400' : 'border-slate-500'}"></div><span class="text-[11px] ${t.done ? 'task-done text-slate-500' : 'text-slate-200'}">${t.text}</span></div></div>`;
                 }).join('');
-                grid.innerHTML += `<div class="glass p-4 min-h-[160px]"><h3 class="text-[10px] font-black uppercase text-teal-400 mb-3 tracking-widest">${day}</h3><div>${tasks || '<p class="text-[9px] text-slate-600 italic py-4">No Plans</p>'}</div></div>`;
+                
+                grid.innerHTML += `<div class="glass p-4 min-h-[160px] ${day === days[new Date().getDay()] ? 'ring-2 ring-teal-400/50' : ''}">
+                    <h3 class="text-[10px] font-black uppercase text-teal-400 tracking-widest">${day}</h3>
+                    <span class="date-sub">${dateStr}</span>
+                    <div class="mt-3">${tasks || '<p class="text-[9px] text-slate-600 italic py-4">Free Day</p>'}</div>
+                </div>`;
             });
+            
             const perc = total === 0 ? 0 : Math.round((done/total) * 100);
             document.getElementById('percent-display').innerText = perc + "%";
             document.getElementById('mastery-bar').style.width = perc + "%";
@@ -212,6 +187,7 @@
             document.getElementById('level-display').innerText = Math.floor(state.xp/100) + 1;
             updatePie(dayXP);
         }
+
         function updatePie(dayXP) {
             const g = document.getElementById('pie-segments'); if(!g) return; g.innerHTML = ""; let acc = 0;
             days.forEach(day => {
@@ -224,11 +200,12 @@
                 }
             });
         }
-        function renderHistory() { document.getElementById('history-list').innerHTML = state.history.map(h => `<div class="p-2 border-l-2 border-teal-400 bg-white/5">${h.date}: ${h.perc}%</div>`).join('') || '<div class="text-[10px] text-slate-500 p-2">No history logs.</div>'; }
-        function resetAll() { if(confirm("Wipe data?")) { localStorage.clear(); location.reload(); } }
+
+        function resetAll() { if(confirm("Delete all routine data?")) { localStorage.clear(); location.reload(); } }
         function toggleMenu() { document.getElementById('menu-sidebar').classList.toggle('translate-x-full'); document.getElementById('sidebar-backdrop').classList.toggle('hidden'); }
         setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
-        updateProfileDisplay(); render();
+        setInterval(checkAlarms, 30000);
+        render();
     </script>
 </body>
 </html>
