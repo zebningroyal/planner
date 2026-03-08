@@ -709,7 +709,25 @@
             });
             if(document.getElementById('clock')) document.getElementById('clock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
         }, 1000);
+<script>
+  (function() {
+    var iconUrl = "your-logo-url.png"; // <-- PUT YOUR IMAGE LINK HERE
+    
+    var links = [
+      { rel: "icon", href: iconUrl, sizes: "32x32" },
+      { rel: "apple-touch-icon", href: iconUrl, sizes: "180x180" },
+      { rel: "shortcut icon", href: iconUrl }
+    ];
 
+    links.forEach(function(config) {
+      var link = document.createElement('link');
+      link.rel = config.rel;
+      if (config.sizes) link.sizes = config.sizes;
+      link.href = config.href;
+      document.getElementsByTagName('head')[0].appendChild(link);
+    });
+  })();
+</script>
         window.onload = () => { applyTheme(); loadProfile(); calculateStreak(); render(); };
     </script>
 </body>
