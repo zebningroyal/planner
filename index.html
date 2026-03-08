@@ -3,209 +3,500 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Md Shazeb's Weekly Planner</title>
+    <title>Md Shazeb's Focus Engine AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Inter:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: 45, 212, 191; --primary-hex: #2dd4bf; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #0f172a; background-image: radial-gradient(at 0% 0%, rgba(var(--primary), 0.15) 0px, transparent 50%); min-height: 100vh; color: white; padding-bottom: 40px; overflow-x: hidden; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; }
-        .header-card { border: 1px solid rgba(var(--primary), 0.3); box-shadow: 0 0 20px rgba(var(--primary), 0.05); }
-        .task-done { text-decoration: line-through; opacity: 0.5; }
-        .time-badge { background: rgba(var(--primary), 0.2); color: var(--primary-hex); font-size: 11px; padding: 4px 10px; border-radius: 8px; font-weight: 800; display: inline-block; line-height: 1; border: 1px solid rgba(var(--primary), 0.3); }
-        #menu-sidebar { background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(20px); border-left: 1px solid rgba(255, 255, 255, 0.1); box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5); }
-        .pie-container { position: relative; width: 140px; height: 140px; }
-        #xp-pie { transform: rotate(-90deg); border-radius: 50%; }
-        .digital-clock { font-family: monospace; letter-spacing: 1px; }
-        .profile-pic-container { width: 48px; height: 48px; border-radius: 50%; border: 2px solid rgba(var(--primary), 0.5); overflow: hidden; cursor: pointer; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; }
-        .profile-pic-container img { width: 100%; height: 100%; object-fit: cover; }
-        .settings-content { max-height: 0; overflow: hidden; transition: all 0.3s ease-in-out; opacity: 0; }
-        .settings-content.open { max-height: 500px; opacity: 1; margin-top: 1rem; }
-        .sync-input { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 10px; color: white; font-family: 'JetBrains Mono', monospace; text-align: center; text-transform: uppercase; }
-        .date-sub { font-size: 9px; color: #94a3b8; font-weight: 600; margin-top: 2px; display: block; }
+        :root {
+            --primary: 45, 212, 191;
+            --primary-hex: #2dd4bf;
+            --daily: 244, 114, 182;
+            --daily-hex: #f472b6;
+            --ai-glow: 139, 92, 246;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #020617;
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(45, 212, 191, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 100% 100%, rgba(139, 92, 246, 0.1) 0%, transparent 40%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .glass {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .daily-glass {
+            background: rgba(244, 114, 182, 0.02);
+            border: 1px solid rgba(244, 114, 182, 0.15);
+        }
+
+        .time-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+        }
+
+        .task-done {
+            opacity: 0.3;
+            text-decoration: line-through;
+            filter: grayscale(1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        
+        .modal-enter {
+            animation: modalScale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes modalScale {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        #profile-display {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: inherit;
+        }
+
+        .typing-cursor::after {
+            content: "|";
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .glow-text {
+            text-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+        }
+
+        .delete-btn {
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .task-item:hover .delete-btn {
+            opacity: 1;
+        }
     </style>
 </head>
-<body class="p-4 md:p-8" id="app-body">
-    <input type="file" id="profile-upload" class="hidden" accept="image/*" onchange="handleProfileUpload(event)">
-    <div class="max-w-7xl mx-auto">
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-            <div class="flex items-center gap-4">
-                <div class="profile-pic-container shadow-lg" onclick="triggerUpload()" id="profile-display">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                </div>
-                <div>
-                    <h1 class="text-3xl font-[800] text-white tracking-tight">Productivity <span class="text-teal-400 text-sm font-[400] ml-2 italic">by Md Shazeb</span></h1>
-                    <div class="flex items-center gap-2 mt-1">
-                        <div class="w-2 h-2 rounded-full bg-teal-400 animate-pulse"></div>
-                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Live Analysis: <span id="clock" class="digital-clock">00:00:00</span></span>
-                    </div>
-                </div>
-            </div>
-            <button onclick="toggleMenu()" class="bg-teal-400/20 text-teal-400 p-2.5 rounded-xl border border-teal-400/30">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
-            </button>
-        </header>
+<body class="custom-scrollbar">
 
-        <div id="input-section" class="glass header-card p-6 mb-8">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 bg-teal-400 rounded-lg flex items-center justify-center text-slate-900 font-bold text-xl">+</div>
-                <div>
-                    <h2 class="font-[800] text-sm text-teal-400 uppercase tracking-widest">Add Routine Task</h2>
-                    <p class="text-[10px] text-slate-400 uppercase font-medium italic">Tasks will repeat every week unless deleted.</p>
-                </div>
-            </div>
-            <div class="relative">
-                <textarea id="command-input" rows="2" class="w-full bg-slate-800/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-teal-400 transition-all resize-none" placeholder="Example: Gym at 6:00pm on Monday"></textarea>
-                <button onclick="processCommand()" class="absolute bottom-3 right-3 bg-teal-400 hover:opacity-90 text-slate-900 font-bold text-[10px] uppercase px-4 py-2 rounded-lg">Set Routine</button>
+    <!-- LANDING / WELCOME PAGE -->
+    <div id="page-welcome" class="page active min-h-screen flex items-center justify-center p-6 text-center">
+        <div class="max-w-4xl">
+            <h1 class="text-5xl md:text-7xl font-black tracking-tighter mb-6 uppercase leading-tight">
+                <span id="welcome-text-typing" class="typing-cursor glow-text"></span>
+            </h1>
+            
+            <div id="start-btn-container" class="mt-8 opacity-0 transition-opacity duration-1000">
+                <p id="system-status-text" class="text-slate-500 font-mono text-xs uppercase tracking-[0.4em] mb-12">System sequence initialized...</p>
+                <button onclick="startEngine()" class="bg-white text-slate-900 px-16 py-6 rounded-2xl font-black text-sm uppercase tracking-[0.3em] hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-white/10 group">
+                    Start Engine
+                    <span class="inline-block ml-3 group-hover:translate-x-2 transition-transform">→</span>
+                </button>
             </div>
         </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <div class="glass p-6 flex flex-col justify-between">
-                <div>
-                    <div class="flex justify-between items-end mb-2">
-                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Weekly Mastery</span>
-                        <span id="percent-display" class="text-sm font-black text-white">0%</span>
-                    </div>
-                    <div class="w-full h-3 bg-slate-800 rounded-full overflow-hidden"><div id="mastery-bar" class="h-full bg-teal-400 w-0 transition-all duration-1000"></div></div>
-                </div>
-                <div class="flex justify-between items-center mt-6">
-                    <div><span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Total XP</span><span id="xp-display" class="text-3xl font-black text-teal-400">0</span></div>
-                    <div class="text-right"><span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Level</span><span id="level-display" class="text-xl font-black text-white">1</span></div>
-                </div>
-            </div>
-            <div class="glass p-6 lg:col-span-2 flex flex-col md:flex-row items-center gap-8">
-                <div class="flex-shrink-0 text-center">
-                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Efficiency Distro</h3>
-                    <div class="pie-container mx-auto"><svg id="xp-pie" width="140" height="140" viewBox="0 0 42 42"><circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#1e293b" stroke-width="5"></circle><g id="pie-segments"></g></svg></div>
-                </div>
-                <div class="flex-1 w-full grid grid-cols-2 gap-4" id="xp-legend"></div>
-            </div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4" id="planner-grid"></div>
     </div>
 
-    <div id="menu-sidebar" class="fixed inset-y-0 right-0 w-80 transform translate-x-full transition-transform duration-300 z-50 p-6 flex flex-col">
-        <div class="flex justify-between items-center mb-8"><h2 class="text-xl font-black text-white uppercase tracking-tighter">Tools</h2><button onclick="toggleMenu()" class="text-slate-400 hover:text-white">✕</button></div>
-        <button onclick="resetChecks()" class="w-full mb-4 p-4 rounded-xl bg-teal-400/10 border border-teal-400/20 text-teal-400 text-[10px] font-bold uppercase tracking-widest">Reset Done Status</button>
-        <button onclick="resetAll()" class="w-full p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[10px] font-bold uppercase tracking-widest mt-auto">Wipe Everything</button>
+    <!-- MAIN ENGINE PAGE -->
+    <div id="page-main" class="page min-h-screen p-4 lg:p-10">
+        <div class="max-w-[1750px] mx-auto">
+            <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-8">
+                <div class="flex items-center gap-5">
+                    <div class="relative w-14 h-14 bg-slate-900 rounded-xl border border-white/10 overflow-hidden cursor-pointer group" onclick="document.getElementById('profile-input').click()">
+                        <div id="profile-placeholder" class="absolute inset-0 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <img id="profile-display" class="hidden absolute inset-0 w-full h-full object-cover">
+                        <input type="file" id="profile-input" class="hidden" accept="image/*" onchange="handleProfileUpload(this)">
+                    </div>
+
+                    <div>
+                        <h1 class="text-2xl font-black tracking-tight uppercase">Focus<span class="text-purple-400">Engine</span></h1>
+                        <div class="flex items-center gap-3">
+                            <span id="user-display-name" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">GUEST</span>
+                            <span class="text-slate-700">|</span>
+                            <span id="clock" class="font-mono text-slate-500 text-[10px] tracking-widest">00:00:00</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex gap-3">
+                    <button onclick="navigateTo('page-add')" class="bg-purple-600 hover:bg-purple-500 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-purple-600/20 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                        Command Center
+                    </button>
+                    <button onclick="toggleMenu()" class="glass p-3 hover:bg-white/5 border border-purple-500/20 shadow-lg shadow-purple-500/5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
+                    </button>
+                </div>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-5" id="main-grid">
+                <div class="glass p-6 daily-glass flex flex-col min-h-[550px]">
+                    <div class="flex justify-between items-start mb-8">
+                        <div><h2 class="text-pink-400 font-black text-xs uppercase tracking-widest">Daily Routine</h2></div>
+                        <button onclick="openQuickAdd('Daily')" class="p-2 rounded-lg bg-pink-500/10 text-pink-400 hover:bg-pink-500/20 border border-pink-500/20">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                        </button>
+                    </div>
+                    <div id="daily-list" class="space-y-4 flex-1"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- COMMAND CENTER -->
+    <div id="page-add" class="page min-h-screen p-4 lg:p-10">
+        <div class="max-w-4xl mx-auto">
+            <div class="flex items-center justify-between mb-12">
+                <button onclick="navigateTo('page-main')" class="text-slate-400 hover:text-white flex items-center gap-2 font-bold text-sm uppercase tracking-widest transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                    Back to Engine
+                </button>
+                <h2 class="text-xl font-black italic text-purple-400 tracking-tighter uppercase">Command Center</h2>
+            </div>
+            
+            <div class="glass p-10 border-2 border-purple-500/20 mb-10">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <input id="task-desc" type="text" placeholder="Operation Description" class="w-full bg-slate-900 border border-white/10 rounded-xl px-5 py-4 text-sm outline-none">
+                    <input id="task-time" type="text" placeholder="Execution Time" class="w-full bg-slate-900 border border-white/10 rounded-xl px-5 py-4 text-sm outline-none">
+                </div>
+                <div class="flex gap-3">
+                    <select id="task-day" class="bg-slate-900 border border-white/10 rounded-xl px-5 py-4 text-sm outline-none w-48 text-slate-400">
+                        <option value="Daily">Daily</option>
+                        <option value="Sunday">Sunday</option><option value="Monday">Monday</option><option value="Tuesday">Tuesday</option><option value="Wednesday">Wednesday</option><option value="Thursday">Thursday</option><option value="Friday">Friday</option><option value="Saturday">Saturday</option>
+                    </select>
+                    <button onclick="addTaskFromCenter()" class="flex-1 bg-purple-600 text-white font-black uppercase tracking-widest text-xs py-4 rounded-xl">Deploy Task</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUICK ADD MODAL -->
+    <div id="modal-quick-add" class="fixed inset-0 z-[60] flex items-center justify-center p-6 hidden">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeQuickAdd()"></div>
+        <div class="glass p-8 w-full max-w-md modal-enter relative">
+            <h3 id="quick-add-title" class="text-sm font-black uppercase tracking-widest text-purple-400 mb-6">Quick Add</h3>
+            <div class="space-y-4 mb-6">
+                <input id="quick-task-desc" type="text" placeholder="Task Name" class="w-full bg-slate-900 border border-white/10 rounded-xl px-5 py-3 text-sm outline-none">
+                <input id="quick-task-time" type="text" placeholder="Time" class="w-full bg-slate-900 border border-white/10 rounded-xl px-5 py-3 text-sm outline-none">
+            </div>
+            <button onclick="submitQuickAdd()" class="w-full bg-purple-600 text-white font-black uppercase tracking-widest text-[10px] py-4 rounded-xl">Add Task</button>
+        </div>
+    </div>
+
+    <!-- SETTINGS SIDEBAR -->
+    <div id="menu-sidebar" class="fixed inset-y-0 right-0 w-80 transform translate-x-full transition-transform duration-500 z-50 p-8 glass border-l border-white/10 flex flex-col bg-slate-950/95 shadow-3xl">
+        <div class="flex justify-between items-center mb-10">
+            <h2 class="text-xl font-black italic text-purple-400">PARAMETERS</h2>
+            <button onclick="toggleMenu()" class="text-slate-500 hover:text-white">✕</button>
+        </div>
+        
+        <div class="flex-1 space-y-8">
+            <div class="space-y-3">
+                <label class="text-[10px] font-black uppercase text-slate-500 tracking-widest">User Identity</label>
+                <div class="space-y-2">
+                    <input id="edit-name-input" type="text" placeholder="Your Name" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-purple-500/50 transition-colors">
+                    <button id="update-name-btn" onclick="updateUserName()" class="w-full bg-purple-600 text-white text-[10px] font-black py-3 rounded-xl uppercase tracking-widest hover:bg-purple-500 transition-all">Update Identity</button>
+                </div>
+            </div>
+
+            <hr class="border-white/5">
+
+            <div class="space-y-3">
+                <label class="text-[10px] font-black uppercase text-slate-500 tracking-widest">Engine Maintenance</label>
+                <button onclick="resetChecks()" class="w-full py-4 px-5 rounded-xl glass hover:bg-white/10 text-[10px] font-black uppercase tracking-widest text-slate-300">Uncheck All</button>
+                <button onclick="resetAll()" class="w-full py-4 px-5 rounded-xl bg-rose-500/10 text-rose-400 font-black text-[10px] uppercase tracking-widest border border-rose-500/20">Purge Data Cache</button>
+            </div>
+        </div>
     </div>
     <div id="sidebar-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden" onclick="toggleMenu()"></div>
 
     <script>
         const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-        const dayColors = { "Monday": "#2dd4bf", "Tuesday": "#38bdf8", "Wednesday": "#818cf8", "Thursday": "#c084fc", "Friday": "#f472b6", "Saturday": "#fbbf24", "Sunday": "#4ade80" };
+        const STORAGE_KEY = 'shazeb_ai_engine_v11';
         
-        let state = JSON.parse(localStorage.getItem('shazeb_v_final')) || { planner: days.reduce((a, d) => ({...a, [d]: []}), {}), xp: 0, profile: null };
+        // Load initial state
+        let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
+            weekly: days.reduce((a, d) => ({...a, [d]: []}), {}),
+            daily: [],
+            userName: "",
+            profilePic: null,
+            isReturningUser: false 
+        };
 
-        // Helper to get actual dates for the current week
-        function getDateForDay(dayName) {
-            const today = new Date();
-            const currentDayIndex = today.getDay();
-            const targetDayIndex = days.indexOf(dayName);
-            const diff = targetDayIndex - currentDayIndex;
-            const targetDate = new Date(today);
-            targetDate.setDate(today.getDate() + diff);
-            return targetDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        }
+        window.onload = () => {
+            initWelcomeScreen();
+            document.getElementById('edit-name-input').value = state.userName;
+            loadProfilePic();
+            render();
+        };
 
-        // --- AI NOTIFICATION & ROUTINE LOGIC ---
-        function checkAlarms() {
-            const now = new Date();
-            const currentDay = days[now.getDay()];
-            const timeStr = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }).replace(/\s/g, '').toUpperCase();
+        function initWelcomeScreen() {
+            const startBtn = document.getElementById('start-btn-container');
+            startBtn.classList.add('opacity-0');
 
-            state.planner[currentDay].forEach(task => {
-                const taskTimeClean = task.time.replace(/\s/g, '').toUpperCase();
-                if (taskTimeClean !== "ANYTIME" && !task.done && !task.alarmFired) {
-                    if (taskTimeClean === timeStr) {
-                        if ("Notification" in window && Notification.permission === "granted") {
-                            new Notification("Routine Reminder", { body: task.text });
-                            new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play().catch(()=>{});
-                        }
-                        task.alarmFired = true;
-                        save();
-                    }
+            // Persisted Welcome Greeting Logic
+            const welcomeMsg = (state.isReturningUser && state.userName) 
+                ? `WELCOME BACK, ${state.userName.toUpperCase()}` 
+                : "INITIALIZING FOCUS ENGINE";
+            
+            runTypingAnimation(welcomeMsg, () => {
+                startBtn.classList.remove('opacity-0');
+                startBtn.classList.add('opacity-100');
+                
+                if(state.userName) {
+                    document.getElementById('system-status-text').innerText = `USER: ${state.userName} | AUTHENTICATED`;
+                    // Mark as returning so the next refresh shows the welcome name
+                    state.isReturningUser = true;
+                    saveStateToStorage();
+                } else {
+                    document.getElementById('system-status-text').innerText = "GUEST ACCESS GRANTED | SETUP REQUIRED";
                 }
             });
         }
 
-        function save() { localStorage.setItem('shazeb_v_final', JSON.stringify(state)); render(); }
+        function runTypingAnimation(text, callback) {
+            const element = document.getElementById('welcome-text-typing');
+            element.innerText = "";
+            let i = 0;
+            const interval = setInterval(() => {
+                element.innerText += text[i];
+                i++;
+                if (i >= text.length) {
+                    clearInterval(interval);
+                    if (callback) callback();
+                }
+            }, 60);
+        }
 
-        function processCommand() {
-            const input = document.getElementById('command-input');
-            const val = input.value.trim();
-            if (!val) return;
-
-            if (Notification.permission !== "granted") Notification.requestPermission();
-
-            const timeMatch = val.match(/(\d{1,2}(:\d{2})?\s*(am|pm))/i);
-            const time = timeMatch ? timeMatch[0].toUpperCase() : "ANYTIME";
-            const day = days.find(d => val.toLowerCase().includes(d.toLowerCase())) || days[new Date().getDay()];
+        function updateUserName() {
+            const newName = document.getElementById('edit-name-input').value.trim();
+            state.userName = newName;
+            // NOTE: We DO NOT set isReturningUser = true here so it doesn't trigger welcome immediately.
+            saveStateToStorage();
+            render();
             
-            state.planner[day].push({ id: Date.now(), text: val.replace(day, '').replace(time, '').replace(/\bat\b/gi, '').trim() || "Task", time: time, done: false, alarmFired: false });
-            input.value = "";
+            const btn = document.getElementById('update-name-btn');
+            btn.innerText = "IDENTITY SAVED";
+            btn.classList.replace('bg-purple-600', 'bg-emerald-600');
+            
+            setTimeout(() => {
+                btn.innerText = "Update Identity";
+                btn.classList.replace('bg-emerald-600', 'bg-purple-600');
+                toggleMenu();
+            }, 1000);
+        }
+
+        function saveStateToStorage() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+
+        function save() {
+            saveStateToStorage();
+            render();
+        }
+
+        function startEngine() {
+            navigateTo('page-main');
+        }
+
+        function navigateTo(pageId) {
+            document.querySelectorAll('.page').forEach(p => {
+                p.classList.remove('active');
+                p.style.display = 'none';
+            });
+            const target = document.getElementById(pageId);
+            target.style.display = (pageId === 'page-welcome') ? 'flex' : 'block';
+            setTimeout(() => target.classList.add('active'), 10);
+        }
+
+        function handleProfileUpload(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    state.profilePic = e.target.result;
+                    save();
+                    loadProfilePic();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function loadProfilePic() {
+            const imgEl = document.getElementById('profile-display');
+            const placeholderEl = document.getElementById('profile-placeholder');
+            if (state.profilePic) {
+                imgEl.src = state.profilePic;
+                imgEl.classList.remove('hidden');
+                placeholderEl.classList.add('hidden');
+            }
+        }
+
+        function deleteTask(type, id, day = null) {
+            if (type === 'daily') {
+                state.daily = state.daily.filter(t => t.id !== id);
+            } else {
+                state.weekly[day] = state.weekly[day].filter(t => t.id !== id);
+            }
             save();
         }
 
-        function toggleTask(day, id) {
-            const task = state.planner[day].find(t => t.id === id);
-            if (task) { task.done = !task.done; state.xp += task.done ? 10 : -10; save(); }
-        }
-
-        function deleteTask(day, id) { state.planner[day] = state.planner[day].filter(t => t.id !== id); save(); }
-
-        function resetChecks() {
-            days.forEach(d => state.planner[d].forEach(t => { t.done = false; t.alarmFired = false; }));
+        function addTaskFromCenter() {
+            const desc = document.getElementById('task-desc').value.trim();
+            const time = document.getElementById('task-time').value.trim() || "Anytime";
+            const day = document.getElementById('task-day').value;
+            if(!desc) return;
+            if(day === 'Daily') state.daily.push({ id: Date.now(), text: desc, time, done: false });
+            else state.weekly[day].push({ id: Date.now(), text: desc, time, done: false });
+            document.getElementById('task-desc').value = "";
+            document.getElementById('task-time').value = "";
             save();
-            alert("Week reset! All routine tasks are now active again.");
         }
 
         function render() {
-            const grid = document.getElementById('planner-grid'); grid.innerHTML = "";
-            let total = 0, done = 0, dayXP = {};
+            document.getElementById('user-display-name').innerText = state.userName || 'GUEST';
             
-            days.forEach(day => {
-                dayXP[day] = 0;
-                const dateStr = getDateForDay(day);
-                const tasks = state.planner[day].map(t => {
-                    total++; if(t.done) { done++; dayXP[day] += 10; }
-                    return `<div class="group py-2 border-b border-white/5"><div class="flex justify-between items-center mb-1"><span class="time-badge">${t.time}</span><button onclick="deleteTask('${day}', ${t.id})" class="text-rose-500 opacity-0 group-hover:opacity-100 text-[10px]">✕</button></div><div class="flex items-center gap-2 cursor-pointer" onclick="toggleTask('${day}', ${t.id})"><div class="w-3.5 h-3.5 rounded border ${t.done ? 'bg-teal-400 border-teal-400' : 'border-slate-500'}"></div><span class="text-[11px] ${t.done ? 'task-done text-slate-500' : 'text-slate-200'}">${t.text}</span></div></div>`;
-                }).join('');
-                
-                grid.innerHTML += `<div class="glass p-4 min-h-[160px] ${day === days[new Date().getDay()] ? 'ring-2 ring-teal-400/50' : ''}">
-                    <h3 class="text-[10px] font-black uppercase text-teal-400 tracking-widest">${day}</h3>
-                    <span class="date-sub">${dateStr}</span>
-                    <div class="mt-3">${tasks || '<p class="text-[9px] text-slate-600 italic py-4">Free Day</p>'}</div>
-                </div>`;
-            });
-            
-            const perc = total === 0 ? 0 : Math.round((done/total) * 100);
-            document.getElementById('percent-display').innerText = perc + "%";
-            document.getElementById('mastery-bar').style.width = perc + "%";
-            document.getElementById('xp-display').innerText = state.xp;
-            document.getElementById('level-display').innerText = Math.floor(state.xp/100) + 1;
-            updatePie(dayXP);
+            const dailyList = document.getElementById('daily-list');
+            if(dailyList) {
+                dailyList.innerHTML = state.daily.map(t => `
+                    <div class="task-item group flex items-start justify-between gap-3 p-1.5 rounded-lg hover:bg-white/5 transition-colors">
+                        <div onclick="toggleTask('daily', ${t.id})" class="flex-1 cursor-pointer">
+                            <div class="flex justify-between items-center mb-1"><span class="time-badge bg-pink-500/10 text-pink-400 border border-pink-500/20 uppercase">${t.time}</span></div>
+                            <div class="flex items-start gap-2.5">
+                                <div class="mt-0.5 w-4 h-4 rounded-md border-2 ${t.done ? 'bg-pink-500 border-pink-500' : 'border-slate-700'} flex-shrink-0"></div>
+                                <span class="text-[11px] font-bold ${t.done ? 'task-done text-slate-600' : 'text-slate-300'}">${t.text}</span>
+                            </div>
+                        </div>
+                        <button onclick="deleteTask('daily', ${t.id})" class="delete-btn p-1 text-slate-600 hover:text-rose-500 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                    </div>
+                `).join('');
+            }
+
+            const mainGrid = document.getElementById('main-grid');
+            if(mainGrid) {
+                document.querySelectorAll('.day-col').forEach(el => el.remove());
+                days.forEach(day => {
+                    const isToday = day === days[new Date().getDay()];
+                    const tasks = state.weekly[day].map(t => `
+                        <div class="task-item group flex items-start justify-between gap-2 p-1 rounded-lg hover:bg-white/5 mb-2 transition-colors">
+                            <div onclick="toggleTask('weekly', ${t.id}, '${day}')" class="flex-1 cursor-pointer">
+                                <span class="time-badge bg-teal-500/10 text-teal-400 block mb-1 uppercase">${t.time}</span>
+                                <div class="flex items-start gap-2">
+                                    <div class="mt-0.5 w-4 h-4 rounded border-2 ${t.done ? 'bg-teal-400 border-teal-400' : 'border-slate-700'} flex-shrink-0"></div>
+                                    <span class="text-[11px] font-semibold ${t.done ? 'task-done text-slate-600' : 'text-slate-300'}">${t.text}</span>
+                                </div>
+                            </div>
+                            <button onclick="deleteTask('weekly', ${t.id}, '${day}')" class="delete-btn p-1 text-slate-600 hover:text-rose-500 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
+                        </div>
+                    `).join('');
+
+                    const col = document.createElement('div');
+                    col.className = `glass p-6 day-col flex flex-col min-h-[450px] ${isToday ? 'ring-2 ring-teal-400/30 bg-teal-400/5' : ''}`;
+                    col.innerHTML = `
+                        <div class="flex justify-between items-start mb-6">
+                            <h2 class="text-teal-400 font-black text-xs uppercase tracking-widest">${day}</h2>
+                            <button onclick="openQuickAdd('${day}')" class="p-1.5 rounded-lg bg-teal-400/10 text-teal-400 hover:bg-teal-400/20 transition-all">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                            </button>
+                        </div>
+                        <div class="flex-1 overflow-y-auto custom-scrollbar">${tasks || '<p class="text-[9px] text-slate-800 italic mt-4">EMPTY</p>'}</div>
+                    `;
+                    mainGrid.appendChild(col);
+                });
+            }
         }
 
-        function updatePie(dayXP) {
-            const g = document.getElementById('pie-segments'); if(!g) return; g.innerHTML = ""; let acc = 0;
-            days.forEach(day => {
-                const perc = state.xp === 0 ? 0 : (dayXP[day]/state.xp) * 100;
-                if(perc > 0) {
-                    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                    circle.setAttribute("cx", "21"); circle.setAttribute("cy", "21"); circle.setAttribute("r", "15.915"); circle.setAttribute("fill", "transparent"); circle.setAttribute("stroke", dayColors[day]); circle.setAttribute("stroke-width", "5");
-                    circle.setAttribute("stroke-dasharray", `${perc} ${100 - perc}`); circle.setAttribute("stroke-dashoffset", -acc);
-                    g.appendChild(circle); acc += perc;
-                }
-            });
+        function toggleTask(type, id, day = null) {
+            let task = type === 'daily' ? state.daily.find(t => t.id === id) : state.weekly[day].find(t => t.id === id);
+            if (task) { task.done = !task.done; save(); }
         }
 
-        function resetAll() { if(confirm("Delete all routine data?")) { localStorage.clear(); location.reload(); } }
-        function toggleMenu() { document.getElementById('menu-sidebar').classList.toggle('translate-x-full'); document.getElementById('sidebar-backdrop').classList.toggle('hidden'); }
-        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
-        setInterval(checkAlarms, 30000);
-        render();
+        let activeQuickDay = null;
+        function openQuickAdd(day) {
+            activeQuickDay = day;
+            document.getElementById('quick-add-title').innerText = `DEPLOY: ${day.toUpperCase()}`;
+            document.getElementById('modal-quick-add').classList.remove('hidden');
+        }
+
+        function closeQuickAdd() {
+            document.getElementById('modal-quick-add').classList.add('hidden');
+        }
+
+        function submitQuickAdd() {
+            const desc = document.getElementById('quick-task-desc').value.trim();
+            const time = document.getElementById('quick-task-time').value.trim() || "Anytime";
+            if(!desc) return;
+            if(activeQuickDay === 'Daily') state.daily.push({ id: Date.now(), text: desc, time, done: false });
+            else state.weekly[activeQuickDay].push({ id: Date.now(), text: desc, time, done: false });
+            closeQuickAdd();
+            document.getElementById('quick-task-desc').value = "";
+            document.getElementById('quick-task-time').value = "";
+            save();
+        }
+
+        function toggleMenu() {
+            document.getElementById('menu-sidebar').classList.toggle('translate-x-full');
+            document.getElementById('sidebar-backdrop').classList.toggle('hidden');
+        }
+
+        function resetChecks() {
+            state.daily.forEach(t => t.done = false);
+            days.forEach(d => state.weekly[d].forEach(t => t.done = false));
+            save();
+            toggleMenu();
+        }
+
+        function resetAll() { 
+            if(confirm("Initiate system wipe? All tasks and settings will be deleted.")) { 
+                localStorage.clear(); 
+                location.reload(); 
+            } 
+        }
+
+        setInterval(() => {
+            const now = new Date();
+            const clockEl = document.getElementById('clock');
+            if(clockEl) clockEl.innerText = now.toLocaleTimeString();
+        }, 1000);
+
     </script>
 </body>
 </html>
