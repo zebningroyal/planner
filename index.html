@@ -204,11 +204,11 @@
     <div id="audio-activator">
         <div class="max-w-xs w-full glass p-8 text-center border-blue-500/20">
             <div class="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 text-blue-500">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" stroke-width="2"/></svg>
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586a1 1 0 00.707-.293l2.414-2.414a1 1 0 011.414 1.414l-2.414 2.414a1 1 0 001.414 1.414l2.414-2.414a1 1 0 011.414 1.414l-2.414 2.414a1 1 0 001.414 1.414l2.414-2.414" stroke-width="2" stroke-linecap="round"/></svg>
             </div>
             <h3 class="text-[11px] font-black uppercase tracking-[0.3em] text-white mb-2">System Ready</h3>
             <p class="text-[9px] font-medium text-slate-500 uppercase tracking-widest leading-relaxed mb-8">Synchronizing with device storage protocols</p>
-            <button onclick="unlockAudio()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] shadow-xl shadow-blue-600/20 active:scale-95 transition-all">Initialize Engine</button>
+            <button onclick="unlockAudio()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] shadow-xl shadow-blue-600/20 active:scale-95 transition-all">Activate</button>
         </div>
     </div>
 
@@ -222,7 +222,7 @@
             </div>
             <h2 class="text-xs font-black uppercase tracking-[0.5em] text-blue-400 mb-2">Protocol Execution Required</h2>
             <h1 id="alarm-task-name" class="text-3xl font-black text-white mb-10 tracking-tighter">Task Notification</h1>
-            <button onclick="dismissAlarm()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-blue-700 transition-all shadow-xl shadow-blue-600/20">Acknowledge Sequence</button>
+            <button onclick="dismissAlarm()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-blue-700 transition-all shadow-xl shadow-blue-600/20">ACKNOWLEDGE</button>
         </div>
     </div>
 
@@ -262,7 +262,7 @@
                 </div>
             </div>
             <div class="flex gap-2 w-full md:w-auto">
-                <button onclick="navigateTo('page-add')" class="flex-1 md:flex-none bg-blue-600 text-white px-6 py-4 rounded-2xl font-bold text-[10px] uppercase tracking-widest shadow-xl shadow-blue-600/20">Allocate Task</button>
+                <button onclick="navigateTo('page-add')" class="flex-1 md:flex-none bg-blue-600 text-white px-6 py-4 rounded-2xl font-bold text-[10px] uppercase tracking-widest shadow-xl shadow-blue-600/20 active:scale-95 transition-all">+ Task</button>
                 <button onclick="toggleMenu()" class="glass p-4 text-slate-400 hover:text-blue-500 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" stroke-width="2"/></svg>
                 </button>
@@ -327,7 +327,7 @@
                 <h1 class="text-3xl font-black text-white uppercase tracking-tighter">Temporal <span class="text-blue-500">Vault</span></h1>
                 <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1">Select a past cycle to reconstruct home page state</p>
             </div>
-            <button onclick="clearHistory()" class="text-[9px] font-bold text-red-500 uppercase tracking-widest border border-red-500/20 px-4 py-2 rounded-xl hover:bg-red-500 hover:text-white transition-all">Purge Archives</button>
+            <button onclick="clearHistory()" class="text-[9px] font-bold text-red-500 uppercase tracking-widest border border-red-500/20 px-4 py-2 rounded-xl hover:bg-red-500 hover:text-white transition-all">Clear All</button>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -351,7 +351,7 @@
             </button>
             <div id="add-card" class="glass p-8 space-y-6">
                 <h3 class="text-xs font-black uppercase tracking-widest text-[var(--text-head)]">New Sequence</h3>
-                <input id="task-desc" type="text" placeholder="Objective (e.g. 'Code Review')" class="w-full rounded-2xl px-5 py-4 outline-none text-sm bg-[var(--input-bg)] border border-white/10 text-white">
+                <input id="task-desc" type="text" placeholder="Objective (e.g. 'Code Review')" class="w-full rounded-2xl px-5 py-4 outline-none text-sm bg-[var(--input-bg)] border border-white/10 text-white placeholder-slate-600">
                 <div class="grid grid-cols-2 gap-4">
                     <input id="task-time" type="time" class="rounded-2xl px-5 py-4 text-sm outline-none bg-[var(--input-bg)] border border-white/10 text-white">
                     <select id="task-day" class="rounded-2xl px-5 py-4 text-sm outline-none bg-[var(--input-bg)] border border-white/10 text-white bg-slate-900">
@@ -379,14 +379,17 @@
         <div class="space-y-8 overflow-y-auto custom-scrollbar pr-2">
             <div>
                 <h3 class="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-4">Interface Mode</h3>
-                <button onclick="toggleTheme()" class="w-full bg-black/20 flex items-center justify-between px-6 py-4 rounded-2xl border border-white/10 text-[10px] font-bold uppercase tracking-widest text-slate-300">Switch Theme</button>
+                <button onclick="toggleTheme()" class="w-full bg-black/20 flex items-center justify-between px-6 py-4 rounded-2xl border border-white/10 text-[10px] font-bold uppercase tracking-widest text-blue-500 hover:bg-blue-500/20 transition-all">
+                    <span>Light/Dark</span>
+                    <span id="theme-indicator">🌙</span>
+                </button>
             </div>
             <div>
                 <h3 class="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-4">User Profile</h3>
                 <input id="edit-name-input" type="text" placeholder="Enter Name" class="w-full rounded-2xl px-6 py-4 outline-none text-sm bg-black/20 border border-white/10 mb-4 text-white">
                 <button onclick="updateName()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold text-[10px] uppercase tracking-widest">Update Profile</button>
             </div>
-            <button onclick="resetStreak()" class="w-full border border-red-500/20 text-red-500/50 py-4 rounded-2xl font-bold text-[9px] uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">Reset All Progress</button>
+            <button onclick="resetStreak()" class="w-full border border-red-500/20 text-red-500/50 py-4 rounded-2xl font-bold text-[9px] uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">Reset Everything</button>
         </div>
     </div>
     <div id="sidebar-backdrop" class="fixed inset-0 bg-black/60 z-[105] hidden backdrop-blur-sm" onclick="toggleMenu()"></div>
@@ -412,24 +415,42 @@
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
+        
         function initParticles() {
-            canvas.width = window.innerWidth; canvas.height = window.innerHeight; particles = [];
+            canvas.width = window.innerWidth; 
+            canvas.height = window.innerHeight; 
+            particles = [];
             const count = Math.min(window.innerWidth / 20, 100);
             for (let i = 0; i < count; i++) {
-                particles.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, size: Math.random() * 2 + 0.5, speedX: (Math.random() - 0.5) * 0.5, speedY: (Math.random() - 0.5) * 0.5, opacity: Math.random() * 0.5 + 0.1 });
+                particles.push({ 
+                    x: Math.random() * canvas.width, 
+                    y: Math.random() * canvas.height, 
+                    size: Math.random() * 2 + 0.5, 
+                    speedX: (Math.random() - 0.5) * 0.5, 
+                    speedY: (Math.random() - 0.5) * 0.5,
+                    opacity: Math.random() * 0.5 + 0.1
+                });
             }
         }
+        
         function animateParticles() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             const color = state.theme === 'dark' ? '59, 130, 246' : '100, 100, 100';
             particles.forEach(p => {
-                p.x += p.speedX; p.y += p.speedY;
-                if (p.x < 0) p.x = canvas.width; if (p.x > canvas.width) p.x = 0;
-                if (p.y < 0) p.y = canvas.height; if (p.y > canvas.height) p.y = 0;
-                ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fillStyle = `rgba(${color}, ${p.opacity})`; ctx.fill();
+                p.x += p.speedX; 
+                p.y += p.speedY;
+                if (p.x < 0) p.x = canvas.width; 
+                if (p.x > canvas.width) p.x = 0;
+                if (p.y < 0) p.y = canvas.height; 
+                if (p.y > canvas.height) p.y = 0;
+                ctx.beginPath(); 
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); 
+                ctx.fillStyle = `rgba(${color}, ${p.opacity})`; 
+                ctx.fill();
             });
             requestAnimationFrame(animateParticles);
         }
+        
         window.addEventListener('resize', initParticles);
 
         function playTypeSound() {
@@ -440,9 +461,15 @@
             const data = noiseBuffer.getChannelData(0);
             for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
             noise.buffer = noiseBuffer;
-            const filter = audioContext.createBiquadFilter(); filter.type = 'highpass'; filter.frequency.setValueAtTime(3500 + Math.random() * 500, now);
-            const gain = audioContext.createGain(); gain.gain.setValueAtTime(0.06, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.012);
-            noise.connect(filter); filter.connect(gain); gain.connect(audioContext.destination);
+            const filter = audioContext.createBiquadFilter(); 
+            filter.type = 'highpass'; 
+            filter.frequency.setValueAtTime(3500 + Math.random() * 500, now);
+            const gain = audioContext.createGain(); 
+            gain.gain.setValueAtTime(0.06, now); 
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.012);
+            noise.connect(filter); 
+            filter.connect(gain); 
+            gain.connect(audioContext.destination);
             noise.start(now);
         }
 
@@ -451,7 +478,9 @@
             document.getElementById('audio-activator').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('audio-activator').style.visibility = 'hidden';
-                initParticles(); animateParticles(); initTypewriter(); 
+                initParticles(); 
+                animateParticles(); 
+                initTypewriter(); 
             }, 500);
         }
 
@@ -461,16 +490,25 @@
             if (alarmInterval) clearInterval(alarmInterval);
             alarmInterval = setInterval(() => {
                 if(!audioContext) return;
-                const osc = audioContext.createOscillator(); const g = audioContext.createGain();
-                osc.type = 'square'; osc.frequency.setValueAtTime(880, audioContext.currentTime);
-                g.gain.setValueAtTime(0.1, audioContext.currentTime); g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-                osc.connect(g); g.connect(audioContext.destination); osc.start(); osc.stop(audioContext.currentTime + 0.1);
+                const osc = audioContext.createOscillator(); 
+                const g = audioContext.createGain();
+                osc.type = 'square'; 
+                osc.frequency.setValueAtTime(880, audioContext.currentTime);
+                g.gain.setValueAtTime(0.1, audioContext.currentTime); 
+                g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                osc.connect(g); 
+                g.connect(audioContext.destination); 
+                osc.start(); 
+                osc.stop(audioContext.currentTime + 0.1);
             }, 500);
         }
 
         function dismissAlarm() {
             document.getElementById('alarm-overlay').style.display = 'none';
-            if (alarmInterval) { clearInterval(alarmInterval); alarmInterval = null; }
+            if (alarmInterval) { 
+                clearInterval(alarmInterval); 
+                alarmInterval = null; 
+            }
         }
 
         function navigateTo(id, day = null) {
@@ -480,13 +518,17 @@
             if (id === 'page-add' && day) document.getElementById('task-day').value = day;
             if (id === 'page-history') renderArchiveList();
             if (id === 'page-main') {
-                isMainPageActive = true; calculateStreak(); render();
+                isMainPageActive = true; 
+                calculateStreak(); 
+                render();
                 setTimeout(() => {
                     target.classList.replace('opacity-0', 'opacity-100');
                     document.getElementById('performance-box').classList.replace('opacity-0', 'opacity-100');
                     document.querySelectorAll('.day-card').forEach((c, i) => setTimeout(() => c.classList.add('assembled'), i * 80));
                 }, 50);
-            } else { isMainPageActive = false; }
+            } else { 
+                isMainPageActive = false; 
+            }
         }
 
         function calculateStreak() {
@@ -520,8 +562,14 @@
             }
         }
 
-        function startEngine() { navigateTo('page-main'); }
-        function toggleMenu() { document.getElementById('menu-sidebar').classList.toggle('translate-x-full'); document.getElementById('sidebar-backdrop').classList.toggle('hidden'); }
+        function startEngine() { 
+            navigateTo('page-main'); 
+        }
+        
+        function toggleMenu() { 
+            document.getElementById('menu-sidebar').classList.toggle('translate-x-full'); 
+            document.getElementById('sidebar-backdrop').classList.toggle('hidden'); 
+        }
         
         function updateName() { 
             state.userName = document.getElementById('edit-name-input').value; 
@@ -536,13 +584,24 @@
             document.getElementById('edit-name-input').value = state.userName;
         }
 
-        function resetStreak() { state.streak = 0; state.completionHistory = {}; state.lastCompletedDate = null; state.historyLogs = {}; state.userName = ""; save(); location.reload(); }
+        function resetStreak() { 
+            state.streak = 0; 
+            state.completionHistory = {}; 
+            state.lastCompletedDate = null; 
+            state.historyLogs = {}; 
+            state.userName = ""; 
+            save(); 
+            location.reload(); 
+        }
 
         function updateChart() {
             const polyline = document.querySelector('#performance-chart polyline');
             const fillPath = document.querySelector('#performance-chart .chart-fill');
             if (!polyline || !fillPath) return;
-            const steps = 7; const points = []; const width = 1000; const height = 200;
+            const steps = 7; 
+            const points = []; 
+            const width = 1000; 
+            const height = 200;
             const allTasks = Object.values(state.tasks).flat();
             const completionRatio = allTasks.length > 0 ? allTasks.filter(t => t.done).length / allTasks.length : 0;
             for (let i = 0; i <= steps; i++) {
@@ -556,7 +615,8 @@
 
         function render() {
             const grid = document.getElementById('main-grid');
-            if (!grid) return; grid.innerHTML = '';
+            if (!grid) return; 
+            grid.innerHTML = '';
             days.forEach(day => {
                 const tks = state.tasks[day] || [];
                 const card = document.createElement('div');
@@ -564,7 +624,7 @@
                 card.innerHTML = `
                     <div class="flex justify-between items-center mb-8">
                         <h3 class="text-[11px] font-black uppercase tracking-[0.4em] text-[var(--text-head)]">${day}</h3>
-                        <button onclick="navigateTo('page-add', '${day}')" class="day-plus-btn"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6" stroke-width="2" stroke-linecap="round"/></svg></button>
+                        <button onclick="navigateTo('page-add', '${day}')" class="day-plus-btn"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6-6H6" stroke-width="2" stroke-linecap="round"/></svg></button>
                     </div>
                     <div class="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-4">
                         ${tks.length === 0 ? '<div class="text-[9px] uppercase tracking-widest text-slate-700 py-12 text-center">Protocol Standby</div>' : ''}
@@ -582,21 +642,40 @@
                 `;
                 grid.appendChild(card);
             });
-            updateStats(); updateChart(); renderStreak();
+            updateStats(); 
+            updateChart(); 
+            renderStreak();
         }
 
         function addTask() { 
-            const desc = document.getElementById('task-desc').value; const day = document.getElementById('task-day').value; const time = document.getElementById('task-time').value;
+            const desc = document.getElementById('task-desc').value; 
+            const day = document.getElementById('task-day').value; 
+            const time = document.getElementById('task-time').value;
             if(!desc || !time) return;
-            state.tasks[day].push({ id: Date.now(), text: desc, time: time, done: false, alarm: document.getElementById('task-alarm').checked, triggered: false });
-            save(); navigateTo('page-main');
+            state.tasks[day].push({ 
+                id: Date.now(), 
+                text: desc, 
+                time: time, 
+                done: false, 
+                alarm: document.getElementById('task-alarm').checked, 
+                triggered: false 
+            });
+            save(); 
+            navigateTo('page-main');
         }
 
-        function removeTask(day, id) { state.tasks[day] = state.tasks[day].filter(x => x.id !== id); save(); render(); }
+        function removeTask(day, id) { 
+            state.tasks[day] = state.tasks[day].filter(x => x.id !== id); 
+            save(); 
+            render(); 
+        }
+        
         function toggleTask(day, id) { 
             const t = state.tasks[day].find(x => x.id === id); 
             if(t) t.done = !t.done;
-            save(); render(); calculateStreak();
+            save(); 
+            render(); 
+            calculateStreak();
         }
 
         function save() { 
@@ -613,18 +692,25 @@
             if(document.getElementById('percent-display')) document.getElementById('percent-display').innerText = eff + '%';
         }
 
-        function toggleTheme() { state.theme = state.theme === 'dark' ? 'light' : 'dark'; applyTheme(); save(); }
-        function applyTheme() { document.body.className = state.theme + '-theme'; }
+        function toggleTheme() { 
+            state.theme = state.theme === 'dark' ? 'light' : 'dark'; 
+            applyTheme(); 
+            save(); 
+        }
+        
+        function applyTheme() { 
+            document.body.className = state.theme + '-theme'; 
+        }
 
         function initTypewriter() {
-            // Priority check for saved user name
             const savedState = JSON.parse(localStorage.getItem(STORAGE_KEY));
             const name = savedState?.userName || state.userName;
             const text = name ? `WELCOME BACK, ${name.toUpperCase()}` : "FOCUS ENGINE 3.5";
             
             const el = document.getElementById('welcome-text-typing');
             if(!el) return;
-            el.innerText = ""; let i = 0;
+            el.innerText = ""; 
+            let i = 0;
             function typeChar() {
                 if (i < text.length) { 
                     el.innerText += text[i++]; 
@@ -696,7 +782,12 @@
             viewer.innerHTML = html;
         }
 
-        function clearHistory() { state.historyLogs = {}; save(); renderArchiveList(); document.getElementById('archive-viewer').innerHTML = ''; }
+        function clearHistory() { 
+            state.historyLogs = {}; 
+            save(); 
+            renderArchiveList(); 
+            document.getElementById('archive-viewer').innerHTML = ''; 
+        }
 
         setInterval(() => {
             const now = new Date();
@@ -704,31 +795,20 @@
             const currentTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
             [...(state.tasks['Daily'] || []), ...(state.tasks[currentDay] || [])].forEach(task => {
                 if (task.alarm && !task.done && !task.triggered && task.time === currentTime) {
-                    task.triggered = true; triggerAlarm(task.text); save();
+                    task.triggered = true; 
+                    triggerAlarm(task.text); 
+                    save();
                 }
             });
             if(document.getElementById('clock')) document.getElementById('clock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
         }, 1000);
-<script>
-  (function() {
-    var iconUrl = "your-logo-url.png"; // <-- PUT YOUR IMAGE LINK HERE
-    
-    var links = [
-      { rel: "icon", href: iconUrl, sizes: "32x32" },
-      { rel: "apple-touch-icon", href: iconUrl, sizes: "180x180" },
-      { rel: "shortcut icon", href: iconUrl }
-    ];
 
-    links.forEach(function(config) {
-      var link = document.createElement('link');
-      link.rel = config.rel;
-      if (config.sizes) link.sizes = config.sizes;
-      link.href = config.href;
-      document.getElementsByTagName('head')[0].appendChild(link);
-    });
-  })();
-</script>
-        window.onload = () => { applyTheme(); loadProfile(); calculateStreak(); render(); };
+        window.onload = () => { 
+            applyTheme(); 
+            loadProfile(); 
+            calculateStreak(); 
+            render(); 
+        };
     </script>
 </body>
 </html>
