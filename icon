@@ -1,0 +1,15 @@
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23007BFF'/><text y='.9em' font-size='90' fill='white' x='50%' text-anchor='middle' font-family='sans-serif'>S</text></svg>">
+
+<link rel="manifest" href="data:application/manifest+json,{
+  'name': 'Md Shazeb Focus Engine',
+  'short_name': 'Focus',
+  'start_url': '.',
+  'display': 'standalone',
+  'icons': [
+    {
+      'src': 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23007BFF%22/><text y=%22.9em%22 font-size=%2290%22 fill=%22white%22 x=%2250%%22 text-anchor=%22middle%22 font-family=%22sans-serif%22>S</text></svg>',
+      'sizes': '192x192',
+      'type': 'image/svg+xml'
+    }
+  ]
+}">
