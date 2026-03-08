@@ -8,15 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Inter:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root { --primary: 45, 212, 191; --primary-hex: #2dd4bf; }
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: #0f172a;
-            background-image: radial-gradient(at 0% 0%, rgba(var(--primary), 0.15) 0px, transparent 50%);
-            min-height: 100vh;
-            color: white;
-            padding-bottom: 40px;
-            overflow-x: hidden;
-        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #0f172a; background-image: radial-gradient(at 0% 0%, rgba(var(--primary), 0.15) 0px, transparent 50%); min-height: 100vh; color: white; padding-bottom: 40px; overflow-x: hidden; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; }
         .header-card { border: 1px solid rgba(var(--primary), 0.3); box-shadow: 0 0 20px rgba(var(--primary), 0.05); }
         .task-done { text-decoration: line-through; opacity: 0.5; }
@@ -35,9 +27,7 @@
     </style>
 </head>
 <body class="p-4 md:p-8" id="app-body">
-
     <input type="file" id="profile-upload" class="hidden" accept="image/*" onchange="handleProfileUpload(event)">
-
     <div class="max-w-7xl mx-auto">
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
             <div class="flex items-center gap-4">
@@ -87,21 +77,14 @@
                     <div class="text-right"><span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Level</span><span id="level-display" class="text-xl font-black text-white">1</span></div>
                 </div>
             </div>
-
             <div class="glass p-6 lg:col-span-2 flex flex-col md:flex-row items-center gap-8">
                 <div class="flex-shrink-0 text-center">
                     <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Focus Distro</h3>
-                    <div class="pie-container mx-auto">
-                        <svg id="xp-pie" width="140" height="140" viewBox="0 0 42 42">
-                            <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#1e293b" stroke-width="5"></circle>
-                            <g id="pie-segments"></g>
-                        </svg>
-                    </div>
+                    <div class="pie-container mx-auto"><svg id="xp-pie" width="140" height="140" viewBox="0 0 42 42"><circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#1e293b" stroke-width="5"></circle><g id="pie-segments"></g></svg></div>
                 </div>
                 <div class="flex-1 w-full grid grid-cols-2 gap-4" id="xp-legend"></div>
             </div>
         </div>
-
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4" id="planner-grid"></div>
     </div>
 
@@ -128,68 +111,74 @@
                             <button onclick="generateKey()" id="btn-gen" class="bg-teal-400 text-slate-900 px-3 py-2 rounded-xl text-[10px] font-bold transition-all">GEN</button>
                         </div>
                     </div>
-                    <div>
-                        <label class="text-[9px] text-slate-500 font-bold uppercase block mb-1">Import Code</label>
-                        <div class="flex gap-2">
-                            <input type="text" id="sync-input" placeholder="PASTE HERE" class="sync-input flex-1 text-[10px]">
-                            <button onclick="importKey()" class="bg-white/10 text-white px-3 py-2 rounded-xl text-[10px] font-bold">SYNC</button>
-                        </div>
-                    </div>
                 </div>
             </div>
             <button onclick="resetAll()" class="w-full p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[10px] font-bold uppercase tracking-widest mt-auto">Wipe Data</button>
         </div>
     </div>
-
     <div id="sidebar-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden" onclick="toggleMenu()"></div>
 
     <script>
         const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
         const dayColors = { "Monday": "#2dd4bf", "Tuesday": "#38bdf8", "Wednesday": "#818cf8", "Thursday": "#c084fc", "Friday": "#f472b6", "Saturday": "#fbbf24", "Sunday": "#4ade80" };
-        
-        let state = JSON.parse(localStorage.getItem('shazeb_v_final')) || {
-            planner: days.reduce((a, d) => ({...a, [d]: []}), {}),
-            xp: 0, profile: null, history: []
-        };
+        let state = JSON.parse(localStorage.getItem('shazeb_v_final')) || { planner: days.reduce((a, d) => ({...a, [d]: []}), {}), xp: 0, profile: null, history: [] };
 
-        // --- AI NOTIFICATION ALARM SYSTEM ---
+        // --- ENHANCED AI ALARM SYSTEM ---
+        function triggerAlarm(title, body) {
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification(title, { body: body, icon: "https://cdn-icons-png.flaticon.com/512/1827/1827347.png" });
+                try {
+                    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                    audio.play();
+                } catch(e) {}
+            }
+        }
+
         function checkAlarms() {
             const now = new Date();
             const currentDay = days[now.getDay()];
-            // Format time to match input (e.g. "4:30PM")
+            // Standardize format to 12h without spaces (e.g., "5:00PM")
             const timeStr = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }).replace(/\s/g, '').toUpperCase();
 
             state.planner[currentDay].forEach(task => {
-                if (task.time !== "ANYTIME" && !task.done && !task.alarmFired) {
-                    const taskTimeClean = task.time.replace(/\s/g, '').toUpperCase();
+                const taskTimeClean = task.time.replace(/\s/g, '').toUpperCase();
+                if (taskTimeClean !== "ANYTIME" && !task.done && !task.alarmFired) {
                     if (taskTimeClean === timeStr) {
-                        triggerAlarm(task.text);
+                        triggerAlarm("Task Time!", task.text);
                         task.alarmFired = true;
-                        // Save immediately so refreshing doesn't re-trigger
-                        localStorage.setItem('shazeb_v_final', JSON.stringify(state));
+                        save();
                     }
                 }
             });
         }
 
-        function triggerAlarm(msg) {
-            if ("Notification" in window && Notification.permission === "granted") {
-                new Notification("Task Alarm!", { body: msg, icon: "https://cdn-icons-png.flaticon.com/512/1827/1827347.png" });
-                try {
-                    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-                    audio.play();
-                } catch(e) { console.log("Audio blocked by browser policy"); }
-            }
-        }
-
-        function requestPerms() {
-            if ("Notification" in window) Notification.requestPermission();
-        }
-
-        setInterval(checkAlarms, 30000); // Check every 30s for better accuracy
-        // -------------------------------------
-
         function save() { localStorage.setItem('shazeb_v_final', JSON.stringify(state)); render(); }
+        
+        function processCommand() {
+            const input = document.getElementById('command-input');
+            const val = input.value.trim();
+            if (!val) return;
+
+            // Diagnostic: Request perms and send test notification immediately
+            if (Notification.permission !== "granted") {
+                Notification.requestPermission().then(p => { if(p === 'granted') triggerAlarm("AI Active", "Notifications are now enabled!"); });
+            } else {
+                triggerAlarm("Task Registered", "I will notify you when it's time!");
+            }
+
+            const timeMatch = val.match(/(\d{1,2}(:\d{2})?\s*(am|pm))/i);
+            const time = timeMatch ? timeMatch[0].toUpperCase() : "ANYTIME";
+            const day = days.find(d => val.toLowerCase().includes(d.toLowerCase())) || days[new Date().getDay()];
+            
+            state.planner[day].push({ id: Date.now(), text: val.replace(day, '').replace(time, '').replace(/\bat\b/gi, '').trim() || "Task", time: time, done: false, alarmFired: false });
+            input.value = "";
+            save();
+        }
+
+        // Loop checks every 30 seconds
+        setInterval(checkAlarms, 30000);
+        // --------------------------------
+
         function triggerUpload() { document.getElementById('profile-upload').click(); }
         function handleProfileUpload(e) {
             const file = e.target.files[0];
@@ -201,51 +190,12 @@
             const el = document.getElementById('profile-display');
             if (state.profile) el.innerHTML = `<img src="${state.profile}">`;
         }
-        function toggleSection(id) {
-            document.getElementById(id).classList.toggle('open');
-            if(id === 'history-content') renderHistory();
-        }
-        function processCommand() {
-            const input = document.getElementById('command-input');
-            const val = input.value.trim();
-            if (!val) return;
-            requestPerms();
-            const timeMatch = val.match(/(\d{1,2}(:\d{2})?\s*(am|pm))/i);
-            const time = timeMatch ? timeMatch[0].toUpperCase() : "ANYTIME";
-            const day = days.find(d => val.toLowerCase().includes(d.toLowerCase())) || days[new Date().getDay()];
-            state.planner[day].push({ id: Date.now(), text: val.replace(day, '').replace(time, '').replace(/\bat\b/gi, '').trim() || "Task", time: time, done: false, alarmFired: false });
-            input.value = "";
-            save();
-        }
-        function toggleTask(day, id) {
-            const task = state.planner[day].find(t => t.id === id);
-            if (task) { task.done = !task.done; state.xp += task.done ? 10 : -10; save(); }
-        }
+        function toggleSection(id) { document.getElementById(id).classList.toggle('open'); if(id === 'history-content') renderHistory(); }
+        function toggleTask(day, id) { const task = state.planner[day].find(t => t.id === id); if (task) { task.done = !task.done; state.xp += task.done ? 10 : -10; save(); } }
         function deleteTask(day, id) { state.planner[day] = state.planner[day].filter(t => t.id !== id); save(); }
-        function generateKey() {
-            const compressed = btoa(JSON.stringify(state));
-            const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-            let visualCode = '';
-            for (let i = 0; i < 6; i++) visualCode += characters.charAt(Math.floor(Math.random() * characters.length));
-            document.getElementById('sync-code-display').value = visualCode;
-            const tempInput = document.createElement("textarea");
-            tempInput.value = compressed;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand("copy");
-            document.body.removeChild(tempInput);
-            const btn = document.getElementById('btn-gen');
-            btn.innerText = "COPIED";
-            setTimeout(() => btn.innerText = "GEN", 2000);
-        }
-        function importKey() {
-            const key = document.getElementById('sync-input').value.trim();
-            if(!key) return;
-            try { state = JSON.parse(atob(key)); save(); location.reload(); } catch(e) { alert("Invalid key."); }
-        }
+        function generateKey() { const compressed = btoa(JSON.stringify(state)); document.getElementById('sync-code-display').value = "COPIED"; const temp = document.createElement("textarea"); temp.value = compressed; document.body.appendChild(temp); temp.select(); document.execCommand("copy"); document.body.removeChild(temp); }
         function render() {
-            const grid = document.getElementById('planner-grid');
-            grid.innerHTML = "";
+            const grid = document.getElementById('planner-grid'); grid.innerHTML = "";
             let total = 0, done = 0, dayXP = {};
             days.forEach(day => {
                 dayXP[day] = 0;
@@ -263,25 +213,22 @@
             updatePie(dayXP);
         }
         function updatePie(dayXP) {
-            const g = document.getElementById('pie-segments');
-            const legend = document.getElementById('xp-legend');
-            if(!g) return; g.innerHTML = ""; legend.innerHTML = "";
-            let acc = 0;
+            const g = document.getElementById('pie-segments'); if(!g) return; g.innerHTML = ""; let acc = 0;
             days.forEach(day => {
                 const perc = state.xp === 0 ? 0 : (dayXP[day]/state.xp) * 100;
                 if(perc > 0) {
                     const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                    circle.setAttribute("cx", "21"); circle.setAttribute("cy", "21"); circle.setAttribute("r", "15.915"); circle.setAttribute("fill", "transparent"); circle.setAttribute("stroke", dayColors[day]); circle.setAttribute("stroke-width", "5"); circle.setAttribute("stroke-dasharray", `${perc} ${100 - perc}`); circle.setAttribute("stroke-dashoffset", -acc);
+                    circle.setAttribute("cx", "21"); circle.setAttribute("cy", "21"); circle.setAttribute("r", "15.915"); circle.setAttribute("fill", "transparent"); circle.setAttribute("stroke", dayColors[day]); circle.setAttribute("stroke-width", "5");
+                    circle.setAttribute("stroke-dasharray", `${perc} ${100 - perc}`); circle.setAttribute("stroke-dashoffset", -acc);
                     g.appendChild(circle); acc += perc;
                 }
-                legend.innerHTML += `<div class="flex items-center gap-2 p-2 rounded-lg bg-white/5 border border-white/5"><div class="w-2 h-2 rounded-full" style="background:${dayColors[day]}"></div><div class="flex flex-col"><span class="text-[8px] text-slate-500 uppercase">${day.slice(0,3)}</span><span class="text-[10px] font-black">${dayXP[day]} XP</span></div></div>`;
             });
         }
-        function renderHistory() { document.getElementById('history-list').innerHTML = state.history.map(h => `<div class="p-2 border-l-2 border-teal-400 bg-white/5">${h.date}: ${h.perc}%</div>`).join('') || '<div class="text-[10px] text-slate-500 p-2">No history yet.</div>'; }
+        function renderHistory() { document.getElementById('history-list').innerHTML = state.history.map(h => `<div class="p-2 border-l-2 border-teal-400 bg-white/5">${h.date}: ${h.perc}%</div>`).join('') || '<div class="text-[10px] text-slate-500 p-2">No history logs.</div>'; }
         function resetAll() { if(confirm("Wipe data?")) { localStorage.clear(); location.reload(); } }
         function toggleMenu() { document.getElementById('menu-sidebar').classList.toggle('translate-x-full'); document.getElementById('sidebar-backdrop').classList.toggle('hidden'); }
         setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
-        updateProfileDisplay(); render(); requestPerms();
+        updateProfileDisplay(); render();
     </script>
 </body>
 </html>
