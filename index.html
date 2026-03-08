@@ -5,359 +5,311 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Md Shazeb's Focus Engine AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: 45, 212, 191;
-            --primary-hex: #2dd4bf;
-            --daily: 244, 114, 182;
-            --daily-hex: #f472b6;
-            --ai-glow: 139, 92, 246;
+            /* Midnight Theme (No Glare) */
+            --bg-dark: #05070a;
+            --primary-glow: rgba(37, 99, 235, 0.15);
+            --card-bg: rgba(13, 17, 23, 0.7);
+            --text-main: #94a3b8;
+            --text-head: #e2e8f0;
+            --border: rgba(255, 255, 255, 0.03);
+        }
+
+        .light-theme {
+            --bg-dark: #f8fafc;
+            --primary-glow: rgba(37, 99, 235, 0.05);
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --text-main: #475569;
+            --text-head: #0f172a;
+            --border: rgba(0, 0, 0, 0.05);
         }
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: #020617;
-            background-image: 
-                radial-gradient(circle at 0% 0%, rgba(45, 212, 191, 0.12) 0%, transparent 40%),
-                radial-gradient(circle at 100% 100%, rgba(139, 92, 246, 0.1) 0%, transparent 40%);
+            background-color: var(--bg-dark);
+            color: var(--text-main);
             min-height: 100vh;
-            color: white;
-            overflow-x: hidden;
+            margin: 0;
             display: flex;
             flex-direction: column;
+            overflow-x: hidden;
+            transition: background-color 0.4s ease;
+        }
+
+        /* Ambient Background - Soft & Eye-Friendly */
+        .bg-mesh {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 20% 20%, var(--primary-glow) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(30, 41, 59, 0.2) 0%, transparent 40%);
         }
 
         .glass {
-            background: rgba(15, 23, 42, 0.6);
+            background: var(--card-bg);
             backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 24px;
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
             transition: all 0.3s ease;
         }
 
-        .daily-glass {
-            background: rgba(244, 114, 182, 0.02);
-            border: 1px solid rgba(244, 114, 182, 0.15);
+        .glass:hover {
+            border-color: rgba(37, 99, 235, 0.1);
+            transform: translateY(-2px);
         }
 
-        .time-badge {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 10px;
-            padding: 2px 8px;
-            border-radius: 6px;
-            font-weight: 700;
-        }
-
-        .task-done {
-            opacity: 0.3;
-            text-decoration: line-through;
-            filter: grayscale(1);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .page {
-            display: none;
-            animation: fadeIn 0.4s ease-out forwards;
-            width: 100%;
-        }
-
-        .page.active {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-        
-        .modal-enter {
-            animation: modalScale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        @keyframes modalScale {
-            from { transform: scale(0.9); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        #profile-display {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: inherit;
-        }
-
-        .typing-cursor::after {
-            content: "|";
-            animation: blink 1s infinite;
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
-
-        .glow-text {
-            text-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
-        }
-
-        .delete-btn {
-            opacity: 0;
-            transition: opacity 0.2s ease;
-        }
-        .task-item:hover .delete-btn {
-            opacity: 1;
-        }
-
-        /* Centering utility for the landing page content */
-        .landing-container {
+        .page-center {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            flex: 1;
+            min-height: 100vh;
             padding: 2rem;
+            width: 100%;
+        }
+
+        .typing-cursor::after {
+            content: "|";
+            animation: blink 1s infinite;
+            color: #3b82f6;
+        }
+
+        @keyframes blink { 50% { opacity: 0; } }
+
+        .task-done {
+            opacity: 0.25;
+            text-decoration: line-through;
+            filter: grayscale(1);
+        }
+
+        .horizontal-snap {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            gap: 1.25rem;
+            padding: 1rem 0;
+            scrollbar-width: none;
+        }
+        .horizontal-snap::-webkit-scrollbar { display: none; }
+        
+        .day-card {
+            scroll-snap-align: center;
+            min-width: 300px;
+            max-width: 340px;
+        }
+
+        @media (min-width: 1024px) {
+            .horizontal-snap {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                overflow-x: visible;
+                padding: 0;
+            }
+            .day-card { min-width: 0; max-width: none; }
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { 
+            background: rgba(255, 255, 255, 0.05); 
+            border-radius: 10px;
+        }
+
+        .check-active {
+            background-color: #3b82f6 !important;
+            border-color: #3b82f6 !important;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 100;
+        }
+
+        input, select {
+            background: rgba(0, 0, 0, 0.2) !important;
+            border: 1px solid rgba(255, 255, 255, 0.03) !important;
+            color: var(--text-head) !important;
+        }
+
+        .light-theme input, .light-theme select {
+            background: rgba(255, 255, 255, 1) !important;
+            border: 1px solid rgba(0, 0, 0, 0.1) !important;
         }
     </style>
 </head>
-<body class="custom-scrollbar">
+<body class="dark-theme">
+    <div class="bg-mesh"></div>
 
-    <!-- LANDING / WELCOME PAGE -->
-    <div id="page-welcome" class="page active">
-        <div class="landing-container">
-            <div class="max-w-4xl w-full">
-                <h1 class="text-4xl sm:text-5xl md:text-7xl font-black tracking-tighter mb-4 sm:mb-6 uppercase leading-tight">
-                    <span id="welcome-text-typing" class="typing-cursor glow-text"></span>
-                </h1>
-                
-                <div id="start-btn-container" class="mt-8 opacity-0 transition-opacity duration-1000">
-                    <p id="system-status-text" class="text-slate-500 font-mono text-[10px] sm:text-xs uppercase tracking-[0.2em] sm:tracking-[0.4em] mb-8 sm:mb-12">System sequence initialized...</p>
-                    <button onclick="startEngine()" class="bg-white text-slate-900 px-8 sm:px-16 py-4 sm:py-6 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-[0.2em] sm:tracking-[0.3em] hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-white/10 group">
-                        Start Engine
-                        <span class="inline-block ml-3 group-hover:translate-x-2 transition-transform">→</span>
-                    </button>
-                </div>
+    <!-- Theme Switcher -->
+    <button onclick="toggleTheme()" class="theme-toggle glass p-3 text-slate-400 hover:text-blue-500 shadow-xl">
+        <svg id="sun-icon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
+        <svg id="moon-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+    </button>
+
+    <!-- PAGE: WELCOME -->
+    <div id="page-welcome" class="page-center">
+        <div class="max-w-4xl w-full">
+            <div class="inline-block px-4 py-1.5 mb-8 glass rounded-full">
+                <span class="text-[9px] font-bold tracking-[0.5em] uppercase text-blue-500">Nocturnal Protocol / v3.1</span>
             </div>
-        </div>
-    </div>
-
-    <!-- MAIN ENGINE PAGE -->
-    <div id="page-main" class="page p-4 lg:p-10">
-        <div class="max-w-[1750px] mx-auto w-full">
-            <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6 md:gap-8">
-                <div class="flex items-center gap-4 sm:gap-5">
-                    <div class="relative w-12 h-12 sm:w-14 sm:h-14 bg-slate-900 rounded-xl border border-white/10 overflow-hidden cursor-pointer group" onclick="document.getElementById('profile-input').click()">
-                        <div id="profile-placeholder" class="absolute inset-0 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                        </div>
-                        <img id="profile-display" class="hidden absolute inset-0 w-full h-full object-cover">
-                        <input type="file" id="profile-input" class="hidden" accept="image/*" onchange="handleProfileUpload(this)">
-                    </div>
-
-                    <div>
-                        <h1 class="text-xl sm:text-2xl font-black tracking-tight uppercase">Focus<span class="text-purple-400">Engine</span></h1>
-                        <div class="flex items-center gap-2 sm:gap-3">
-                            <span id="user-display-name" class="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest">GUEST</span>
-                            <span class="text-slate-700">|</span>
-                            <span id="clock" class="font-mono text-slate-500 text-[9px] sm:text-[10px] tracking-widest">00:00:00</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="flex gap-2 sm:gap-3 w-full md:w-auto">
-                    <button onclick="navigateTo('page-add')" class="flex-1 md:flex-none bg-purple-600 hover:bg-purple-500 text-white px-4 sm:px-6 py-3 rounded-xl font-bold text-[10px] sm:text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-purple-600/20 transition-all">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                        Command Center
-                    </button>
-                    <button onclick="toggleMenu()" class="glass p-3 hover:bg-white/5 border border-purple-500/20 shadow-lg shadow-purple-500/5">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
-                    </button>
-                </div>
-            </header>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-5" id="main-grid">
-                <!-- Daily routine column is rendered separately for styling prominence -->
-                <div class="glass p-6 daily-glass flex flex-col min-h-[500px] sm:min-h-[550px]">
-                    <div class="flex justify-between items-start mb-8">
-                        <div><h2 class="text-pink-400 font-black text-xs uppercase tracking-widest">Daily Routine</h2></div>
-                        <button onclick="openQuickAdd('Daily')" class="p-2 rounded-lg bg-pink-500/10 text-pink-400 hover:bg-pink-500/20 border border-pink-500/20">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                        </button>
-                    </div>
-                    <div id="daily-list" class="space-y-4 flex-1"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- COMMAND CENTER -->
-    <div id="page-add" class="page p-4 lg:p-10">
-        <div class="max-w-4xl mx-auto w-full">
-            <div class="flex items-center justify-between mb-12">
-                <button onclick="navigateTo('page-main')" class="text-slate-400 hover:text-white flex items-center gap-2 font-bold text-sm uppercase tracking-widest transition-all">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-                    Back to Engine
-                </button>
-                <h2 class="text-xl font-black italic text-purple-400 tracking-tighter uppercase">Command Center</h2>
-            </div>
+            <h1 class="text-5xl sm:text-6xl md:text-8xl font-black tracking-tighter leading-[0.9] mb-12">
+                <span id="welcome-text-typing" class="typing-cursor bg-clip-text text-transparent bg-gradient-to-b from-blue-400 to-slate-900"></span>
+            </h1>
             
-            <div class="glass p-6 sm:p-10 border-2 border-purple-500/20 mb-10">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <input id="task-desc" type="text" placeholder="Operation Description" class="w-full bg-slate-900 border border-white/10 rounded-xl px-5 py-4 text-sm outline-none">
-                    <input id="task-time" type="text" placeholder="Execution Time" class="w-full bg-slate-900 border border-white/10 rounded-xl px-5 py-4 text-sm outline-none">
+            <div id="start-btn-container" class="opacity-0 transition-all duration-1000 transform translate-y-4">
+                <button onclick="startEngine()" class="bg-blue-600 text-white px-10 py-4 rounded-xl font-bold text-[10px] uppercase tracking-[0.3em] hover:bg-blue-700 transition-all shadow-2xl">
+                    Launch
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE: MAIN ENGINE -->
+    <div id="page-main" class="hidden p-6 md:p-12 w-full max-w-[1900px] mx-auto opacity-0 transition-opacity duration-700">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-16">
+            <div class="flex items-center gap-6">
+                <div class="relative w-14 h-14 bg-slate-900 rounded-xl border border-white/5 overflow-hidden cursor-pointer group" onclick="document.getElementById('profile-input').click()">
+                    <div id="profile-placeholder" class="absolute inset-0 flex items-center justify-center text-slate-500">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    </div>
+                    <img id="profile-display" class="hidden absolute inset-0 w-full h-full object-cover">
+                    <input type="file" id="profile-input" class="hidden" accept="image/*" onchange="handleProfileUpload(this)">
                 </div>
-                <div class="flex flex-col sm:flex-row gap-3">
-                    <select id="task-day" class="bg-slate-900 border border-white/10 rounded-xl px-5 py-4 text-sm outline-none w-full sm:w-48 text-slate-400">
+                <div>
+                    <h2 class="text-2xl font-black uppercase tracking-tighter flex items-center gap-2 text-[var(--text-head)]">
+                        FOCUS <span class="text-blue-500">ENGINE</span>
+                    </h2>
+                    <div class="flex items-center gap-4 text-[9px] font-bold text-slate-500 tracking-[0.4em]">
+                        <span id="user-display-name">GUEST_ID</span>
+                        <span id="clock" class="font-mono">00:00:00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-3 w-full md:w-auto">
+                <button onclick="navigateTo('page-add')" class="flex-1 md:flex-none bg-blue-600 text-white px-8 py-3.5 rounded-xl font-bold text-[9px] uppercase tracking-widest transition-all">
+                    Allocate Task
+                </button>
+                <button onclick="toggleMenu()" class="glass p-3.5 text-slate-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M12 12h8M4 18h11"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <div id="main-grid" class="horizontal-snap">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+
+    <!-- PAGE: ADD TASK -->
+    <div id="page-add" class="hidden p-8">
+        <div class="max-w-xl mx-auto">
+            <button onclick="navigateTo('page-main')" class="mb-8 text-[9px] font-bold uppercase tracking-widest text-blue-500 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                Abort
+            </button>
+            <div class="glass p-8 space-y-6">
+                <h3 class="font-black uppercase tracking-[0.3em] text-[var(--text-head)] text-xs">New Sequence</h3>
+                <input id="task-desc" type="text" placeholder="Objective" class="w-full rounded-xl px-5 py-3.5 outline-none focus:border-blue-500 text-sm">
+                <div class="grid grid-cols-2 gap-4">
+                    <input id="task-time" type="text" placeholder="Timeline (00:00)" class="rounded-xl px-5 py-3.5 text-sm outline-none">
+                    <select id="task-day" class="rounded-xl px-5 py-3.5 text-sm outline-none">
                         <option value="Daily">Daily</option>
-                        <option value="Sunday">Sunday</option><option value="Monday">Monday</option><option value="Tuesday">Tuesday</option><option value="Wednesday">Wednesday</option><option value="Thursday">Thursday</option><option value="Friday">Friday</option><option value="Saturday">Saturday</option>
+                        <option value="Monday">Monday</option><option value="Tuesday">Tuesday</option><option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option><option value="Friday">Friday</option><option value="Saturday">Saturday</option>
+                        <option value="Sunday">Sunday</option>
                     </select>
-                    <button onclick="addTaskFromCenter()" class="flex-1 bg-purple-600 text-white font-black uppercase tracking-widest text-xs py-4 rounded-xl">Deploy Task</button>
                 </div>
+                <button onclick="addTaskFromCenter()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black uppercase tracking-widest text-[9px]">Authorize</button>
             </div>
         </div>
     </div>
 
-    <!-- QUICK ADD MODAL -->
-    <div id="modal-quick-add" class="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 hidden">
-        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeQuickAdd()"></div>
-        <div class="glass p-6 sm:p-8 w-full max-w-md modal-enter relative">
-            <h3 id="quick-add-title" class="text-sm font-black uppercase tracking-widest text-purple-400 mb-6">Quick Add</h3>
-            <div class="space-y-4 mb-6">
-                <input id="quick-task-desc" type="text" placeholder="Task Name" class="w-full bg-slate-900 border border-white/10 rounded-xl px-5 py-3 text-sm outline-none">
-                <input id="quick-task-time" type="text" placeholder="Time" class="w-full bg-slate-900 border border-white/10 rounded-xl px-5 py-3 text-sm outline-none">
-            </div>
-            <button onclick="submitQuickAdd()" class="w-full bg-purple-600 text-white font-black uppercase tracking-widest text-[10px] py-4 rounded-xl">Add Task</button>
+    <!-- SIDEBAR -->
+    <div id="menu-sidebar" class="fixed inset-y-0 right-0 w-full sm:w-80 transform translate-x-full transition-transform duration-500 z-50 p-10 glass flex flex-col">
+        <div class="flex justify-between items-center mb-12">
+            <h2 class="text-sm font-black uppercase tracking-widest text-[var(--text-head)]">System</h2>
+            <button onclick="toggleMenu()" class="text-slate-500">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l18 18"/></svg>
+            </button>
         </div>
+        <input id="edit-name-input" type="text" placeholder="Alias" class="rounded-xl px-5 py-3.5 mb-4 outline-none text-sm">
+        <button onclick="updateUserName()" class="bg-blue-600 text-white py-3.5 rounded-xl font-bold text-[9px] uppercase mb-10">Sync Profile</button>
+        <button onclick="resetAll()" class="mt-auto text-red-500/60 hover:text-red-500 font-bold text-[9px] uppercase tracking-widest transition-colors">Clear Engine Cache</button>
     </div>
-
-    <!-- SETTINGS SIDEBAR -->
-    <div id="menu-sidebar" class="fixed inset-y-0 right-0 w-full sm:w-80 transform translate-x-full transition-transform duration-500 z-50 p-8 glass border-l border-white/10 flex flex-col bg-slate-950/95 shadow-3xl">
-        <div class="flex justify-between items-center mb-10">
-            <h2 class="text-xl font-black italic text-purple-400">PARAMETERS</h2>
-            <button onclick="toggleMenu()" class="text-slate-500 hover:text-white">✕</button>
-        </div>
-        
-        <div class="flex-1 space-y-8">
-            <div class="space-y-3">
-                <label class="text-[10px] font-black uppercase text-slate-500 tracking-widest">User Identity</label>
-                <div class="space-y-2">
-                    <input id="edit-name-input" type="text" placeholder="Your Name" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-purple-500/50 transition-colors">
-                    <button id="update-name-btn" onclick="updateUserName()" class="w-full bg-purple-600 text-white text-[10px] font-black py-3 rounded-xl uppercase tracking-widest hover:bg-purple-500 transition-all">Update Identity</button>
-                </div>
-            </div>
-
-            <hr class="border-white/5">
-
-            <div class="space-y-3">
-                <label class="text-[10px] font-black uppercase text-slate-500 tracking-widest">Engine Maintenance</label>
-                <button onclick="resetChecks()" class="w-full py-4 px-5 rounded-xl glass hover:bg-white/10 text-[10px] font-black uppercase tracking-widest text-slate-300">Uncheck All</button>
-                <button onclick="resetAll()" class="w-full py-4 px-5 rounded-xl bg-rose-500/10 text-rose-400 font-black text-[10px] uppercase tracking-widest border border-rose-500/20">Purge Data Cache</button>
-            </div>
-        </div>
-    </div>
-    <div id="sidebar-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden" onclick="toggleMenu()"></div>
+    <div id="sidebar-backdrop" class="fixed inset-0 bg-black/60 z-40 hidden" onclick="toggleMenu()"></div>
 
     <script>
-        const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-        const STORAGE_KEY = 'shazeb_ai_engine_v11';
+        const days = ["Daily", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+        const STORAGE_KEY = 'shazeb_focus_v3_dark';
         
-        // Load initial state
         let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
-            weekly: days.reduce((a, d) => ({...a, [d]: []}), {}),
-            daily: [],
+            tasks: days.reduce((a, d) => ({...a, [d]: []}), {}),
             userName: "",
             profilePic: null,
-            isReturningUser: false 
+            theme: 'dark'
         };
 
         window.onload = () => {
+            applyTheme();
             initWelcomeScreen();
-            document.getElementById('edit-name-input').value = state.userName;
             loadProfilePic();
             render();
+            setInterval(updateClock, 1000);
         };
 
+        function toggleTheme() {
+            state.theme = state.theme === 'dark' ? 'light' : 'dark';
+            save();
+            applyTheme();
+        }
+
+        function applyTheme() {
+            const body = document.body;
+            const sun = document.getElementById('sun-icon');
+            const moon = document.getElementById('moon-icon');
+            
+            if (state.theme === 'light') {
+                body.classList.add('light-theme');
+                sun.classList.remove('hidden');
+                moon.classList.add('hidden');
+            } else {
+                body.classList.remove('light-theme');
+                sun.classList.add('hidden');
+                moon.classList.remove('hidden');
+            }
+        }
+
         function initWelcomeScreen() {
-            const startBtn = document.getElementById('start-btn-container');
-            startBtn.classList.add('opacity-0');
-
-            // Persisted Welcome Greeting Logic
-            const welcomeMsg = (state.isReturningUser && state.userName) 
-                ? `WELCOME BACK, ${state.userName.toUpperCase()}` 
-                : "INITIALIZING FOCUS ENGINE";
-            
-            runTypingAnimation(welcomeMsg, () => {
-                startBtn.classList.remove('opacity-0');
-                startBtn.classList.add('opacity-100');
-                
-                if(state.userName) {
-                    document.getElementById('system-status-text').innerText = `USER: ${state.userName} | AUTHENTICATED`;
-                    state.isReturningUser = true;
-                    saveStateToStorage();
-                } else {
-                    document.getElementById('system-status-text').innerText = "GUEST ACCESS GRANTED | SETUP REQUIRED";
-                }
-            });
-        }
-
-        function runTypingAnimation(text, callback) {
-            const element = document.getElementById('welcome-text-typing');
-            element.innerText = "";
+            const container = document.getElementById('start-btn-container');
+            const welcomeMsg = state.userName ? `AUTHENTICATED: ${state.userName.toUpperCase()}` : "FOCUS ENGINE ONLINE";
             let i = 0;
+            const element = document.getElementById('welcome-text-typing');
             const interval = setInterval(() => {
-                element.innerText += text[i];
+                element.innerText += welcomeMsg[i];
                 i++;
-                if (i >= text.length) {
+                if (i >= welcomeMsg.length) {
                     clearInterval(interval);
-                    if (callback) callback();
+                    container.classList.replace('opacity-0', 'opacity-100');
+                    container.classList.replace('translate-y-4', 'translate-y-0');
                 }
-            }, 60);
+            }, 40);
         }
 
-        function updateUserName() {
-            const newName = document.getElementById('edit-name-input').value.trim();
-            state.userName = newName;
-            saveStateToStorage();
-            render();
-            
-            const btn = document.getElementById('update-name-btn');
-            btn.innerText = "IDENTITY SAVED";
-            btn.classList.replace('bg-purple-600', 'bg-emerald-600');
-            
-            setTimeout(() => {
-                btn.innerText = "Update Identity";
-                btn.classList.replace('bg-emerald-600', 'bg-purple-600');
-                toggleMenu();
-            }, 1000);
+        function startEngine() { 
+            navigateTo('page-main'); 
+            document.getElementById('page-main').classList.replace('opacity-0', 'opacity-100');
         }
 
-        function saveStateToStorage() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        }
-
-        function save() {
-            saveStateToStorage();
-            render();
-        }
-
-        function startEngine() {
-            navigateTo('page-main');
-        }
-
-        function navigateTo(pageId) {
-            document.querySelectorAll('.page').forEach(p => {
-                p.classList.remove('active');
-                p.style.display = 'none';
-            });
-            const target = document.getElementById(pageId);
-            target.style.display = (pageId === 'page-welcome') ? 'flex' : 'block';
-            setTimeout(() => target.classList.add('active'), 10);
+        function navigateTo(id) {
+            document.querySelectorAll('#page-welcome, #page-main, #page-add').forEach(p => p.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
         }
 
         function handleProfileUpload(input) {
@@ -374,119 +326,78 @@
         }
 
         function loadProfilePic() {
-            const imgEl = document.getElementById('profile-display');
-            const placeholderEl = document.getElementById('profile-placeholder');
+            const img = document.getElementById('profile-display');
+            const placeholder = document.getElementById('profile-placeholder');
             if (state.profilePic) {
-                imgEl.src = state.profilePic;
-                imgEl.classList.remove('hidden');
-                placeholderEl.classList.add('hidden');
+                img.src = state.profilePic;
+                img.classList.remove('hidden');
+                placeholder.classList.add('hidden');
             }
-        }
-
-        function deleteTask(type, id, day = null) {
-            if (type === 'daily') {
-                state.daily = state.daily.filter(t => t.id !== id);
-            } else {
-                state.weekly[day] = state.weekly[day].filter(t => t.id !== id);
-            }
-            save();
         }
 
         function addTaskFromCenter() {
             const desc = document.getElementById('task-desc').value.trim();
-            const time = document.getElementById('task-time').value.trim() || "Anytime";
+            const time = document.getElementById('task-time').value.trim() || "--:--";
             const day = document.getElementById('task-day').value;
             if(!desc) return;
-            if(day === 'Daily') state.daily.push({ id: Date.now(), text: desc, time, done: false });
-            else state.weekly[day].push({ id: Date.now(), text: desc, time, done: false });
+            state.tasks[day].push({ id: Date.now(), text: desc, time, done: false });
             document.getElementById('task-desc').value = "";
-            document.getElementById('task-time').value = "";
             save();
+            navigateTo('page-main');
+        }
+
+        function toggleTask(day, id) {
+            const task = state.tasks[day].find(t => t.id === id);
+            if(task) task.done = !task.done;
+            save();
+        }
+
+        function deleteTask(day, id) {
+            state.tasks[day] = state.tasks[day].filter(t => t.id !== id);
+            save();
+        }
+
+        function save() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            render();
         }
 
         function render() {
-            document.getElementById('user-display-name').innerText = state.userName || 'GUEST';
-            
-            const dailyList = document.getElementById('daily-list');
-            if(dailyList) {
-                dailyList.innerHTML = state.daily.map(t => `
-                    <div class="task-item group flex items-start justify-between gap-3 p-1.5 rounded-lg hover:bg-white/5 transition-colors">
-                        <div onclick="toggleTask('daily', ${t.id})" class="flex-1 cursor-pointer">
-                            <div class="flex justify-between items-center mb-1"><span class="time-badge bg-pink-500/10 text-pink-400 border border-pink-500/20 uppercase">${t.time}</span></div>
-                            <div class="flex items-start gap-2.5">
-                                <div class="mt-0.5 w-4 h-4 rounded-md border-2 ${t.done ? 'bg-pink-500 border-pink-500' : 'border-slate-700'} flex-shrink-0"></div>
-                                <span class="text-[11px] font-bold ${t.done ? 'task-done text-slate-600' : 'text-slate-300'}">${t.text}</span>
-                            </div>
-                        </div>
-                        <button onclick="deleteTask('daily', ${t.id})" class="delete-btn p-1 text-slate-600 hover:text-rose-500 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                        </button>
+            document.getElementById('user-display-name').innerText = state.userName || 'GUEST_ID';
+            const grid = document.getElementById('main-grid');
+            grid.innerHTML = '';
+
+            days.forEach(day => {
+                const dayTasks = state.tasks[day];
+                const card = document.createElement('div');
+                card.className = `day-card glass p-6 flex flex-col h-[520px]`;
+                card.innerHTML = `
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-[9px] font-black uppercase tracking-[0.4em] text-[var(--text-head)]">${day}</h3>
+                        <span class="text-[9px] font-mono text-blue-500/50">${dayTasks.length.toString().padStart(2, '0')}</span>
                     </div>
-                `).join('');
-            }
-
-            const mainGrid = document.getElementById('main-grid');
-            if(mainGrid) {
-                document.querySelectorAll('.day-col').forEach(el => el.remove());
-                days.forEach(day => {
-                    const isToday = day === days[new Date().getDay()];
-                    const tasks = state.weekly[day].map(t => `
-                        <div class="task-item group flex items-start justify-between gap-2 p-1 rounded-lg hover:bg-white/5 mb-2 transition-colors">
-                            <div onclick="toggleTask('weekly', ${t.id}, '${day}')" class="flex-1 cursor-pointer">
-                                <span class="time-badge bg-teal-500/10 text-teal-400 block mb-1 uppercase">${t.time}</span>
-                                <div class="flex items-start gap-2">
-                                    <div class="mt-0.5 w-4 h-4 rounded border-2 ${t.done ? 'bg-teal-400 border-teal-400' : 'border-slate-700'} flex-shrink-0"></div>
-                                    <span class="text-[11px] font-semibold ${t.done ? 'task-done text-slate-600' : 'text-slate-300'}">${t.text}</span>
+                    <div class="flex-1 overflow-y-auto space-y-3 pr-1 custom-scrollbar">
+                        ${dayTasks.map(t => `
+                            <div class="group flex items-start gap-3 p-4 rounded-xl hover:bg-white/[0.02] transition-all cursor-pointer" onclick="toggleTask('${day}', ${t.id})">
+                                <div class="mt-1 w-3.5 h-3.5 rounded border border-slate-700 flex-shrink-0 transition-colors ${t.done ? 'check-active' : ''}"></div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1">${t.time}</div>
+                                    <div class="text-[11px] font-medium leading-relaxed truncate ${t.done ? 'task-done' : 'text-[var(--text-head)]'}">${t.text}</div>
                                 </div>
+                                <button onclick="event.stopPropagation(); deleteTask('${day}', ${t.id})" class="opacity-0 group-hover:opacity-100 text-slate-600 hover:text-red-500 transition-all">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
                             </div>
-                            <button onclick="deleteTask('weekly', ${t.id}, '${day}')" class="delete-btn p-1 text-slate-600 hover:text-rose-500 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                            </button>
-                        </div>
-                    `).join('');
-
-                    const col = document.createElement('div');
-                    col.className = `glass p-6 day-col flex flex-col min-h-[400px] sm:min-h-[450px] ${isToday ? 'ring-2 ring-teal-400/30 bg-teal-400/5' : ''}`;
-                    col.innerHTML = `
-                        <div class="flex justify-between items-start mb-6">
-                            <h2 class="text-teal-400 font-black text-xs uppercase tracking-widest">${day}</h2>
-                            <button onclick="openQuickAdd('${day}')" class="p-1.5 rounded-lg bg-teal-400/10 text-teal-400 hover:bg-teal-400/20 transition-all">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                            </button>
-                        </div>
-                        <div class="flex-1 overflow-y-auto custom-scrollbar">${tasks || '<p class="text-[9px] text-slate-800 italic mt-4">EMPTY</p>'}</div>
-                    `;
-                    mainGrid.appendChild(col);
-                });
-            }
+                        `).join('')}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
         }
 
-        function toggleTask(type, id, day = null) {
-            let task = type === 'daily' ? state.daily.find(t => t.id === id) : state.weekly[day].find(t => t.id === id);
-            if (task) { task.done = !task.done; save(); }
-        }
-
-        let activeQuickDay = null;
-        function openQuickAdd(day) {
-            activeQuickDay = day;
-            document.getElementById('quick-add-title').innerText = `DEPLOY: ${day.toUpperCase()}`;
-            document.getElementById('modal-quick-add').classList.remove('hidden');
-        }
-
-        function closeQuickAdd() {
-            document.getElementById('modal-quick-add').classList.add('hidden');
-        }
-
-        function submitQuickAdd() {
-            const desc = document.getElementById('quick-task-desc').value.trim();
-            const time = document.getElementById('quick-task-time').value.trim() || "Anytime";
-            if(!desc) return;
-            if(activeQuickDay === 'Daily') state.daily.push({ id: Date.now(), text: desc, time, done: false });
-            else state.weekly[activeQuickDay].push({ id: Date.now(), text: desc, time, done: false });
-            closeQuickAdd();
-            document.getElementById('quick-task-desc').value = "";
-            document.getElementById('quick-task-time').value = "";
-            save();
+        function updateClock() {
+            const el = document.getElementById('clock');
+            if (el) el.innerText = new Date().toLocaleTimeString('en-GB');
         }
 
         function toggleMenu() {
@@ -494,26 +405,18 @@
             document.getElementById('sidebar-backdrop').classList.toggle('hidden');
         }
 
-        function resetChecks() {
-            state.daily.forEach(t => t.done = false);
-            days.forEach(d => state.weekly[d].forEach(t => t.done = false));
+        function updateUserName() {
+            state.userName = document.getElementById('edit-name-input').value.trim();
             save();
             toggleMenu();
         }
 
-        function resetAll() { 
-            if(confirm("Initiate system wipe? All tasks and settings will be deleted.")) { 
-                localStorage.clear(); 
-                location.reload(); 
-            } 
+        function resetAll() {
+            if(confirm("Confirm system purge?")) {
+                localStorage.clear();
+                location.reload();
+            }
         }
-
-        setInterval(() => {
-            const now = new Date();
-            const clockEl = document.getElementById('clock');
-            if(clockEl) clockEl.innerText = now.toLocaleTimeString();
-        }, 1000);
-
     </script>
 </body>
 </html>
