@@ -7,11 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Inter:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: 45, 212, 191;
-            --primary-hex: #2dd4bf;
-        }
-
+        :root { --primary: 45, 212, 191; --primary-hex: #2dd4bf; }
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background: #0f172a;
@@ -21,95 +17,21 @@
             padding-bottom: 40px;
             overflow-x: hidden;
         }
-
-        .glass {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-        }
-
-        .header-card {
-            border: 1px solid rgba(var(--primary), 0.3);
-            box-shadow: 0 0 20px rgba(var(--primary), 0.05);
-        }
-
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; }
+        .header-card { border: 1px solid rgba(var(--primary), 0.3); box-shadow: 0 0 20px rgba(var(--primary), 0.05); }
         .task-done { text-decoration: line-through; opacity: 0.5; }
-
-        .time-badge {
-            background: rgba(var(--primary), 0.2);
-            color: var(--primary-hex);
-            font-size: 11px;
-            padding: 4px 10px;
-            border-radius: 8px;
-            font-weight: 800;
-            display: inline-block;
-            line-height: 1;
-            border: 1px solid rgba(var(--primary), 0.3);
-        }
-
-        #menu-sidebar {
-            background: rgba(15, 23, 42, 0.98);
-            backdrop-filter: blur(20px);
-            border-left: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
-        }
-
+        .time-badge { background: rgba(var(--primary), 0.2); color: var(--primary-hex); font-size: 11px; padding: 4px 10px; border-radius: 8px; font-weight: 800; display: inline-block; line-height: 1; border: 1px solid rgba(var(--primary), 0.3); }
+        #menu-sidebar { background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(20px); border-left: 1px solid rgba(255, 255, 255, 0.1); box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5); }
         .pie-container { position: relative; width: 140px; height: 140px; }
         #xp-pie { transform: rotate(-90deg); border-radius: 50%; }
-
         .digital-clock { font-family: monospace; letter-spacing: 1px; }
-        
-        .profile-pic-container {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            border: 2px solid rgba(var(--primary), 0.5);
-            overflow: hidden;
-            cursor: pointer;
-            background: rgba(255,255,255,0.05);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .profile-pic-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .settings-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: all 0.3s ease-in-out;
-            opacity: 0;
-        }
-        .settings-content.open {
-            max-height: 500px;
-            opacity: 1;
-            margin-top: 1rem;
-        }
-
-        .sync-input {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 10px;
-            color: white;
-            font-family: 'JetBrains Mono', monospace;
-            text-align: center;
-            text-transform: uppercase;
-        }
-
-        .copy-success {
-            animation: pulse-teal 1.5s infinite;
-        }
-
-        @keyframes pulse-teal {
-            0% { box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(45, 212, 191, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(45, 212, 191, 0); }
-        }
+        .profile-pic-container { width: 48px; height: 48px; border-radius: 50%; border: 2px solid rgba(var(--primary), 0.5); overflow: hidden; cursor: pointer; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; }
+        .profile-pic-container img { width: 100%; height: 100%; object-fit: cover; }
+        .settings-content { max-height: 0; overflow: hidden; transition: all 0.3s ease-in-out; opacity: 0; }
+        .settings-content.open { max-height: 500px; opacity: 1; margin-top: 1rem; }
+        .sync-input { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 10px; color: white; font-family: 'JetBrains Mono', monospace; text-align: center; text-transform: uppercase; }
+        .copy-success { animation: pulse-teal 1.5s infinite; }
+        @keyframes pulse-teal { 0% { box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(45, 212, 191, 0); } 100% { box-shadow: 0 0 0 0 rgba(45, 212, 191, 0); } }
     </style>
 </head>
 <body class="p-4 md:p-8" id="app-body">
@@ -120,9 +42,7 @@
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
             <div class="flex items-center gap-4">
                 <div class="profile-pic-container shadow-lg" onclick="triggerUpload()" id="profile-display">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                 </div>
                 <div>
                     <h1 class="text-3xl font-[800] text-white tracking-tight">Productivity <span class="text-teal-400 text-sm font-[400] ml-2 italic">by Md Shazeb</span></h1>
@@ -163,14 +83,8 @@
                     </div>
                 </div>
                 <div class="flex justify-between items-center mt-6">
-                    <div>
-                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Total XP</span>
-                        <span id="xp-display" class="text-3xl font-black text-teal-400">0</span>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Level</span>
-                        <span id="level-display" class="text-xl font-black text-white">1</span>
-                    </div>
+                    <div><span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Total XP</span><span id="xp-display" class="text-3xl font-black text-teal-400">0</span></div>
+                    <div class="text-right"><span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Level</span><span id="level-display" class="text-xl font-black text-white">1</span></div>
                 </div>
             </div>
 
@@ -191,24 +105,19 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4" id="planner-grid"></div>
     </div>
 
-    <!-- Menu Sidebar -->
     <div id="menu-sidebar" class="fixed inset-y-0 right-0 w-80 transform translate-x-full transition-transform duration-300 z-50 p-6 flex flex-col">
         <div class="flex justify-between items-center mb-8">
             <h2 class="text-xl font-black text-white uppercase tracking-tighter">Tools</h2>
             <button onclick="toggleMenu()" class="text-slate-400 hover:text-white">✕</button>
         </div>
-        
         <div class="space-y-6 overflow-y-auto flex-1">
             <div class="p-5 rounded-2xl bg-white/5 border border-white/10">
                 <div class="flex justify-between items-center cursor-pointer" onclick="toggleSection('history-content')">
                     <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Progress History</h3>
                     <span class="text-slate-500">▼</span>
                 </div>
-                <div id="history-content" class="settings-content">
-                    <div id="history-list" class="space-y-2 mt-4 text-xs"></div>
-                </div>
+                <div id="history-content" class="settings-content"><div id="history-list" class="space-y-2 mt-4 text-xs"></div></div>
             </div>
-
             <div class="p-5 rounded-2xl bg-teal-400/5 border border-teal-400/20">
                 <h3 class="text-[10px] font-black text-teal-400 uppercase tracking-widest mb-3 italic">Cloud Sync</h3>
                 <div class="space-y-4">
@@ -228,7 +137,6 @@
                     </div>
                 </div>
             </div>
-
             <button onclick="resetAll()" class="w-full p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[10px] font-bold uppercase tracking-widest mt-auto">Wipe Data</button>
         </div>
     </div>
@@ -241,16 +149,47 @@
         
         let state = JSON.parse(localStorage.getItem('shazeb_v_final')) || {
             planner: days.reduce((a, d) => ({...a, [d]: []}), {}),
-            xp: 0,
-            profile: null,
-            history: []
+            xp: 0, profile: null, history: []
         };
 
-        function save() {
-            localStorage.setItem('shazeb_v_final', JSON.stringify(state));
-            render();
+        // --- AI NOTIFICATION ALARM SYSTEM ---
+        function checkAlarms() {
+            const now = new Date();
+            const currentDay = days[now.getDay()];
+            // Format time to match input (e.g. "4:30PM")
+            const timeStr = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }).replace(/\s/g, '').toUpperCase();
+
+            state.planner[currentDay].forEach(task => {
+                if (task.time !== "ANYTIME" && !task.done && !task.alarmFired) {
+                    const taskTimeClean = task.time.replace(/\s/g, '').toUpperCase();
+                    if (taskTimeClean === timeStr) {
+                        triggerAlarm(task.text);
+                        task.alarmFired = true;
+                        // Save immediately so refreshing doesn't re-trigger
+                        localStorage.setItem('shazeb_v_final', JSON.stringify(state));
+                    }
+                }
+            });
         }
 
+        function triggerAlarm(msg) {
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification("Task Alarm!", { body: msg, icon: "https://cdn-icons-png.flaticon.com/512/1827/1827347.png" });
+                try {
+                    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                    audio.play();
+                } catch(e) { console.log("Audio blocked by browser policy"); }
+            }
+        }
+
+        function requestPerms() {
+            if ("Notification" in window) Notification.requestPermission();
+        }
+
+        setInterval(checkAlarms, 30000); // Check every 30s for better accuracy
+        // -------------------------------------
+
+        function save() { localStorage.setItem('shazeb_v_final', JSON.stringify(state)); render(); }
         function triggerUpload() { document.getElementById('profile-upload').click(); }
         function handleProfileUpload(e) {
             const file = e.target.files[0];
@@ -258,179 +197,91 @@
             reader.onload = (ev) => { state.profile = ev.target.result; save(); updateProfileDisplay(); };
             reader.readAsDataURL(file);
         }
-
         function updateProfileDisplay() {
             const el = document.getElementById('profile-display');
             if (state.profile) el.innerHTML = `<img src="${state.profile}">`;
         }
-
         function toggleSection(id) {
             document.getElementById(id).classList.toggle('open');
             if(id === 'history-content') renderHistory();
         }
-
         function processCommand() {
             const input = document.getElementById('command-input');
             const val = input.value.trim();
             if (!val) return;
-
+            requestPerms();
             const timeMatch = val.match(/(\d{1,2}(:\d{2})?\s*(am|pm))/i);
             const time = timeMatch ? timeMatch[0].toUpperCase() : "ANYTIME";
             const day = days.find(d => val.toLowerCase().includes(d.toLowerCase())) || days[new Date().getDay()];
-            
-            state.planner[day].push({
-                id: Date.now(),
-                text: val.replace(day, '').replace(time, '').replace(/\bat\b/gi, '').trim() || "Task",
-                time: time,
-                done: false
-            });
-
+            state.planner[day].push({ id: Date.now(), text: val.replace(day, '').replace(time, '').replace(/\bat\b/gi, '').trim() || "Task", time: time, done: false, alarmFired: false });
             input.value = "";
             save();
         }
-
         function toggleTask(day, id) {
             const task = state.planner[day].find(t => t.id === id);
-            if (task) {
-                task.done = !task.done;
-                state.xp += task.done ? 10 : -10;
-                save();
-            }
+            if (task) { task.done = !task.done; state.xp += task.done ? 10 : -10; save(); }
         }
-
-        function deleteTask(day, id) {
-            state.planner[day] = state.planner[day].filter(t => t.id !== id);
-            save();
-        }
-
-        /**
-         * Generates a 6-digit sync key. 
-         * Note: In a real cloud app, this would be a lookup key in a database.
-         * For this standalone version, we still generate a full portable key 
-         * but label it as a sync code for the user experience.
-         */
+        function deleteTask(day, id) { state.planner[day] = state.planner[day].filter(t => t.id !== id); save(); }
         function generateKey() {
-            // We create a compressed version for the clipboard
             const compressed = btoa(JSON.stringify(state));
-            
-            // Visual 6-digit code for the UI
             const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
             let visualCode = '';
-            for (let i = 0; i < 6; i++) {
-                visualCode += characters.charAt(Math.floor(Math.random() * characters.length));
-            }
-            
+            for (let i = 0; i < 6; i++) visualCode += characters.charAt(Math.floor(Math.random() * characters.length));
             document.getElementById('sync-code-display').value = visualCode;
-            
-            // Still copy the full data key to the clipboard so it actually works for "Sync"
             const tempInput = document.createElement("textarea");
             tempInput.value = compressed;
             document.body.appendChild(tempInput);
             tempInput.select();
-            try {
-                document.execCommand("copy");
-                const btn = document.getElementById('btn-gen');
-                btn.innerText = "COPIED";
-                btn.classList.add('copy-success');
-                setTimeout(() => {
-                    btn.innerText = "GEN";
-                    btn.classList.remove('copy-success');
-                }, 2000);
-            } catch (err) {
-                console.error("Copy failed", err);
-            }
+            document.execCommand("copy");
             document.body.removeChild(tempInput);
+            const btn = document.getElementById('btn-gen');
+            btn.innerText = "COPIED";
+            setTimeout(() => btn.innerText = "GEN", 2000);
         }
-
         function importKey() {
             const key = document.getElementById('sync-input').value.trim();
             if(!key) return;
-            try {
-                const data = JSON.parse(atob(key));
-                state = data;
-                save();
-                location.reload();
-            } catch(e) { 
-                alert("Invalid sync code. Please make sure you copied the full generated key.");
-            }
+            try { state = JSON.parse(atob(key)); save(); location.reload(); } catch(e) { alert("Invalid key."); }
         }
-
         function render() {
             const grid = document.getElementById('planner-grid');
             grid.innerHTML = "";
             let total = 0, done = 0, dayXP = {};
-
             days.forEach(day => {
                 dayXP[day] = 0;
                 const tasks = state.planner[day].map(t => {
                     total++; if(t.done) { done++; dayXP[day] += 10; }
-                    return `
-                        <div class="group py-2 border-b border-white/5">
-                            <div class="flex justify-between items-center mb-1">
-                                <span class="time-badge">${t.time}</span>
-                                <button onclick="deleteTask('${day}', ${t.id})" class="text-rose-500 opacity-0 group-hover:opacity-100 text-[10px]">✕</button>
-                            </div>
-                            <div class="flex items-center gap-2 cursor-pointer" onclick="toggleTask('${day}', ${t.id})">
-                                <div class="w-3.5 h-3.5 rounded border ${t.done ? 'bg-teal-400 border-teal-400' : 'border-slate-500'}"></div>
-                                <span class="text-[11px] ${t.done ? 'task-done text-slate-500' : 'text-slate-200'}">${t.text}</span>
-                            </div>
-                        </div>
-                    `;
+                    return `<div class="group py-2 border-b border-white/5"><div class="flex justify-between items-center mb-1"><span class="time-badge">${t.time}</span><button onclick="deleteTask('${day}', ${t.id})" class="text-rose-500 opacity-0 group-hover:opacity-100 text-[10px]">✕</button></div><div class="flex items-center gap-2 cursor-pointer" onclick="toggleTask('${day}', ${t.id})"><div class="w-3.5 h-3.5 rounded border ${t.done ? 'bg-teal-400 border-teal-400' : 'border-slate-500'}"></div><span class="text-[11px] ${t.done ? 'task-done text-slate-500' : 'text-slate-200'}">${t.text}</span></div></div>`;
                 }).join('');
-
-                grid.innerHTML += `
-                    <div class="glass p-4 min-h-[160px]">
-                        <h3 class="text-[10px] font-black uppercase text-teal-400 mb-3 tracking-widest">${day}</h3>
-                        <div>${tasks || '<p class="text-[9px] text-slate-600 italic py-4">No Plans</p>'}</div>
-                    </div>
-                `;
+                grid.innerHTML += `<div class="glass p-4 min-h-[160px]"><h3 class="text-[10px] font-black uppercase text-teal-400 mb-3 tracking-widest">${day}</h3><div>${tasks || '<p class="text-[9px] text-slate-600 italic py-4">No Plans</p>'}</div></div>`;
             });
-
             const perc = total === 0 ? 0 : Math.round((done/total) * 100);
             document.getElementById('percent-display').innerText = perc + "%";
             document.getElementById('mastery-bar').style.width = perc + "%";
             document.getElementById('xp-display').innerText = state.xp;
             document.getElementById('level-display').innerText = Math.floor(state.xp/100) + 1;
-            
             updatePie(dayXP);
         }
-
         function updatePie(dayXP) {
             const g = document.getElementById('pie-segments');
             const legend = document.getElementById('xp-legend');
-            g.innerHTML = ""; legend.innerHTML = "";
+            if(!g) return; g.innerHTML = ""; legend.innerHTML = "";
             let acc = 0;
             days.forEach(day => {
                 const perc = state.xp === 0 ? 0 : (dayXP[day]/state.xp) * 100;
                 if(perc > 0) {
                     const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                    circle.setAttribute("cx", "21"); circle.setAttribute("cy", "21"); circle.setAttribute("r", "15.915");
-                    circle.setAttribute("fill", "transparent"); circle.setAttribute("stroke", dayColors[day]); circle.setAttribute("stroke-width", "5");
-                    circle.setAttribute("stroke-dasharray", `${perc} ${100 - perc}`); circle.setAttribute("stroke-dashoffset", -acc);
+                    circle.setAttribute("cx", "21"); circle.setAttribute("cy", "21"); circle.setAttribute("r", "15.915"); circle.setAttribute("fill", "transparent"); circle.setAttribute("stroke", dayColors[day]); circle.setAttribute("stroke-width", "5"); circle.setAttribute("stroke-dasharray", `${perc} ${100 - perc}`); circle.setAttribute("stroke-dashoffset", -acc);
                     g.appendChild(circle); acc += perc;
                 }
-                legend.innerHTML += `
-                    <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5 border border-white/5">
-                        <div class="w-2 h-2 rounded-full" style="background:${dayColors[day]}"></div>
-                        <div class="flex flex-col">
-                            <span class="text-[8px] text-slate-500 uppercase">${day.slice(0,3)}</span>
-                            <span class="text-[10px] font-black">${dayXP[day]} XP</span>
-                        </div>
-                    </div>`;
+                legend.innerHTML += `<div class="flex items-center gap-2 p-2 rounded-lg bg-white/5 border border-white/5"><div class="w-2 h-2 rounded-full" style="background:${dayColors[day]}"></div><div class="flex flex-col"><span class="text-[8px] text-slate-500 uppercase">${day.slice(0,3)}</span><span class="text-[10px] font-black">${dayXP[day]} XP</span></div></div>`;
             });
         }
-
-        function renderHistory() {
-            const list = document.getElementById('history-list');
-            list.innerHTML = state.history.map(h => `<div class="p-2 border-l-2 border-teal-400 bg-white/5">${h.date}: ${h.perc}% Completion</div>`).join('') || '<div class="text-[10px] text-slate-500 italic p-2">Sync data to populate history logs.</div>';
-        }
-
-        function resetAll() { if(confirm("Are you sure? This will delete all your local data.")) { localStorage.clear(); location.reload(); } }
+        function renderHistory() { document.getElementById('history-list').innerHTML = state.history.map(h => `<div class="p-2 border-l-2 border-teal-400 bg-white/5">${h.date}: ${h.perc}%</div>`).join('') || '<div class="text-[10px] text-slate-500 p-2">No history yet.</div>'; }
+        function resetAll() { if(confirm("Wipe data?")) { localStorage.clear(); location.reload(); } }
         function toggleMenu() { document.getElementById('menu-sidebar').classList.toggle('translate-x-full'); document.getElementById('sidebar-backdrop').classList.toggle('hidden'); }
-
         setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
-        updateProfileDisplay();
-        render();
+        updateProfileDisplay(); render(); requestPerms();
     </script>
 </body>
 </html>
