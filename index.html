@@ -226,13 +226,13 @@
         </div>
     </div>
 
-    <!-- WELCOME PAGE (SAME AS ORIGINAL) -->
+    <!-- WELCOME PAGE -->
     <div id="page-welcome" class="flex flex-col items-center justify-center min-h-screen p-6 text-center">
         <div class="max-w-4xl w-full">
             <div class="inline-block px-4 py-1.5 mb-8 glass rounded-full scale-90 sm:scale-100">
                 <span class="text-[10px] font-bold tracking-[0.5em] uppercase text-blue-500">Nocturnal Protocol / v3.5</span>
             </div>
-            <h1 class="text-5xl sm:text-7xl lg:text-9xl font-black tracking-tighter leading-none mb-12">
+            <h1 class="text-4xl sm:text-7xl lg:text-8xl font-black tracking-tighter leading-none mb-12 min-h-[1.2em]">
                 <span id="welcome-text-typing" class="typing-cursor bg-clip-text text-transparent bg-gradient-to-b from-blue-400 to-slate-900"></span>
             </h1>
             <div id="start-btn-container" class="opacity-0 translate-y-4 transition-all duration-1000 flex flex-col items-center gap-4">
@@ -244,7 +244,7 @@
         </div>
     </div>
 
-    <!-- MAIN INTERFACE (SAME AS ORIGINAL) -->
+    <!-- MAIN INTERFACE -->
     <div id="page-main" class="hidden opacity-0 transition-opacity duration-700 p-4 sm:p-8 lg:p-12 w-full max-w-[1600px] mx-auto">
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
             <div class="flex items-center gap-4">
@@ -317,7 +317,7 @@
         </div>
     </div>
 
-    <!-- NEW TEMPORAL ARCHIVE PAGE (HISTORY) -->
+    <!-- TEMPORAL ARCHIVE PAGE (HISTORY) -->
     <div id="page-history" class="hidden p-6 sm:p-12 max-w-6xl mx-auto">
         <header class="flex justify-between items-center mb-12">
             <div>
@@ -343,7 +343,7 @@
         </div>
     </div>
 
-    <!-- ADD TASK PAGE (SAME AS ORIGINAL) -->
+    <!-- ADD TASK PAGE -->
     <div id="page-add" class="hidden p-6 sm:p-12">
         <div class="max-w-lg mx-auto">
             <button onclick="navigateTo('page-main')" class="mb-8 text-[10px] font-bold uppercase tracking-widest text-blue-500 flex items-center gap-2">
@@ -370,7 +370,7 @@
         </div>
     </div>
 
-    <!-- SETTINGS SIDEBAR (SAME AS ORIGINAL) -->
+    <!-- SETTINGS SIDEBAR -->
     <div id="menu-sidebar" class="fixed inset-y-0 right-0 w-full sm:w-80 translate-x-full transition-transform duration-500 z-[110] glass p-10 flex flex-col">
         <div class="flex justify-between items-center mb-12">
             <h2 class="text-xs font-black uppercase tracking-widest text-[var(--text-head)]">Settings</h2>
@@ -395,7 +395,6 @@
         const days = ["Daily", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
         const STORAGE_KEY = 'shazeb_v4_persistent_vault';
         
-        // RE-INITIALIZE STATE WITH PERSISTENCE (compatible with chrome sync concepts)
         let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
             tasks: days.reduce((a, d) => ({...a, [d]: []}), {}),
             userName: "",
@@ -403,14 +402,13 @@
             streak: 0,
             lastCompletedDate: null,
             completionHistory: {},
-            historyLogs: {} // Keyed by Date string "YYYY-MM-DD" -> contains snapshot of tasks
+            historyLogs: {}
         };
 
         let audioContext;
         let isMainPageActive = false;
         let alarmInterval = null;
 
-        // Particle System (SAME)
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -524,9 +522,21 @@
 
         function startEngine() { navigateTo('page-main'); }
         function toggleMenu() { document.getElementById('menu-sidebar').classList.toggle('translate-x-full'); document.getElementById('sidebar-backdrop').classList.toggle('hidden'); }
-        function updateName() { state.userName = document.getElementById('edit-name-input').value; save(); loadProfile(); toggleMenu(); }
-        function loadProfile() { document.getElementById('user-display-name').innerText = state.userName || 'GUEST'; }
-        function resetStreak() { state.streak = 0; state.completionHistory = {}; state.lastCompletedDate = null; state.historyLogs = {}; save(); location.reload(); }
+        
+        function updateName() { 
+            state.userName = document.getElementById('edit-name-input').value; 
+            save(); 
+            loadProfile(); 
+            toggleMenu(); 
+        }
+
+        function loadProfile() { 
+            const name = state.userName || 'GUEST';
+            document.getElementById('user-display-name').innerText = name; 
+            document.getElementById('edit-name-input').value = state.userName;
+        }
+
+        function resetStreak() { state.streak = 0; state.completionHistory = {}; state.lastCompletedDate = null; state.historyLogs = {}; state.userName = ""; save(); location.reload(); }
 
         function updateChart() {
             const polyline = document.querySelector('#performance-chart polyline');
@@ -590,7 +600,6 @@
         }
 
         function save() { 
-            // Create snapshot for today in history before saving
             const todayKey = new Date().toISOString().split('T')[0];
             state.historyLogs[todayKey] = JSON.parse(JSON.stringify(state.tasks));
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); 
@@ -608,18 +617,27 @@
         function applyTheme() { document.body.className = state.theme + '-theme'; }
 
         function initTypewriter() {
-            const text = "FOCUS ENGINE 3.5";
+            // Priority check for saved user name
+            const savedState = JSON.parse(localStorage.getItem(STORAGE_KEY));
+            const name = savedState?.userName || state.userName;
+            const text = name ? `WELCOME BACK, ${name.toUpperCase()}` : "FOCUS ENGINE 3.5";
+            
             const el = document.getElementById('welcome-text-typing');
-            if(!el || el.innerText !== "") return;
+            if(!el) return;
             el.innerText = ""; let i = 0;
             function typeChar() {
-                if (i < text.length) { el.innerText += text[i++]; playTypeSound(); setTimeout(typeChar, 60 + Math.random() * 120); }
-                else { document.getElementById('start-btn-container').classList.replace('opacity-0', 'opacity-100'); }
+                if (i < text.length) { 
+                    el.innerText += text[i++]; 
+                    playTypeSound(); 
+                    setTimeout(typeChar, 60 + Math.random() * 80); 
+                }
+                else { 
+                    document.getElementById('start-btn-container').classList.replace('opacity-0', 'opacity-100'); 
+                }
             }
             setTimeout(typeChar, 400);
         }
 
-        // ARCHIVE LOGIC
         function renderArchiveList() {
             const sidebar = document.getElementById('archive-sidebar');
             sidebar.innerHTML = '';
