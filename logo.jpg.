@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='black'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='50' fill='%2300f2ff' font-weight='bold'>FS</text></svg>">
+    
+    <title>FS SYSTEM</title>
+    <style>
+        body { background: #000; color: #00f2ff; text-align: center; font-family: fixedsys, courier, monospace; padding-top: 100px; }
+        .logo-box { border: 2px solid #00f2ff; display: inline-block; padding: 20px; box-shadow: 0 0 15px #00f2ff; }
+    </style>
+</head>
+<body>
+    <div class="logo-box">
+        <h1>FS_PROTOCOL_ACTIVE</h1>
+        <p>> Shortcut Icon: ENABLED</p>
+        <p>> System Status: ONLINE</p>
+    </div>
+</body>
+</html>
